@@ -1,0 +1,2606 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Build 3DXChat profile texts from blocks. Live preview, automatic centring, character counter.">
+<title>Profilly — 3DX Profile Editor by Lari</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23c77dff'/%3E%3Cstop offset='1' stop-color='%23ff6fae'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='1.5' y='1.5' width='29' height='29' rx='9.5' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='12.5' r='4.3' fill='%23fff'/%3E%3Cpath d='M7.4 25.6c0-4.7 3.9-7.6 8.6-7.6s8.6 2.9 8.6 7.6' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+  :root{
+    /* Grundflächen: fast schwarz mit Pflaumen-Unterton */
+    --bg:#08070c;
+    --surface:#141019;        /* Karten und Bausteine */
+    --surface-hi:#1a1523;     /* dieselbe Fläche, angehoben */
+    --sunken:#0b0910;         /* Eingabefelder, leicht eingelassen */
+    --line:rgba(255,255,255,.055);
+    --line-hi:rgba(255,255,255,.10);
+    /* Schrift: weiches Weiß, helles Lavendel, gedecktes Grauviolett */
+    --text:#eceaf3; --body:#c6c1d4; --muted:#8b8599; --dim:#6b6579;
+    /* Akzente — nur gezielt einsetzen */
+    --acc:#c77dff; --acc2:#ff6fae;
+    --acc-tint:rgba(199,125,255,.085);
+    --acc-line:rgba(199,125,255,.38);
+    --ok:#8ccfa8; --bad:#ff6b82;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 6px 18px rgba(0,0,0,.28);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--body);
+    font:13.5px/1.6 'Segoe UI',system-ui,sans-serif;min-height:100vh;
+    padding:0 28px 80px;-webkit-font-smoothing:antialiased}
+  /* Tiefe statt Farbe: sehr zurückhaltender Pflaumen-Schimmer, und zwar
+     erst unterhalb des Kopfes — dadurch wirkt die Kopfzeile dunkler. */
+  body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(64% 46% at 16% 34%, rgba(150, 90,200,.13), transparent 66%),
+      radial-gradient(56% 40% at 88% 22%, rgba(190, 70,130,.08), transparent 66%),
+      radial-gradient(72% 52% at 50% 104%, rgba(120,100,190,.09), transparent 68%)}
+  .wrap{max-width:966px;margin:0 auto}
+  ::selection{background:rgba(199,125,255,.3);color:#fff}
+  body::-webkit-scrollbar{width:11px}
+  body::-webkit-scrollbar-track{background:transparent}
+  body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:7px;
+    border:3px solid transparent;background-clip:padding-box}
+  body::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.16);background-clip:padding-box}
+  button:focus-visible,a:focus-visible,.dot:focus-visible{
+    outline:1px solid var(--acc-line);outline-offset:2px}
+
+  /* ---------- Kopf ---------- */
+  /* flach, niedrig, nur eine feine Linie darunter */
+  header{display:flex;align-items:center;gap:12px;
+    padding:17px 0 15px;border-bottom:1px solid var(--line)}
+  .logo{width:27px;height:27px;flex:none;opacity:.95}
+  .mark{font-size:20px;font-weight:600;letter-spacing:.05em;color:var(--text)}
+  .byline{font-size:11.5px;color:var(--dim);align-self:center;
+    border-left:1px solid var(--line);padding-left:13px;margin-left:2px}
+  .byline span{color:var(--muted)}
+  /* Links auf Schwester-Tool und Discord — sekundär, also dunkel und ruhig */
+  .chip-link{align-self:center;text-decoration:none;background:transparent;
+    border:1px solid var(--line);border-radius:8px;
+    padding:5px 11px;font-size:11.5px;color:var(--muted);
+    display:flex;align-items:center;gap:7px;transition:.16s;white-space:nowrap}
+  .chip-link:first-of-type{margin-left:auto}
+  .chip-link:hover{color:var(--text);border-color:var(--line-hi);background:var(--surface)}
+  .chip-link span{color:inherit}
+  .chip-link svg{opacity:.7}
+  .chip-link.discord:hover{border-color:rgba(120,132,255,.4)}
+  /* Fortschritt: eine der wenigen Stellen mit Akzentfarbe */
+  .badge{display:flex;align-items:center;gap:14px;font-size:11.5px;margin-left:14px}
+  .badge .warn{color:var(--bad)}
+  .meter{display:flex;align-items:center;gap:9px;color:var(--dim)}
+  .meter .bar{width:76px;height:3px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden}
+  .meter .fill{height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc));transition:width .15s}
+  .meter b{color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+  .meter.over .fill{background:var(--bad)}
+  .meter.over b{color:var(--bad)}
+
+  /* ---------- Schrittleiste ---------- */
+  /* nur eine leise Zeile, kein Kästchen pro Schritt */
+  .wizard{list-style:none;display:flex;flex-wrap:wrap;align-items:center;
+    margin:20px 0 30px;font-size:11.5px;color:var(--dim)}
+  .wizard li{display:flex;align-items:center;gap:8px}
+  .wizard li+li::before{content:'';display:block;width:18px;height:1px;
+    background:var(--line-hi);margin:0 15px}
+  .wizard b{display:inline-flex;align-items:center;justify-content:center;
+    width:17px;height:17px;border-radius:50%;flex:none;font-size:10px;font-weight:600;
+    background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+  /* Schrittnummer in den Abschnitts-Überschriften */
+  h2 i{display:inline-flex;align-items:center;justify-content:center;
+    width:17px;height:17px;border-radius:50%;margin-right:9px;font-style:normal;
+    font-size:10px;font-weight:600;vertical-align:1px;
+    background:var(--acc-tint);border:1px solid var(--acc-line);color:var(--acc)}
+
+  /* ---------- Überschriften ---------- */
+  h2{font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--text);margin-bottom:14px}
+  .note{font-size:11.5px;color:var(--dim);margin:-8px 0 18px}
+  .section-head{display:flex;align-items:center;gap:14px;margin:0 0 15px}
+  .section-head h2{margin-bottom:0}
+  .section-head span{color:var(--dim);font-size:11.5px}
+  .section-head.collapsed{margin-bottom:44px}
+  .collapse{background:transparent;border:1px solid var(--line);color:var(--dim);
+    border-radius:8px;padding:6px 11px;font:inherit;font-size:11px;cursor:pointer;
+    flex:none;letter-spacing:.03em;transition:.16s}
+  .collapse:hover{color:var(--text);border-color:var(--line-hi);background:var(--surface)}
+  .section-head .collapse{margin-left:auto}
+  .collapse.armed{color:#ff9aac;border-color:rgba(255,107,130,.42);background:rgba(255,107,130,.08)}
+  .cat-tabs[hidden],.cat-grid[hidden]{display:none}
+
+  /* ---------- Copy-Bereich ---------- */
+  .ready{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    margin:0 0 14px;font-size:11.5px}
+  .ready-state{color:var(--ok);font-weight:600}
+  .ready-state.bad{color:var(--bad)}
+  .ready-size{color:var(--dim);margin-left:auto;font-variant-numeric:tabular-nums}
+  .btn.big{width:100%;padding:12px;font-size:12.5px;border-radius:9px;letter-spacing:.04em}
+  .howto{margin-top:12px;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.04em}
+  .disclose{display:block;width:100%;margin-top:20px;background:none;
+    border:none;border-top:1px solid var(--line);
+    color:var(--dim);font:inherit;font-size:11px;cursor:pointer;
+    padding:13px 0 0;border-radius:0;letter-spacing:.03em;transition:color .15s}
+  .disclose:hover{color:var(--muted)}
+
+  /* ---------- Vorlagen-Galerie ---------- */
+  .cat-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px}
+  .cat-tab{background:transparent;border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;padding:6px 12px;font:inherit;font-size:11.5px;cursor:pointer;
+    display:flex;align-items:center;gap:7px;transition:.16s}
+  .cat-tab:hover{color:var(--text);border-color:var(--line-hi);background:var(--surface)}
+  .cat-tab.on{background:var(--acc-tint);border-color:var(--acc-line);color:var(--acc)}
+  .cat-tab b{font-weight:400;opacity:.5;font-size:10px}
+  .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));
+    gap:7px;margin-bottom:34px}
+  /* flache Zeile statt hoher Kachel — 89 Vorlagen sollen nicht die halbe Seite fressen.
+     Ausgewählt: feiner Akzentrahmen und ein schmaler Streifen links. */
+  .card{position:relative;background:var(--surface);
+    border:1px solid var(--line);border-radius:8px;
+    padding:8px 11px;cursor:pointer;text-align:left;font:inherit;color:var(--body);
+    display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);
+    transition:background .16s,border-color .16s}
+  .card:hover{background:var(--surface-hi);border-color:var(--line-hi)}
+  .card.on{border-color:var(--acc-line);background:var(--surface-hi);
+    box-shadow:var(--shadow),inset 2px 0 0 var(--acc2)}
+  .card .emo{font-size:14px;line-height:1;opacity:.75;flex:none;width:15px;text-align:center}
+  .card .nm{font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card.on .nm{color:var(--acc)}
+  .card .sub{font-size:10px;color:var(--dim);flex:none;font-variant-numeric:tabular-nums}
+
+  /* ---------- Arbeitsbereich ---------- */
+  /* Zwei Spalten, viel Luft dazwischen. Keine Rahmen um die Bereiche —
+     Gruppen entstehen durch Abstand, nicht durch weitere Kästen. */
+  .grid{display:grid;grid-template-columns:minmax(0,420px) 494px;gap:52px;align-items:start}
+  .panel{background:none;border:0;padding:0;box-shadow:none}
+  /* Vorschau bleibt beim Scrollen stehen — sonst arbeitet man blind */
+  .stage{position:sticky;top:22px;display:grid;gap:34px}
+  #search{margin-left:auto;width:180px;background:var(--sunken);color:var(--text);
+    border:1px solid var(--line);border-radius:8px;padding:6px 12px;
+    font:inherit;font-size:11.5px;transition:.16s}
+  #search::placeholder{color:var(--dim)}
+  #search:focus{outline:none;border-color:var(--acc-line);width:220px}
+  #search::-webkit-search-cancel-button{filter:invert(.55)}
+
+  /* ---------- Bausteine ---------- */
+  .block{border:1px solid var(--line);border-radius:10px;
+    background:var(--surface);margin-bottom:6px;overflow:hidden;
+    box-shadow:var(--shadow);transition:border-color .18s,background .18s}
+  .block:hover{background:var(--surface-hi)}
+  .block:focus-within{border-color:var(--line-hi);background:var(--surface-hi)}
+  .block.hit{border-color:var(--acc-line)}
+  .block.dragging{opacity:.35}
+  .block.dropzone{border-color:var(--acc-line)}
+  .block-head{display:flex;align-items:center;gap:9px;padding:7px 10px 6px 7px}
+  /* Griff zum Umsortieren */
+  .grip{cursor:grab;color:var(--dim);font-size:13px;line-height:1;padding:2px 3px;
+    flex:none;user-select:none;opacity:.4;transition:opacity .15s}
+  .block:hover .grip{opacity:.85}
+  .grip:active{cursor:grabbing}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none;cursor:pointer;padding:0;
+    border:none;box-shadow:0 0 0 1px rgba(255,255,255,.18);transition:box-shadow .15s}
+  .dot:hover{box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+  .block-name{font-size:11.5px;color:var(--muted);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;flex:1}
+  .block-name.faint{color:var(--dim);font-style:italic}
+  .tagpill{font-size:10px;color:var(--dim);flex:none;letter-spacing:.05em}
+  /* Duplizieren und Löschen sind zweitrangig: erst beim Hinschauen sichtbar */
+  .tools{display:flex;gap:2px;flex:none;opacity:0;visibility:hidden;transition:opacity .15s}
+  .block:hover .tools,.block:focus-within .tools{opacity:1;visibility:visible}
+  @media (hover:none){.tools{opacity:1;visibility:visible}.grip{opacity:.85}}
+  .tools button{background:none;border:none;color:var(--dim);cursor:pointer;
+    font-size:11.5px;padding:3px 5px;border-radius:5px;line-height:1;transition:.15s}
+  .tools button:hover{color:var(--text);background:rgba(255,255,255,.07)}
+  .tools button[data-del]:hover{color:#ff9aac;background:rgba(255,107,130,.12)}
+  .block-body{padding:0 10px 9px;display:grid;gap:6px}
+  .row{display:flex;align-items:center;gap:8px;min-width:0}
+  /* Formatierzeile tritt zurück, solange man den Baustein nicht bearbeitet */
+  .row.fmt{opacity:.55;transition:opacity .18s}
+  .block:hover .row.fmt,.block:focus-within .row.fmt{opacity:1}
+
+  /* ---------- Eingabefelder ---------- */
+  input[type=text]{flex:1;min-width:0;background:var(--sunken);color:var(--text);
+    border:1px solid rgba(255,255,255,.04);border-radius:7px;padding:6px 10px;
+    font:inherit;font-size:12.5px;transition:border-color .15s,box-shadow .15s;
+    box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
+  input[type=text]::placeholder{color:var(--dim)}
+  input[type=text]:hover{border-color:var(--line)}
+  input[type=text]:focus{outline:none;border-color:var(--acc-line);
+    box-shadow:inset 0 1px 2px rgba(0,0,0,.5), 0 0 0 2px rgba(199,125,255,.11)}
+  .seg{display:flex;background:var(--sunken);border:1px solid rgba(255,255,255,.04);
+    border-radius:7px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
+  .seg button{background:none;border:none;color:var(--dim);padding:3px 9px;
+    font:inherit;font-size:10.5px;cursor:pointer;transition:.15s}
+  .seg button:hover{color:var(--body)}
+  .seg button.on{background:rgba(255,255,255,.07);color:var(--text)}
+  .sz{font-size:10.5px;color:var(--dim);margin-left:auto;font-variant-numeric:tabular-nums}
+  .flabel{font-size:10px;color:var(--dim);flex:none;min-width:34px;letter-spacing:.03em}
+  .block-body select,input.num{background:var(--sunken);color:var(--body);
+    border:1px solid rgba(255,255,255,.04);border-radius:6px;font:inherit;font-size:11.5px;
+    flex:none;box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
+  .block-body select{padding:4px 5px}
+  input.num{width:50px;text-align:center;padding:5px 4px}
+  .block-body select:focus,input.num:focus{outline:none;border-color:var(--acc-line)}
+  .row.pair input{flex:1 1 0;min-width:0}
+  .block-body input[type=text]{min-width:0}
+  /* hohe Trefferflaeche, damit man den Regler nicht verfehlt */
+  input[type=range]{flex:1;min-width:0;accent-color:var(--acc);height:18px;cursor:pointer;
+    background:transparent}
+  /* Baustein hinzufügen — sekundär, also dunkel und ruhig */
+  .add{width:100%;margin-top:9px;padding:10px;background:transparent;
+    border:1px dashed var(--line-hi);color:var(--dim);border-radius:9px;
+    cursor:pointer;font:inherit;font-size:12px;transition:.16s}
+  .add:hover{border-color:var(--acc-line);color:var(--acc);background:var(--acc-tint)}
+  .addmenu{margin-top:9px;display:grid;grid-template-columns:1fr 1fr;gap:6px;
+    padding:10px;border-radius:10px;background:rgba(0,0,0,.24);border:1px solid var(--line)}
+  .addmenu[hidden]{display:none}
+  .addmenu button{background:var(--surface);border:1px solid var(--line);color:var(--body);
+    border-radius:7px;padding:8px 10px;font:inherit;font-size:11.5px;cursor:pointer;
+    text-align:left;transition:.15s}
+  .addmenu button:hover{border-color:var(--acc-line);background:var(--surface-hi);color:var(--text)}
+  .addmenu button small{display:block;color:var(--dim);font-size:10px;margin-top:2px}
+
+  /* ---------- Vorschau ---------- */
+  /* Kein Rahmen, keine Deko — das Profilfenster steht für sich. */
+  /* Warnbanner mittig über der Vorschau — fällt sofort auf */
+  .alert{margin:0 0 16px;padding:12px 16px;border-radius:10px;text-align:center;
+    background:rgba(255,107,130,.10);border:1px solid rgba(255,107,130,.32);
+    color:#ffc2cf;font-size:12px;line-height:1.55}
+  .alert b{color:#ff9aac;font-weight:600}
+  .alert small{display:block;margin-top:3px;color:#c79ba6;font-size:11px}
+  /* Profilfenster nachgebaut. Maße wie im Spiel: Fenster 494x547,
+     Textfeld bei x=8, y=215, exakt 480px breit. */
+  .popup{width:494px;height:547px;position:relative;border-radius:5px;overflow:hidden;
+    background:#1a1f24;box-shadow:0 16px 44px rgba(0,0,0,.5);
+    font-family:'Segoe UI',system-ui,sans-serif}
+  .pp-title{display:flex;align-items:center;padding:9px 12px 7px;
+    font-size:14px;font-weight:600;color:#ff8fbf}
+  .pp-title span{margin-left:auto;color:#dfe3e8;font-weight:400;font-size:15px}
+  .pp-tabs{display:flex;gap:5px;padding:0 8px}
+  .pp-tabs span{background:#2b3238;color:#c9d1d9;font-size:12px;
+    padding:5px 12px;border-radius:3px}
+  .pp-body{display:flex;gap:14px;padding:12px 8px 0}
+  .pp-avatar{width:180px;height:131px;flex:none;background:#b3b3b3;position:relative;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:15px;letter-spacing:.02em}
+  .pp-avatar::before,.pp-avatar::after{content:'';position:absolute;left:0;top:50%;
+    width:100%;height:2px;background:#fff;opacity:.85}
+  .pp-avatar::before{transform:rotate(33deg)}
+  .pp-avatar::after{transform:rotate(-33deg)}
+  .pp-avatar b{position:relative;z-index:1;background:#b3b3b3;padding:0 6px;font-weight:400}
+  .pp-meta{display:grid;gap:8px;align-content:start;font-size:13px;color:#b8c0c8;padding-top:2px}
+  .pp-about{position:absolute;left:8px;top:212px;font-size:16px;color:#cfe3ea;
+    font-family:Georgia,'Times New Roman',serif;font-style:italic}
+  .textwrap{position:absolute;left:8px;top:240px;width:480px;height:300px;overflow-y:auto}
+  .profiletext{font-family:Arial,Helvetica,sans-serif;white-space:pre}
+  .profiletext > div{line-height:1.5}
+  /* Vorschau-Zeilen sind anklickbar und springen zum passenden Baustein */
+  .pline{cursor:pointer;border-radius:3px}
+  .pline:hover{outline:1px dashed rgba(199,125,255,.5);outline-offset:1px}
+
+  /* ---------- Knöpfe und Code ---------- */
+  /* dunkel und zurückhaltend — Verlauf bekommt nur der Copy-Knopf */
+  .btn{background:var(--surface);border:1px solid var(--line);color:var(--body);
+    font:inherit;font-size:12px;padding:7px 13px;border-radius:8px;cursor:pointer;
+    transition:.16s}
+  .btn:hover{background:var(--surface-hi);border-color:var(--line-hi);color:var(--text)}
+  .copy{background:linear-gradient(100deg,#d4568c,#9560d2);border:1px solid transparent;
+    color:#fff;font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+  .copy:hover{background:linear-gradient(100deg,#e0629a,#a06ddd);
+    border-color:transparent;color:#fff}
+  .copy.done,.copy.done:hover{background:#4e8b6b;color:#fff}
+  /* Der erzeugte Code bleibt optisch im Hintergrund, bis man ihn aufklappt */
+  textarea{background:var(--sunken);border:1px solid rgba(255,255,255,.04);border-radius:9px;
+    padding:12px 14px;font:11px/1.7 'Consolas','JetBrains Mono',monospace;color:#8e8aa2;
+    width:100%;height:160px;resize:vertical;display:block;margin-top:12px;
+    box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
+  textarea:focus{outline:none;border-color:var(--acc-line);color:var(--body)}
+  /* ohne das schlaegt display:block das hidden-Attribut und das Feld bleibt sichtbar */
+  textarea[hidden]{display:none}
+
+  /* ---------- Farbwähler ---------- */
+  .cpick{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+    background:rgba(5,4,8,.72);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+  .cpick[hidden]{display:none}
+  .cpick-box{width:430px;padding:20px;border-radius:14px;
+    background:#141019;border:1px solid var(--line-hi);
+    box-shadow:0 24px 70px rgba(0,0,0,.7)}
+  .cpick-head{display:flex;align-items:center;gap:10px;margin-bottom:15px;
+    font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+  .cpick-prev{width:20px;height:20px;border-radius:6px;border:1px solid var(--line-hi)}
+  .cpick-x{margin-left:auto;background:none;border:none;color:var(--dim);
+    cursor:pointer;font-size:13px;padding:2px 5px;border-radius:5px}
+  .cpick-x:hover{color:var(--text);background:rgba(255,255,255,.07)}
+  .cpick-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--dim);margin:14px 0 8px}
+  .cpick-label:first-of-type{margin-top:0}
+  .cpick-grid{display:grid;gap:4px}
+  .cpick-grid.fav{grid-template-columns:repeat(14,1fr)}
+  .cpick-grid.all{grid-template-columns:repeat(14,1fr);gap:2px}
+  .cpick-grid button{aspect-ratio:1;cursor:pointer;padding:0;transition:transform .1s}
+  .cpick-grid.fav button{border-radius:6px;border:1px solid rgba(255,255,255,.14)}
+  .cpick-grid.all button{border-radius:3px;border:none}
+  .cpick-grid button:hover{transform:scale(1.35);position:relative;z-index:2;
+    box-shadow:0 0 0 2px #fff,0 3px 10px rgba(0,0,0,.6)}
+  .cpick-grid button.on{box-shadow:0 0 0 2px var(--acc);position:relative;z-index:1}
+  .cpick-none{width:100%;margin-top:14px;font-size:11.5px}
+  #cpHex{flex:1;font-family:'Consolas',monospace}
+  #cpNative{width:34px;height:30px;padding:2px;border-radius:7px;flex:none;cursor:pointer;
+    background:var(--sunken);border:1px solid var(--line)}
+
+  /* ---------- schmale Fenster ---------- */
+  @media (max-width:1000px){
+    body{padding:0 16px 60px}
+    .grid{grid-template-columns:1fr;gap:38px}
+    .stage{position:static}
+  }
+</style>
+</head>
+<body>
+<!-- Farbwähler -->
+<div class="cpick" id="cpick" hidden>
+  <div class="cpick-box">
+    <div class="cpick-head">
+      <span>Colour</span>
+      <span class="cpick-prev" id="cpPrev"></span>
+      <button class="cpick-x" id="cpClose">✕</button>
+    </div>
+    <div class="cpick-label">Favourites</div>
+    <div class="cpick-grid fav" id="cpFav"></div>
+    <div class="cpick-label">All colours</div>
+    <div class="cpick-grid all" id="cpGrid"></div>
+    <div class="row" style="margin-top:13px">
+      <span class="flabel">Hex</span>
+      <input type="text" id="cpHex" placeholder="#ff6fae" spellcheck="false">
+      <input type="color" id="cpNative" title="Pick any colour">
+    </div>
+    <button class="btn cpick-none" id="cpNone">Default colour — saves ~24 characters</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#c77dff"/><stop offset="1" stop-color="#ff6fae"/>
+        </linearGradient>
+      </defs>
+      <rect x="1.5" y="1.5" width="29" height="29" rx="9.5" fill="url(#lg)"/>
+      <circle cx="16" cy="12.5" r="4.3" fill="#fff" opacity=".96"/>
+      <path d="M7.4 25.6c0-4.7 3.9-7.6 8.6-7.6s8.6 2.9 8.6 7.6" fill="#fff" opacity=".96"/>
+    </svg>
+    <div class="mark">Profilly</div>
+    <div class="byline">3DX Profile Editor <span>by Lari</span></div>
+    <a class="chip-link" href="https://sophey.vodka/gift-generator/" target="_blank" rel="noopener"
+       title="Gifty — the gift text generator">🎁 <span>Gifty</span></a>
+    <a class="chip-link discord" href="https://discord.gg/h3uAk96r68" target="_blank" rel="noopener"
+       title="The Cloud on Discord">
+      <svg viewBox="0 0 127 96" width="15" height="12" aria-hidden="true"><path fill="currentColor"
+        d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.11 0A72.37 72.37 0 0 0 45.64 0a105.89 105.89 0 0 0-26.25 8.09C2.79 32.65-1.71 56.6.54 80.21a105.73 105.73 0 0 0 32.17 16.15 77.7 77.7 0 0 0 6.89-11.11 68.42 68.42 0 0 1-10.85-5.18c.91-.66 1.8-1.34 2.66-2a75.57 75.57 0 0 0 64.32 0c.87.71 1.76 1.39 2.66 2a68.68 68.68 0 0 1-10.87 5.19 77 77 0 0 0 6.89 11.1 105.25 105.25 0 0 0 32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45 65.69C36.18 65.69 31 60 31 53s5-12.74 11.43-12.74S54 46 53.89 53s-5.05 12.69-11.44 12.69Zm42.24 0C78.41 65.69 73.25 60 73.25 53s5-12.74 11.44-12.74S96.23 46 96.12 53s-5.04 12.69-11.43 12.69Z"/></svg>
+      <span>The Cloud</span></a>
+    <div class="badge">
+      <span class="warn" id="wide"></span>
+      <span class="meter" id="meter">
+        <span class="bar"><span class="fill" id="fill"></span></span>
+        <span><b id="chars">0</b> / 1000</span>
+      </span>
+    </div>
+  </header>
+
+  <ol class="wizard">
+    <li><b>1</b> Choose a template</li>
+    <li><b>2</b> Edit your profile</li>
+    <li><b>3</b> Copy to 3DX</li>
+  </ol>
+
+  <div class="section-head">
+    <h2><i>1</i> Choose a template</h2><span id="galinfo"></span>
+    <input type="search" id="search" placeholder="Search templates…" spellcheck="false">
+    <button class="collapse" id="galToggle" aria-expanded="true">Hide ▴</button>
+  </div>
+  <div class="cat-tabs" id="catTabs"></div>
+  <div class="cat-grid" id="gallery"></div>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="section-head"><h2><i>2</i> Edit your profile</h2>
+        <button class="collapse" id="resetBtn" title="Back to the template as it was">Reset</button></div>
+      <div class="note">Drag ⠿ to reorder · click a line in the preview to jump to it</div>
+      <div id="blocks"></div>
+      <button class="add" id="addBtn">+ Add block</button>
+      <div class="addmenu" id="addMenu" hidden></div>
+    </div>
+
+    <div class="stage">
+      <div class="panel">
+        <h2>Preview</h2>
+        <div class="note">Shows exactly how it will look in game, using the real character widths.</div>
+        <div class="alert" id="alert" hidden></div>
+        <div class="popup" id="popup">
+          <div class="pp-title">MissLarifari<span>✕</span></div>
+          <div class="pp-tabs"><span>Edit Profile</span><span>My Gallery</span><span>My Gifts</span></div>
+          <div class="pp-body">
+            <div class="pp-avatar"><b>PLACEHOLDER</b></div>
+            <div class="pp-meta"><div>Age</div><div>Interested in</div><div>Location</div></div>
+          </div>
+          <div class="pp-about">About me</div>
+          <div class="textwrap"><div class="profiletext" id="preview"></div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2><i>3</i> Copy to 3DX</h2>
+
+        <div class="ready" id="ready">
+          <span class="ready-state" id="readyState">Ready for 3DX ✓</span>
+          <span class="ready-size" id="readySize"></span>
+        </div>
+
+        <button class="btn copy big" id="copyBtn">Copy profile code</button>
+        <div class="howto" id="howtoLine">Copy → Profile → Edit → Paste → Save</div>
+
+        <button class="disclose" id="showCode" aria-expanded="false">Show generated code ▾</button>
+        <textarea id="code" spellcheck="false" hidden></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const L = (text,c,s,a,o={}) => ({t:'line',text,c,s:s||13,a:a||'center',...o});
+const SP = s => ({t:'line',text:'',c:'#000',s:s||8,a:'center'});
+
+const FROM_IMAGES = {
+'Velvet':{emo:'✧',blocks:[
+  L('✧·:·✧·:·✧ ───────── ✦ L A R I ✦ ───────── ✧·:·✧·:·✧','#ff8fbf',13),
+  SP(6),
+  L('Host ✦ Night Owl ✦ Music Nerd','#ff3d7f',15,'center',{b:1}),
+  L('✦ Curious • Chatty • Slightly Chaotic ✦','#b9b4c8',13,'center',{i:1}),
+  L('Open-Minded • Friendly','#e8e6f0',13),
+  L('────── ♡ Talks • Movies • Music • Teasing ♡ ──────','#ff8fbf',13),
+  L('Partners • Somebody','#9b96ad',12),
+  L('────── ☀ Storms pass, good energy stays ☀ ──────','#ff8fbf',13),
+]},
+'Daydream':{emo:'☁',blocks:[
+  L('⋆｡°✩ ☁ ｙｏｕｒ ｎａｍｅ ☁ ✩°｡⋆','#e9e4f2',16),
+  SP(8),
+  {t:'cols',c:'#d9d3e6',s:13,bullet:'↳ ',cols:[
+    ['long evenings ♡','films & stories ✦','rainy weather ✦˚','small comforts ⌂'],
+    ['calm playlists ♪♪','cat person (• •⩊)','slow mornings ☾','video games ✿']]},
+  SP(8),
+  L('☽ Bring me good music, random facts or your comfort game.','#dcd7e8',12),
+  L('⁞ Colds and one-line pickups get ignored ⁞','#8b8699',12),
+  {t:'lr',c:'#8b8699',s:11,left:'GER / EN',right:'➡ mostly here'},
+]},
+'Halo':{emo:'◎',blocks:[
+  {t:'frame',c:'#c9b98a',s:13,width:380,left:'HAPPY',right:'VIBES',inner:[
+    L('Y O U R  N A M E','#e8dcae',17),
+    L(': QUIRKY, GOOFY, HARMLESS','#cfc9d8',12),
+    L('˚ ‧ ⁺ ˖ ⋆ ˚ ‧ ⁺ ˖ ⋆','#7f7a8d',11),
+    L('Put your favourite line here','#8f7fd6',13),
+    L('SAY HI IF YOU SEE ME ♥','#cfc9d8',12),
+  ]},
+]},
+'Static':{emo:'♪',blocks:[
+  L('.·✦ y o u r  n a m e ✦· ,  x: @handle  ☽','#e6e0f0',14),
+  L('╶───────────── ✦ ─────────────╴','#a89ac4',11),
+  L('↺♡ CATS | SOFTY | GAMES | MUSIC | FRIENDS |','#d6d0e2',12),
+  L('╶───────────── ✦ ─────────────╴','#a89ac4',11),
+  L('BE SOFT AND KIND BUT TAKE NO NONSENSE','#f3eefc',15,'center',{b:1}),
+  SP(8),
+  {t:'player',c:'#e0dbea',s:12,title:'▶ YOUR FAVOURITE SONG',cur:'1:05',total:'3:22'},
+  SP(8),
+  L('.˚✦ SHARE MY SKY GENTLY ✦˚.','#e8e2f2',12),
+  L('♡ for someone','#8b8699',11,'left'),
+]},
+'Bare':{emo:'☾',blocks:[
+  SP(26),
+  L('⋆｡° ☁ ˚ ⋆ ˚ ☽ ° ⋆','#c9c4d6',13),
+  L('BE NICE OR BE ELSEWHERE.','#dedae8',12),
+  L('I DO NOT BITE, BUT I DO IGNORE.','#dedae8',12),
+  L('⋆｡° ☾ ˚ ⋆ ˚ ☁ ° ⋆','#c9c4d6',13),
+]},
+'Ultimatum':{emo:'✓',blocks:[
+  L('✧·+','#c9c4d6',11,'left'),
+  SP(14),
+  L('Deep talks √ Music √ Series & Movies','#e8e2f2',13),
+  L('─────── ∘♡∘ ───────','#b9a9d6',11),
+  L('Drama ✖ Smalltalk ✖ Colds ✖ Pushy people','#e8e2f2',13),
+  L('─────── ∘♡∘ ───────','#b9a9d6',11),
+  L('「 ✦ your name ✦ 」','#ff8fbf',13),
+  L('✖ Ask before you assume ✖','#f3eefc',19,'center',{b:1}),
+  L('✧·+','#c9c4d6',11,'right'),
+]},
+'Signature':{emo:'❖',blocks:[
+  L('✦  y o u r  n a m e  ✦','#e8e2f2',20),
+  L('──── ⋆ ✿ ✿ ✿ ⋆ ────','#9b96ad',11),
+  L('here for the good stuff','#8b8699',14,'center',{i:1}),
+  L('╭──────────── ∘✿∘ ────────────╮','#a89ac4',11),
+  L('✓ Music  ✓ Late nights  ✓ Good jokes','#cfc9d8',11),
+  L('| Kind • Curious • Loud |','#f3eefc',20),
+  L('✖ Drama  ✖ Rudeness  ✖ Cold openers','#cfc9d8',11),
+  L('╰──────────── ∘✿∘ ────────────╯','#a89ac4',11),
+]},
+'Inventory':{emo:'♠',blocks:[
+  {t:'rule',c:'#ff6fae',s:12,char:'─',mid:'✦',end:'♠'},
+  SP(8),
+  {t:'grid3',c:'#e8e2f2',s:13,items:['#Chatty','#NightOwl','#Softie','#Gamer','#MusicNerd','#Overthinker','#Coffee','#Cats','#Chaos']},
+  SP(8),
+  {t:'rule',c:'#ff6fae',s:12,char:'─',mid:'❁',end:'♠'},
+  L('Currently: probably somewhere loud','#cfc9d8',12),
+]},
+'Overload':{emo:'✺',blocks:[
+  L("Hi I'm your name~",'#ff8fbf',22),
+  L('# KIND # WARM # EMPATHIC # SILLY # CHATTY # EASY # LEWD','#ff5c8a',11),
+  {t:'rule',c:'#ff8fbf',s:10,char:'─',mid:'▲'},
+  L('Interests / likes:','#ff8fbf',12,'left',{i:1}),
+  {t:'cols',c:'#dedae8',s:12,bullet:'»',cols:[
+    ['Movies, Sci-Fi','Gaming, VR','DnB, House, Trance'],
+    ['Connection','Snuggles','Ramen'],
+    ['Travel','Honesty','Puppies']]},
+  {t:'rule',c:'#ff8fbf',s:10,char:'─',mid:'▼'},
+  L("Down to earth — don't be shy, say hi!",'#e8e2f2',13),
+]},
+};
+
+const INVENTED = {
+'Ladder':{emo:'⌇',blocks:[
+  SP(10),
+  L('witchy   ✦','#c08a91',19,'left'),
+  L('       loyal   ♡','#c08a91',19,'left'),
+  L('             sensitive   (˶˃ ᵕ ˂˶)','#c08a91',19,'left'),
+  L('                   chaotic   ☆','#c08a91',19,'left'),
+  SP(8),
+  L('— moonlit & a little unhinged —','#5a5643',12,'right'),
+]},
+'Dossier':{emo:'✎',blocks:[
+  L('╭─────────────────────────────╮','#8f86a8',11,'left'),
+  {t:'kv',c:'#dedae8',s:13,items:[
+    ['name','your name'],['vibe','soft but stubborn'],['hours','night shift'],
+    ['talks','german / english'],['status','open for chaos']]},
+  L('╰─────────────────────────────╯','#8f86a8',11,'left'),
+  SP(6),
+  L('ask me anything, I answer honestly','#9b96ad',12,'center',{i:1}),
+]},
+'Meters':{emo:'▰',blocks:[
+  L('· ✦ ·  y o u r  n a m e  · ✦ ·','#c77dff',16),
+  SP(10),
+  {t:'bars',c:'#dedae8',s:12,items:[['chaos',8],['patience',4],['cuddles',10],['drama',1],['coffee',9]]},
+  SP(10),
+  L('numbers may vary by daytime','#8b8699',11,'center',{i:1}),
+]},
+'Receipt':{emo:'☕',blocks:[
+  L('────────  T H E   M E N U  ────────','#e8dcae',14),
+  SP(8),
+  {t:'menu',c:'#dedae8',s:13,items:[
+    ['Late night talks','always'],['Music recommendations','yes please'],
+    ['Random facts','served daily'],['Cold openers','closed'],['Drama','out of stock']]},
+  SP(8),
+  L('──────────── ✦ ────────────','#e8dcae',12),
+]},
+'Wired':{emo:'▮',blocks:[
+  L('┌─ user@3dx ─────────────────────┐','#6ee7a8',11,'left'),
+  L('> whoami','#6ee7a8',12,'left'),
+  L('  your name · 28 · night shift','#cfe8d8',12,'left'),
+  L('> status','#6ee7a8',12,'left'),
+  L('  online · probably distracted','#cfe8d8',12,'left'),
+  L('> likes --list','#6ee7a8',12,'left'),
+  L('  music, chaos, long talks','#cfe8d8',12,'left'),
+  L('> rules','#6ee7a8',12,'left'),
+  L('  say hi like a human','#cfe8d8',12,'left'),
+  L('> _','#6ee7a8',12,'left'),
+  L('└────────────────────────────────┘','#6ee7a8',11,'left'),
+]},
+'Hourglass':{emo:'⧗',blocks:[
+  L('▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔','#8f86a8',11),
+  L('all my favourite things','#dedae8',13),
+  L('music · films · rain','#dedae8',13),
+  L('long talks','#dedae8',13),
+  L('you','#ff8fbf',18,'center',{b:1}),
+  L('long nights','#dedae8',13),
+  L('coffee · cats · noise','#dedae8',13),
+  L('and everything in between','#dedae8',13),
+  L('▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁','#8f86a8',11),
+]},
+'Moonlit':{emo:'☽',blocks:[
+  SP(12),
+  L('· ☾ · ○ · ◐ · ● · ◑ · ○ · ☽ ·','#b9a9d6',14),
+  SP(8),
+  L('y o u r   n a m e','#f3eefc',19),
+  L('kept awake by the moon','#a89ac4',12,'center',{i:1}),
+  SP(8),
+  L('soft hours · loud thoughts · slow replies','#dedae8',12),
+  SP(8),
+  L('· ☽ · ○ · ◑ · ● · ◐ · ○ · ☾ ·','#b9a9d6',14),
+]},
+
+/* Dialog: Zeilen springen zwischen links und rechts wie ein Chatverlauf */
+'Overheard':{emo:'❝',blocks:[
+  SP(14),
+  L('« so what are you into »','#cfc9d8',13,'left'),
+  L('« depends who is asking »','#ff8fbf',13,'right'),
+  SP(4),
+  L('« thats not an answer »','#cfc9d8',13,'left'),
+  L('« it is if you listen »','#ff8fbf',13,'right'),
+  SP(4),
+  L('« fair enough »','#cfc9d8',13,'left'),
+  SP(10),
+  {t:'rule',c:'#8f86a8',s:11,char:'┈',mid:'❞'},
+  L('ask better questions','#8b8699',11,'center',{i:1}),
+]},
+
+/* Zeitleiste: Stationen untereinander, mit Strich verbunden */
+'Chapters':{emo:'❧',blocks:[
+  {t:'rule',c:'#b9a9d6',s:11,char:'─',mid:'s o   f a r',end:'◈'},
+  SP(10),
+  L('          ● 2021   ·  found this place','#dedae8',13,'left'),
+  L('          │','#7f7a8d',11,'left'),
+  L('          ● 2023   ·  found the good ones','#dedae8',13,'left'),
+  L('          │','#7f7a8d',11,'left'),
+  L('          ● 2025   ·  built something','#dedae8',13,'left'),
+  L('          │','#7f7a8d',11,'left'),
+  L('          ● now    ·  still not leaving','#ff8fbf',13,'left'),
+  SP(10),
+  L('chapter four is being written','#8b8699',11,'center',{i:1}),
+]},
+
+/* Wortwolke: Wörter frei verteilt, verschiedene Größen und Farben */
+'Scatter':{emo:'⁘',blocks:[
+  SP(12),
+  L('soft','#c9a8d6',15,'left'),
+  L('                              loud','#ff8fbf',13,'left'),
+  L('          A L W A Y S   T I R E D','#f3eefc',20,'left'),
+  L('                                     honest','#9b96ad',12,'left'),
+  L('     kind','#c9a8d6',14,'left'),
+  L('                    chaotic','#ff6fae',17,'left'),
+  L('                                  warm','#b9a9d6',12,'left'),
+  SP(12),
+  L('pick whichever you need','#8b8699',11,'right'),
+]},
+
+/* Wetterbericht: Tageszeit, Symbol, Aussicht — drei Spalten */
+'Forecast':{emo:'☂',blocks:[
+  L('☁ ☀ ☾   T O D A Y   ☾ ☀ ☁','#cfe3ea',15),
+  {t:'rule',c:'#8f9fb0',s:11,char:'─'},
+  SP(6),
+  {t:'cols',c:'#dedae8',s:13,bullet:'',gap:22,cols:[
+    ['morning','afternoon','evening','night'],
+    ['☁','☀','☂','☾'],
+    ['soft and quiet','actually talkative','loud and chaotic','unreachable']]},
+  SP(6),
+  {t:'rule',c:'#8f9fb0',s:11,char:'─'},
+  L('forecast subject to change','#8b8699',11,'center',{i:1}),
+]},
+
+/* Ticket: Feld links, Wert ganz rechts, unten die Abrisslinie */
+'Boarding':{emo:'✈',blocks:[
+  {t:'rule',c:'#c9b98a',s:12,char:'─',end:'✈'},
+  SP(8),
+  {t:'lr',c:'#e8dcae',s:13,left:'  PASSENGER',right:'your name  '},
+  {t:'lr',c:'#dedae8',s:13,left:'  FROM',right:'somewhere real  '},
+  {t:'lr',c:'#dedae8',s:13,left:'  TO',right:'here, mostly  '},
+  {t:'lr',c:'#dedae8',s:13,left:'  SEAT',right:'next to you  '},
+  {t:'lr',c:'#ff8fbf',s:13,left:'  STATUS',right:'boarding  '},
+  SP(8),
+  {t:'rule',c:'#8f86a8',s:11,char:'·'},
+  L('no return ticket needed','#8b8699',11,'center',{i:1}),
+]},
+
+/* Tagesablauf mit Uhrzeiten */
+'Nightshift':{emo:'◑',blocks:[
+  L('◑  n i g h t s h i f t  ◐','#c9c4d6',16),
+  SP(10),
+  {t:'kv',c:'#dedae8',s:13,items:[
+    ['22:00','finally online'],
+    ['01:00','actually awake'],
+    ['03:00','best conversations'],
+    ['05:00','should be asleep'],
+    ['13:00','do not try'],
+  ]},
+  SP(10),
+  L('☾ nights are just quieter ☾','#a89ac4',12),
+]},
+
+/* Wörterbuch-Eintrag: Stichwort, Wortart, nummerierte Bedeutungen */
+'Dictionary':{emo:'❡',blocks:[
+  SP(10),
+  L('your name','#f3eefc',20,'left'),
+  L('noun  ·  informal  ·  rarely on time','#8b8699',12,'left',{i:1}),
+  {t:'rule',c:'#7f7a8d',s:11,char:'─'},
+  SP(6),
+  L('1.  someone who talks too much and','#dedae8',13,'left'),
+  L('      sleeps far too little','#dedae8',13,'left'),
+  SP(6),
+  L('2.  reliably late, reliably there','#dedae8',13,'left'),
+  SP(8),
+  L('see also:  chaos, warmth, bad timing','#a89ac4',12,'left',{i:1}),
+]},
+
+/* Sternbild: Punkte mit Linien verbunden */
+'Constellation':{emo:'✵',blocks:[
+  SP(12),
+  L('                  ✦','#f3eefc',13,'left'),
+  L('                 /  \\','#7f7a8d',12,'left'),
+  L('              ✦      ✦','#f3eefc',13,'left'),
+  L('               \\    /  \\','#7f7a8d',12,'left'),
+  L('                ✦        ✦','#f3eefc',13,'left'),
+  SP(12),
+  L('a r i e s','#ff8fbf',17),
+  L('stubborn by design, warm by accident','#8b8699',11,'center',{i:1}),
+]},
+
+/* Etikett: Zusammensetzung in Prozent */
+'Label':{emo:'▤',blocks:[
+  {t:'rule',c:'#c9b98a',s:11,char:'─',mid:'I N G R E D I E N T S'},
+  SP(8),
+  {t:'kv',c:'#dedae8',s:13,items:[
+    ['40 %','chaos'],
+    ['25 %','warmth'],
+    ['20 %','caffeine'],
+    ['10 %','bad decisions'],
+    ['5 %','actual sleep'],
+  ]},
+  SP(8),
+  {t:'rule',c:'#c9b98a',s:11,char:'─'},
+  L('best before: never   ·   store in the dark','#8b8699',11),
+]},
+
+/* Herzform: Zeilen laufen nach unten spitz zu */
+'Heart':{emo:'♡',blocks:[
+  SP(10),
+  L('♡ ♡ ♡          ♡ ♡ ♡','#ff6fae',13),
+  L('♡     soft   ·   kind     ♡','#ffb3d4',13),
+  L('♡   warm  ·  here  ·  yours   ♡','#f3eefc',14),
+  L('♡     and still awake     ♡','#ffb3d4',13),
+  L('♡        at 3am        ♡','#ff8fbf',13),
+  L('♡ ♡ ♡ ♡','#ff6fae',13),
+  L('♡','#ff6fae',16),
+]},
+
+/* Songliste mit Laufzeiten */
+'Playlist':{emo:'▶',blocks:[
+  L('▶   o n   r e p e a t','#e0dbea',15),
+  {t:'rule',c:'#7f7a8d',s:11,char:'─'},
+  SP(6),
+  {t:'menu',c:'#dedae8',s:12,items:[
+    ['01   something loud','3:22'],
+    ['02   something soft','4:01'],
+    ['03   something sad','2:47'],
+    ['04   something from 2009','5:13'],
+  ]},
+  SP(6),
+  {t:'rule',c:'#7f7a8d',s:11,char:'─'},
+  L('ask and I will send the link','#8b8699',11,'center',{i:1}),
+]},
+
+/* Schieberegler zwischen zwei Polen */
+'Balance':{emo:'⇄',blocks:[
+  L('⇄   w h e r e   I   s i t   ⇄','#c9c4d6',15),
+  {t:'rule',c:'#7f7a8d',s:11,char:'─'},
+  SP(8),
+  {t:'cols',c:'#dedae8',s:13,bullet:'',gap:18,cols:[
+    ['quiet','mornings','patient','soft'],
+    ['──●───────','────────●─','───●──────','──────●───'],
+    ['loud','nights','chaotic','sharp']]},
+  SP(8),
+  {t:'rule',c:'#7f7a8d',s:11,char:'─'},
+  L('positions shift depending on the day','#8b8699',11,'center',{i:1}),
+]},
+
+/* Tarotkarte */
+'Tarot':{emo:'✤',blocks:[
+  {t:'rule',c:'#c9b98a',s:11,char:'─',end:'✤'},
+  SP(10),
+  L('X V I I','#c9b98a',15),
+  L('T H E   S T A R','#f3eefc',20),
+  SP(8),
+  L('hope  ·  stubborn light','#dedae8',13),
+  L('the quiet part after the storm','#dedae8',13),
+  SP(10),
+  {t:'rule',c:'#c9b98a',s:11,char:'─',end:'✤'},
+  L('drawn again this morning','#8b8699',11,'center',{i:1}),
+]},
+
+/* Glückskeks */
+'Fortune':{emo:'❈',blocks:[
+  {t:'rule',c:'#e8dcae',s:11,char:'─',mid:'❈'},
+  SP(12),
+  L('« you will be misunderstood','#f3eefc',14,'center',{i:1}),
+  L('by people who do not matter »','#f3eefc',14,'center',{i:1}),
+  SP(14),
+  L('l u c k y   n u m b e r s','#a89ac4',11),
+  L('3  ·  17  ·  22  ·  41','#dedae8',13),
+  SP(12),
+  {t:'rule',c:'#e8dcae',s:11,char:'─',mid:'❈'},
+]},
+
+/* Rezept: Zutaten und Zubereitung */
+'Recipe':{emo:'❀',blocks:[
+  L('❀   h o w   t o   m a k e   m e   ❀','#e8dcae',14),
+  {t:'rule',c:'#8f86a8',s:11,char:'─'},
+  SP(8),
+  {t:'kv',c:'#dedae8',s:13,items:[
+    ['2 cups','of overthinking'],
+    ['1 tbsp','of dry humour'],
+    ['a pinch','of chaos'],
+    ['plenty','of caffeine'],
+  ]},
+  SP(8),
+  L('mix late at night.  do not rush.','#f3eefc',13),
+  L('serves one, occasionally two','#8b8699',11,'center',{i:1}),
+  {t:'rule',c:'#8f86a8',s:11,char:'─'},
+]},
+
+/* Warnschild */
+'Caution':{emo:'▲',blocks:[
+  L('▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲','#e8c96a',13),
+  SP(10),
+  L('C A U T I O N','#f3eefc',22,'center',{b:1}),
+  SP(10),
+  L('may talk for hours without warning','#dedae8',13),
+  L('may vanish mid sentence','#dedae8',13),
+  L('may grow on you','#ff8fbf',13),
+  SP(10),
+  L('▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲','#e8c96a',13),
+]},
+
+/* Charakterbogen */
+'Character':{emo:'◈',blocks:[
+  {t:'rule',c:'#a89ac4',s:11,char:'─',mid:'C H A R A C T E R',end:'◈'},
+  SP(8),
+  {t:'kv',c:'#dedae8',s:13,items:[
+    ['CLASS','night owl'],
+    ['LEVEL','29'],
+    ['ALIGNMENT','chaotic warm'],
+  ]},
+  SP(8),
+  L('S K I L L S','#a89ac4',11,'left'),
+  {t:'menu',c:'#dedae8',s:12,items:[
+    ['  talking too much','lv 9'],
+    ['  showing up on time','lv 2'],
+    ['  remembering names','lv 4'],
+    ['  going to bed early','lv 1'],
+  ]},
+  {t:'rule',c:'#a89ac4',s:11,char:'─',end:'◈'},
+]},
+
+/* ---- kantiger, kühler Stil ---- */
+
+'Dogtag':{emo:'▬',blocks:[
+  SP(14),
+  {t:'rule',c:'#8f9aa6',s:11,char:'▬'},
+  SP(8),
+  {t:'kv',c:'#c8d2da',s:13,items:[
+    ['NAME','your name'],
+    ['ID','29 / 3DX'],
+    ['SHIFT','nights, mostly'],
+    ['STATUS','operational'],
+  ]},
+  SP(8),
+  {t:'rule',c:'#8f9aa6',s:11,char:'▬'},
+  L('no further questions','#7c858f',11,'center',{i:1}),
+]},
+
+'Scoreboard':{emo:'▦',blocks:[
+  L('S C O R E B O A R D','#c8d2da',16),
+  {t:'rule',c:'#5f6a75',s:11,char:'═'},
+  SP(10),
+  {t:'cols',c:'#dfe6ec',s:14,bullet:'',gap:30,cols:[
+    ['CONVERSATIONS','ARGUMENTS WON','EARLY NIGHTS'],
+    ['1482','3','0']]},
+  SP(10),
+  {t:'rule',c:'#5f6a75',s:11,char:'═'},
+  L('season is still running','#7c858f',11,'center',{i:1}),
+]},
+
+'Bartab':{emo:'▪',blocks:[
+  L('T H E   T A B','#e0d5b8',16),
+  {t:'rule',c:'#7a7263',s:11,char:'─'},
+  SP(8),
+  {t:'menu',c:'#d8d2c4',s:12,items:[
+    ['whiskey, neat','2'],
+    ['bad ideas','4'],
+    ['good conversations','many'],
+    ['apologies','0'],
+  ]},
+  SP(8),
+  {t:'rule',c:'#7a7263',s:11,char:'─'},
+  {t:'lr',c:'#e0d5b8',s:13,left:'  TOTAL',right:'still open  '},
+]},
+
+'Blueprint':{emo:'◆',blocks:[
+  L('◆   S P E C I F I C A T I O N   ◆','#8fb8d8',14),
+  {t:'rule',c:'#4a6c88',s:11,char:'─'},
+  SP(8),
+  {t:'kv',c:'#cfe0ee',s:13,items:[
+    ['BUILD','tall enough'],
+    ['RANGE','online until 4am'],
+    ['NOISE','moderate to loud'],
+    ['UPTIME','unreliable'],
+    ['WARRANTY','void'],
+  ]},
+  SP(8),
+  {t:'rule',c:'#4a6c88',s:11,char:'─'},
+  L('built to spec, tested rarely','#6b8299',11,'center',{i:1}),
+]},
+
+'Vault':{emo:'■',blocks:[
+  SP(24),
+  L('■ ■ ■','#6f7780',13),
+  SP(12),
+  L('L O C K E D','#dfe6ec',24,'center',{b:1}),
+  SP(12),
+  L('ask properly and it opens','#9aa4ae',13),
+  SP(12),
+  L('■ ■ ■','#6f7780',13),
+]},
+
+/* Namensaufkleber */
+'Nametag':{emo:'▭',blocks:[
+  SP(14),
+  {t:'rule',c:'#e05a7a',s:12,char:'█'},
+  L('H E L L O','#ffd6de',14,'center',{b:1}),
+  L('my name is','#ffd6de',11),
+  {t:'rule',c:'#e05a7a',s:12,char:'█'},
+  SP(12),
+  L('your name','#f3eefc',30),
+  SP(12),
+  L('and I am probably late','#8b8699',12,'center',{i:1}),
+]},
+
+/* Himmelsrichtungen — nutzt links, mitte und rechts gleichzeitig */
+'Compass':{emo:'✥',blocks:[
+  SP(12),
+  L('N','#a89ac4',12),
+  L('still awake','#dedae8',13),
+  SP(8),
+  {t:'lr',c:'#a89ac4',s:12,left:'  W',right:'E  '},
+  {t:'lr',c:'#dedae8',s:13,left:'  too honest',right:'too loud  '},
+  SP(8),
+  L('somewhere quiet','#dedae8',13),
+  L('S','#a89ac4',12),
+  SP(12),
+  L('✥  pick a direction  ✥','#8b8699',11),
+]},
+
+/* Museums-Schild */
+'Museum':{emo:'▭',blocks:[
+  SP(16),
+  L('your name','#f3eefc',18,'left'),
+  L('born 1996, still running','#9b96ad',12,'left',{i:1}),
+  SP(10),
+  L('mixed media  ·  chaos on canvas','#dedae8',12,'left'),
+  L('permanent collection, room 3','#dedae8',12,'left'),
+  SP(12),
+  L('The artist asks that visitors do not','#a89ac4',11,'left',{i:1}),
+  L('touch, but may absolutely say hello.','#a89ac4',11,'left',{i:1}),
+]},
+
+/* Ladebildschirm */
+'Loading':{emo:'▱',blocks:[
+  SP(24),
+  L('L O A D I N G   P E R S O N A L I T Y','#c8d2da',13),
+  SP(12),
+  L('████████████████░░░░░  78 %','#8fb8d8',14),
+  SP(12),
+  L('tip: responds faster to jokes than to hey','#7c858f',11,'center',{i:1}),
+  SP(20),
+]},
+
+/* Urkunde */
+'Certificate':{emo:'❉',blocks:[
+  {t:'rule',c:'#c9b98a',s:11,char:'─',end:'❉'},
+  SP(12),
+  L('C E R T I F I E D','#e8dcae',14),
+  SP(10),
+  L('your name','#f3eefc',24),
+  SP(10),
+  L('has been officially declared','#dedae8',12),
+  L('a menace to quiet evenings','#dedae8',12),
+  SP(12),
+  L('in effect since 2021','#8b8699',11,'center',{i:1}),
+  {t:'rule',c:'#c9b98a',s:11,char:'─',end:'❉'},
+]},
+
+/* Schallplatte mit zwei Seiten */
+'Vinyl':{emo:'⊙',blocks:[
+  L('⊙   S I D E   A','#c8d2da',14,'left'),
+  {t:'rule',c:'#5f6a75',s:11,char:'─'},
+  {t:'menu',c:'#dedae8',s:12,items:[
+    ['  01   loud on purpose','2:41'],
+    ['  02   louder by accident','3:15'],
+  ]},
+  SP(12),
+  L('⊙   S I D E   B','#c8d2da',14,'left'),
+  {t:'rule',c:'#5f6a75',s:11,char:'─'},
+  {t:'menu',c:'#dedae8',s:12,items:[
+    ['  01   quiet at last','4:02'],
+    ['  02   gone by morning','1:58'],
+  ]},
+]},
+
+/* ---- eigene Gruppe: für Typen ---- */
+
+'Manual':{emo:'⌘',blocks:[
+  {t:'rule',c:'#8f9aa6',s:11,char:'─',mid:'U S E R   M A N U A L'},
+  SP(10),
+  L('1.   do not feed after midnight','#dfe6ec',13,'left'),
+  L('2.   responds well to direct questions','#dfe6ec',13,'left'),
+  L('3.   requires coffee to operate','#dfe6ec',13,'left'),
+  L('4.   warranty void if ignored','#dfe6ec',13,'left'),
+  SP(10),
+  {t:'rule',c:'#8f9aa6',s:11,char:'─'},
+  L('for support, just say hi','#7c858f',11,'center',{i:1}),
+]},
+
+'Rank':{emo:'★',blocks:[
+  L('★ ★ ★','#e8c96a',15),
+  {t:'rule',c:'#6f7780',s:11,char:'═'},
+  SP(8),
+  {t:'kv',c:'#dfe6ec',s:13,items:[
+    ['RANK','certified menace'],
+    ['SERVICE','since 2019'],
+    ['MEDALS','3, all self-awarded'],
+    ['DISCHARGE','dishonourable, twice'],
+  ]},
+  SP(8),
+  {t:'rule',c:'#6f7780',s:11,char:'═'},
+  L('★ ★ ★','#e8c96a',15),
+]},
+
+'Poker':{emo:'♣',blocks:[
+  L('♠   ♥   ♦   ♣','#dfe6ec',18),
+  {t:'rule',c:'#6f7780',s:11,char:'─'},
+  SP(8),
+  {t:'menu',c:'#dfe6ec',s:13,items:[
+    ['  dealt','one good hand'],
+    ['  bluffing','constantly'],
+    ['  folding','never learned'],
+    ['  all in','usually'],
+  ]},
+  SP(8),
+  {t:'rule',c:'#6f7780',s:11,char:'─'},
+  L('your move','#9aa4ae',12,'center',{i:1}),
+]},
+
+'Coordinates':{emo:'⊕',blocks:[
+  L('⊕   C U R R E N T   P O S I T I O N','#8fb8d8',13),
+  {t:'rule',c:'#4a6c88',s:11,char:'─'},
+  SP(8),
+  {t:'kv',c:'#cfe0ee',s:13,items:[
+    ['LAT','probably online'],
+    ['LON','somewhere loud'],
+    ['ALT','two drinks in'],
+    ['ETA','whenever'],
+  ]},
+  SP(8),
+  {t:'rule',c:'#4a6c88',s:11,char:'─'},
+  L('signal weak after 3am','#6b8299',11,'center',{i:1}),
+]},
+
+'Radio':{emo:'‖',blocks:[
+  L('‖   C H   3 D X   ·   8 8 . 4','#c8d2da',14),
+  {t:'rule',c:'#5f6a75',s:11,char:'─'},
+  SP(10),
+  L('« anyone out there, over »','#dfe6ec',13,'left'),
+  L('« still here, over »','#8fb8d8',13,'right'),
+  L('« good. keep talking, over »','#dfe6ec',13,'left'),
+  SP(10),
+  {t:'rule',c:'#5f6a75',s:11,char:'─'},
+  L('signal is stronger than it looks','#7c858f',11,'center',{i:1}),
+]},
+
+'Bounty':{emo:'✗',blocks:[
+  {t:'rule',c:'#c9b98a',s:12,char:'─',mid:'B O U N T Y'},
+  SP(10),
+  L('W A N T E D   F O R','#9aa4ae',11),
+  L('talking too loud, winning arguments','#dfe6ec',13),
+  L('and leaving without saying goodbye','#dfe6ec',13),
+  SP(10),
+  L('R E W A R D','#9aa4ae',11),
+  L('one (1) beer, possibly two','#e8c96a',14),
+  SP(10),
+  {t:'rule',c:'#c9b98a',s:12,char:'─'},
+]},
+
+/* ---- aufwendige Layouts ---- */
+
+/* Farbverlauf: jede Zeile eine Stufe weiter */
+'Aurora':{emo:'✧',blocks:[
+  SP(10),
+  L('✦ · ✧ · ⋆ · ✧ · ✦','#ff8fbf',13),
+  SP(8),
+  L('y o u r   n a m e','#f3eefc',26),
+  SP(10),
+  L('soft in the morning','#ff8fbf',14),
+  L('talkative by noon','#d98fd6',14),
+  L('unbearable by midnight','#b28fe0',14),
+  L('finally quiet at four','#8f9ae8',14),
+  L('and awake again by nine','#7ac6e8',14),
+  SP(10),
+  L('✦ · ✧ · ⋆ · ✧ · ✦','#7ac6e8',13),
+]},
+
+/* Gestapelte Farblinien über und unter dem Namen */
+'Prism':{emo:'▬',blocks:[
+  SP(12),
+  {t:'rule',c:'#ff6fae',s:11,char:'▬'},
+  {t:'rule',c:'#c77dff',s:11,char:'▬'},
+  {t:'rule',c:'#7ac6e8',s:11,char:'▬'},
+  SP(10),
+  L('y o u r   n a m e','#ffffff',28),
+  L('everything at once, always','#b8b2c8',12,'center',{i:1}),
+  SP(10),
+  {t:'rule',c:'#7ac6e8',s:11,char:'▬'},
+  {t:'rule',c:'#c77dff',s:11,char:'▬'},
+  {t:'rule',c:'#ff6fae',s:11,char:'▬'},
+]},
+
+/* Verzierter Rahmen im Zauberbuch-Stil */
+'Grimoire':{emo:'❦',blocks:[
+  {t:'rule',c:'#a89ac4',s:11,char:'═',end:'❦'},
+  L('✦        ⁘        ✦','#7f7a8d',12),
+  SP(6),
+  L('y o u r   n a m e','#f3eefc',24),
+  L('☾  witch, but the tired kind  ☽','#c9a8d6',13,'center',{i:1}),
+  SP(6),
+  L('✦        ⁘        ✦','#7f7a8d',12),
+  {t:'rule',c:'#a89ac4',s:11,char:'═',end:'❦'},
+  SP(8),
+  {t:'cols',c:'#dedae8',s:12,bullet:'',gap:26,cols:[
+    ['moon water'],['bad omens'],['good coffee']]},
+]},
+
+/* Neon-Schild */
+'Neon':{emo:'█',blocks:[
+  SP(10),
+  {t:'rule',c:'#ff2d95',s:13,char:'█'},
+  L('N E O N   N I G H T S','#ffffff',20,'center',{b:1}),
+  {t:'rule',c:'#ff2d95',s:13,char:'█'},
+  SP(12),
+  L('▸  open until sunrise','#4de8ff',14,'left'),
+  L('▸  loud entirely on purpose','#4de8ff',14,'left'),
+  L('▸  ask nicely for the good stuff','#4de8ff',14,'left'),
+  SP(12),
+  L('✦ no photos, no promises ✦','#ff2d95',13),
+]},
+
+/* Ritual */
+'Seance':{emo:'☾',blocks:[
+  SP(12),
+  L('☾ · ✦ · ⁘ · ✦ · ☽','#9a8fd6',14),
+  SP(10),
+  L('S P E A K   T O   M E','#f3eefc',21,'center',{b:1}),
+  SP(10),
+  {t:'menu',c:'#c9c4d6',s:12,items:[
+    ['  the dead','answer faster'],
+    ['  the living','take their time'],
+    ['  you','somewhere between'],
+  ]},
+  SP(10),
+  L('☽ · ✦ · ⁘ · ✦ · ☾','#9a8fd6',14),
+]},
+
+/* Wellen, die zur Mitte hin heller werden */
+'Silk':{emo:'⌒',blocks:[
+  SP(10),
+  L('⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒','#7a4a6e',12),
+  L('⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒','#b05a8e',12),
+  L('⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒','#ff8fbf',12),
+  SP(10),
+  L('y o u r   n a m e','#ffffff',26),
+  L('soft to the touch, sharp if you pull','#c9a8d6',12,'center',{i:1}),
+  SP(10),
+  L('⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒','#ff8fbf',12),
+  L('⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒','#b05a8e',12),
+  L('⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒ ⌒','#7a4a6e',12),
+]},
+
+/* Kronleuchter: hängt von oben herab und wird breiter */
+'Chandelier':{emo:'✧',blocks:[
+  L('✦','#e8dcae',13),
+  L('✧','#e8dcae',12),
+  L('✦   ♡   ✦','#f3eefc',15),
+  L('✧   ✦   ✧   ✦   ✧','#e8dcae',14),
+  L('✿   ✦   ✧   ♡   ✧   ✦   ✿','#c9b98a',13),
+  SP(12),
+  L('y o u r   n a m e','#ffffff',24),
+  L('lit only in the evenings','#a89ac4',12,'center',{i:1}),
+]},
+
+/* Glut: Blockzeichen werden zur Mitte hin dichter */
+'Ember':{emo:'▓',blocks:[
+  SP(12),
+  L('░▒▓███████████████▓▒░','#ff6a3d',13),
+  SP(10),
+  L('y o u r   n a m e','#ffd9a0',26),
+  L('burning quietly since 1996','#ff9c5a',13),
+  SP(10),
+  L('░▒▓███████████████▓▒░','#c9452a',13),
+  SP(10),
+  {t:'cols',c:'#ffb87a',s:12,bullet:'',gap:26,cols:[
+    ['warm'],['loud'],['unextinguished']]},
+]},
+
+/* Schmetterling: spiegelsymmetrische Flügel */
+'Butterfly':{emo:'✿',blocks:[
+  SP(10),
+  L('✦             ✦','#c9a8d6',13),
+  L('✿ ❀ ✿       ✿ ❀ ✿','#ff8fbf',13),
+  L('✦     ♡     ✦','#f3eefc',15),
+  L('✿ ❀ ✿       ✿ ❀ ✿','#ff8fbf',13),
+  L('✦             ✦','#c9a8d6',13),
+  SP(12),
+  L('y o u r   n a m e','#ffffff',22),
+  L('landed here on purpose','#a89ac4',12,'center',{i:1}),
+]},
+
+/* Blütenblätter, die nach unten fallen */
+'Petals':{emo:'❀',blocks:[
+  L('❀','#ff8fbf',14),
+  L('✿       ❀','#ffa8cf',13),
+  L('❀     ✿     ❀','#ffc2dd',13),
+  SP(8),
+  L('y o u r   n a m e','#ffffff',24),
+  L('shedding, not wilting','#c9a8d6',12,'center',{i:1}),
+  SP(8),
+  L('❀     ✿     ❀','#ffc2dd',13),
+  L('✿       ❀','#ffa8cf',13),
+  L('❀','#ff8fbf',14),
+]},
+
+/* Autobahnschild mit Ausfahrten */
+'Highway':{emo:'▲',blocks:[
+  SP(12),
+  {t:'rule',c:'#5f8f5f',s:12,char:'█'},
+  L('E X I T   3 D X','#ffffff',20,'center',{b:1}),
+  {t:'rule',c:'#5f8f5f',s:12,char:'█'},
+  SP(12),
+  {t:'kv',c:'#dfe6ec',s:14,items:[
+    ['↑','straight on into chaos'],
+    ['→','detour: long conversations'],
+    ['←','back to bed, coward'],
+  ]},
+  SP(12),
+  L('no U-turns, no regrets','#7c858f',11,'center',{i:1}),
+]},
+
+/* Strichcode */
+'Barcode':{emo:'▌',blocks:[
+  SP(14),
+  L('█▌▐█ ▓▒ █▌▐ ░▒▓ █▐▌█ ▒▓ ▌█▐ ░▓ █▌','#dfe6ec',15),
+  SP(10),
+  L('y o u r   n a m e','#ffffff',22),
+  L('0 2 9   ·   m a d e   i n   3 d x','#7c858f',12),
+  SP(10),
+  L('█▌▐█ ▓▒ █▌▐ ░▒▓ █▐▌█ ▒▓ ▌█▐ ░▓ █▌','#dfe6ec',15),
+  SP(10),
+  L('scan me, or do not, I am busy','#9aa4ae',11,'center',{i:1}),
+]},
+
+/* Werkzeugkasten */
+'Toolbox':{emo:'✂',blocks:[
+  {t:'rule',c:'#8f9aa6',s:11,char:'═',mid:'W H A T   I   B R I N G'},
+  SP(10),
+  {t:'cols',c:'#dfe6ec',s:13,bullet:'▪ ',gap:30,cols:[
+    ['fixing things','carrying stuff','bad puns'],
+    ['honest answers','showing up','staying late']]},
+  SP(10),
+  {t:'rule',c:'#8f9aa6',s:11,char:'═'},
+  L('borrow anything except the last beer','#7c858f',11,'center',{i:1}),
+]},
+
+/* Schachpartie */
+'Chess':{emo:'♝',blocks:[
+  L('♜ ♞ ♝   ♛ ♚   ♝ ♞ ♜','#dfe6ec',17),
+  {t:'rule',c:'#6f7780',s:11,char:'─'},
+  SP(8),
+  {t:'menu',c:'#dfe6ec',s:13,items:[
+    ['  1.  e4','you moved first'],
+    ['  2.  Nf3','I was already there'],
+    ['  3.  ...','still thinking'],
+  ]},
+  SP(8),
+  {t:'rule',c:'#6f7780',s:11,char:'─'},
+  L('I play slow on purpose','#9aa4ae',11,'center',{i:1}),
+]},
+
+/* Wirtshausschild */
+'Tavern':{emo:'▪',blocks:[
+  {t:'rule',c:'#a08050',s:12,char:'─',end:'❖'},
+  SP(8),
+  L('T H E   L A S T   R O U N D','#e0d5b8',18,'center',{b:1}),
+  L('open late, closes later','#a89880',12,'center',{i:1}),
+  SP(10),
+  {t:'menu',c:'#d8d2c4',s:12,items:[
+    ['  good company','always on tap'],
+    ['  small talk','out of stock'],
+    ['  last call','never'],
+  ]},
+  SP(8),
+  {t:'rule',c:'#a08050',s:12,char:'─',end:'❖'},
+]},
+
+/* Polaroid mit Bildunterschrift */
+'Polaroid':{emo:'▢',blocks:[
+  SP(10),
+  L('┌────────────────────────┐',null,13),
+  L('│                        │',null,13),
+  L('│      y o u r  n a m e  │','#f3eefc',13),
+  L('│                        │',null,13),
+  L('└────────────────────────┘',null,13),
+  SP(6),
+  L('summer, probably','#a89ac4',13,'center',{i:1}),
+  L('do not shake, it stays blurry','#8b8699',11,'center',{i:1}),
+]},
+
+/* Wetterkarte mit Temperaturen */
+'Season':{emo:'❋',blocks:[
+  L('❋   f o u r   s e a s o n s   ❋','#cfe3ea',14),
+  {t:'rule',c:'#7f8f9f',s:11,char:'─'},
+  SP(8),
+  {t:'cols',c:'#dedae8',s:13,bullet:'',gap:24,cols:[
+    ['spring','summer','autumn','winter'],
+    ['✿','☀','❋','☾'],
+    ['restless','unbearable','finally myself','asleep']]},
+  SP(8),
+  {t:'rule',c:'#7f8f9f',s:11,char:'─'},
+  L('currently: somewhere between','#8b8699',11,'center',{i:1}),
+]},
+
+/* Bibliotheks-Karteikarte */
+'Library':{emo:'❧',blocks:[
+  L('╭─────────────────────────────╮','#c9b98a',11,'left'),
+  SP(4),
+  {t:'kv',c:'#dedae8',s:12,items:[
+    ['SHELF','fiction, mostly'],
+    ['DUE','never'],
+    ['RENEWED','eleven times'],
+    ['NOTES','margins full of pencil'],
+  ]},
+  SP(4),
+  L('╰─────────────────────────────╯','#c9b98a',11,'left'),
+  SP(8),
+  L('please return me before closing','#8b8699',11,'center',{i:1}),
+]},
+
+/* Rezept vom Arzt */
+'Prescription':{emo:'✚',blocks:[
+  {t:'rule',c:'#8fb8d8',s:11,char:'─',mid:'✚'},
+  SP(8),
+  L('take as needed','#cfe0ee',12,'left',{i:1}),
+  SP(6),
+  {t:'menu',c:'#dfe6ec',s:12,items:[
+    ['  long conversations','2× daily'],
+    ['  loud music','as required'],
+    ['  small talk','avoid entirely'],
+    ['  sleep','not responding'],
+  ]},
+  SP(8),
+  {t:'rule',c:'#8fb8d8',s:11,char:'─',mid:'✚'},
+  L('side effects may include attachment','#6b8299',11,'center',{i:1}),
+]},
+
+/* Wolken, die zur Mitte hin dichter werden */
+'Overcast':{emo:'☁',blocks:[
+  SP(10),
+  L('☁','#5a6472',14),
+  L('☁   ☁','#7a8494',14),
+  L('☁   ☁   ☁','#9aa4b4',14),
+  SP(10),
+  L('y o u r   n a m e','#eef2f8',24),
+  L('rain expected, bring nothing','#8f9aab',12,'center',{i:1}),
+  SP(10),
+  L('☁   ☁   ☁','#9aa4b4',14),
+  L('☁   ☁','#7a8494',14),
+  L('☁','#5a6472',14),
+]},
+
+/* Zugticket mit Abfahrt und Ankunft */
+'Platform':{emo:'▬',blocks:[
+  {t:'rule',c:'#6f7780',s:12,char:'▬'},
+  SP(8),
+  {t:'lr',c:'#dfe6ec',s:16,left:'  22:14',right:'04:07  '},
+  {t:'lr',c:'#9aa4ae',s:12,left:'  still awake',right:'still talking  '},
+  SP(10),
+  L('P L A T F O R M   3','#ffffff',20,'center',{b:1}),
+  L('delayed, as usual','#9aa4ae',12,'center',{i:1}),
+  SP(10),
+  {t:'rule',c:'#6f7780',s:12,char:'▬'},
+]},
+
+/* ---------- girly ---------- */
+
+'Bubblegum':{emo:'♡',blocks:[
+  L('♡ ✧ ♡ ✧ ♡ ✧ ♡ ✧ ♡ ✧ ♡ ✧ ♡','#ff4da6',13),
+  SP(8),
+  L('˚ ♡  y o u r  n a m e  ♡ ˚','#ffffff',24,'center',{b:1}),
+  L('pink is a personality trait','#ffb3e0',12,'center',{i:1}),
+  SP(10),
+  {t:'menu',c:'#ff8fcf',s:13,items:[
+    ['  ♡ glitter','not optional'],
+    ['  ♡ volume','maximum'],
+    ['  ♡ apologies','none'],
+  ]},
+  SP(10),
+  L('♡ ✧ ♡ ✧ ♡ ✧ ♡ ✧ ♡ ✧ ♡ ✧ ♡','#ff4da6',13),
+]},
+
+'Slumber':{emo:'☾',blocks:[
+  L('☾ ˚ ✧   s l e e p o v e r   ✧ ˚ ☾','#ffc2e0',15),
+  {t:'rule',c:'#e08fc0',s:11,char:'─',mid:'♡'},
+  SP(8),
+  L('♡  midnight snacks and worse ideas','#ffe0f0',13,'left'),
+  L('♡  secrets that expire at sunrise','#ffe0f0',13,'left'),
+  L('♡  someone always cries a little','#ffe0f0',13,'left'),
+  L('♡  nobody actually sleeps','#ffe0f0',13,'left'),
+  SP(8),
+  {t:'rule',c:'#e08fc0',s:11,char:'─',mid:'♡'},
+  L('bring your own blanket','#c99ab8',11,'center',{i:1}),
+]},
+
+'Bows':{emo:'❀',blocks:[
+  L('❀ ｡ ❀','#ff8fcf',13),
+  L('⋆ ˚ ❀ ˚ ⋆','#ffb3e0',13),
+  SP(10),
+  L('y o u r   n a m e','#ffffff',26),
+  SP(10),
+  L('❀  soft  ❀  sweet  ❀  stubborn  ❀','#ff6fbf',14),
+  SP(10),
+  L('⋆ ˚ ❀ ˚ ⋆','#ffb3e0',13),
+  L('❀ ｡ ❀','#ff8fcf',13),
+]},
+
+'Diary':{emo:'✎',blocks:[
+  L('✎   d e a r   d i a r y','#ffc2e0',15,'left'),
+  {t:'rule',c:'#e08fc0',s:11,char:'─'},
+  SP(8),
+  {t:'kv',c:'#ffe0f0',s:13,items:[
+    ['monday','he texted back'],
+    ['tuesday','I did not reply'],
+    ['wednesday','I replied twice'],
+    ['thursday','we do not speak of it'],
+  ]},
+  SP(8),
+  {t:'rule',c:'#e08fc0',s:11,char:'─'},
+  L('this page is locked ♡','#c99ab8',11,'center',{i:1}),
+]},
+
+'Sparkle':{emo:'✧',blocks:[
+  SP(10),
+  L('⋆ ˚ ✧ ˚ ⋆ ˚ ✧ ˚ ⋆ ˚ ✧ ˚ ⋆','#ffffff',13),
+  L('⋆ ˚ ✧ ˚ ⋆ ˚ ✧ ˚ ⋆','#ffc2e0',13),
+  L('✧ ⋆ ✧','#ff8fcf',13),
+  SP(10),
+  L('y o u r   n a m e','#ffffff',26),
+  L('catches the light on purpose','#ffb3e0',12,'center',{i:1}),
+  SP(10),
+  L('✧ ⋆ ✧','#ff8fcf',13),
+  L('⋆ ˚ ✧ ˚ ⋆ ˚ ✧ ˚ ⋆','#ffc2e0',13),
+  L('⋆ ˚ ✧ ˚ ⋆ ˚ ✧ ˚ ⋆ ˚ ✧ ˚ ⋆','#ffffff',13),
+]},
+
+'Sweettooth':{emo:'❁',blocks:[
+  L('❁ ｡ ✿ ｡ ❁ ｡ ✿ ｡ ❁','#ff8fcf',14),
+  SP(10),
+  L('s w e e t   t o o t h','#ffffff',22),
+  SP(10),
+  L('♡  vanilla, always','#ffe0f0',13,'left'),
+  L('♡  sprinkles, obviously','#ffe0f0',13,'left'),
+  L('♡  one bite of whatever you ordered','#ffe0f0',13,'left'),
+  SP(10),
+  L('❁ ｡ ✿ ｡ ❁ ｡ ✿ ｡ ❁','#ff8fcf',14),
+]},
+
+'Pointe':{emo:'❥',blocks:[
+  SP(12),
+  L('❥','#ff8fcf',14),
+  L('⋆       ⋆','#ffc2e0',13),
+  L('❥   p o i n t e   ❥','#ffffff',20),
+  L('⋆       ⋆','#ffc2e0',13),
+  L('❥','#ff8fcf',14),
+  SP(12),
+  L('soft steps, iron feet','#ffb3e0',13,'center',{i:1}),
+]},
+
+'Highness':{emo:'♛',blocks:[
+  {t:'rule',c:'#e8c96a',s:12,char:'─',end:'♔'},
+  SP(8),
+  L('h e r   h i g h n e s s','#ffd9a0',12),
+  L('y o u r   n a m e','#ffffff',24),
+  SP(8),
+  {t:'rule',c:'#e8c96a',s:12,char:'─',end:'♔'},
+  SP(8),
+  {t:'menu',c:'#ffe6c2',s:13,items:[
+    ['  ♛ opinions','loud'],
+    ['  ♛ patience','limited'],
+    ['  ♛ standards','higher than yours'],
+  ]},
+]},
+
+/* ---------- gothic ---------- */
+
+'Crypt':{emo:'†',blocks:[
+  {t:'rule',c:'#6b5f7a',s:12,char:'─',end:'†'},
+  SP(10),
+  L('H E R E   L I E S','#9a8fb0',12),
+  L('y o u r   n a m e','#e8e2f2',26),
+  L('1996  —  ongoing','#6b5f7a',13),
+  SP(10),
+  {t:'rule',c:'#6b5f7a',s:12,char:'─',end:'†'},
+  SP(8),
+  L('cause of death: boredom','#a83248',12,'center',{i:1}),
+]},
+
+'Nevermore':{emo:'✟',blocks:[
+  SP(10),
+  L('✟   ☾   ✟   ☾   ✟','#6b5f7a',14),
+  SP(10),
+  L('n e v e r m o r e','#e8e2f2',24,'center',{b:1}),
+  SP(10),
+  {t:'cols',c:'#9a8fb0',s:13,bullet:'† ',gap:30,cols:[
+    ['quiet as a rule','black suits me'],
+    ['loud when it counts','so does silence']]},
+  SP(10),
+  L('✟   ☾   ✟   ☾   ✟','#6b5f7a',14),
+]},
+
+'Requiem':{emo:'♰',blocks:[
+  {t:'rule',c:'#5a5266',s:12,char:'─',mid:'♰'},
+  SP(10),
+  L('R E Q U I E M','#c9bfd8',15),
+  L('for whoever I was before','#8a7f9c',13,'center',{i:1}),
+  SP(12),
+  {t:'cols',c:'#b0a5c0',s:13,bullet:'♱ ',gap:34,cols:[
+    ['candles','old music'],
+    ['silence','colder rooms']]},
+  SP(12),
+  {t:'rule',c:'#5a5266',s:12,char:'─',mid:'♰'},
+  L('kneel or leave','#a83248',12,'center',{i:1}),
+]},
+
+/* Sargform über die Zeilenlänge */
+'Coffin':{emo:'♱',blocks:[
+  {t:'rule',c:'#5a5266',s:12,char:'─',end:'♱'},
+  SP(10),
+  L('▪','#8a7f9c',13),
+  L('▪   ▪','#8a7f9c',13),
+  L('▪       ▪','#8a7f9c',13),
+  L('y o u r   n a m e','#e8e2f2',20),
+  L('▪       ▪','#8a7f9c',13),
+  L('▪   ▪','#8a7f9c',13),
+  L('▪','#8a7f9c',13),
+  SP(10),
+  L('six feet down and still talking','#a83248',12,'center',{i:1}),
+  {t:'rule',c:'#5a5266',s:12,char:'─',end:'♱'},
+]},
+
+'Cathedral':{emo:'♰',blocks:[
+  L('♰            ♰            ♰','#8a7f9c',14),
+  L('│            │            │','#5a5266',13),
+  {t:'rule',c:'#5a5266',s:12,char:'─',mid:'✟'},
+  SP(10),
+  L('y o u r   n a m e','#e8e2f2',24),
+  L('built to outlast whoever comes','#8a7f9c',12,'center',{i:1}),
+  SP(10),
+  {t:'rule',c:'#5a5266',s:12,char:'─',mid:'✟'},
+  L('│            │            │','#5a5266',13),
+  L('♰            ♰            ♰','#8a7f9c',14),
+]},
+
+/* Hexenbrett */
+'Ouija':{emo:'☽',blocks:[
+  {t:'lr',c:'#c9bfd8',s:16,left:'  ☾  Y E S',right:'N O  ☽  '},
+  {t:'rule',c:'#5a5266',s:11,char:'─'},
+  SP(10),
+  L('a  b  c  d  e  f  g  h  i  j  k  l  m','#b0a5c0',14),
+  L('n  o  p  q  r  s  t  u  v  w  x  y  z','#b0a5c0',14),
+  SP(8),
+  L('1  2  3  4  5  6  7  8  9  0','#8a7f9c',14),
+  SP(10),
+  {t:'rule',c:'#5a5266',s:11,char:'─'},
+  L('g o o d b y e','#a83248',15),
+]},
+
+'Thorns':{emo:'✖',blocks:[
+  L('✖ ❀ ✖ ❀ ✖ ❀ ✖ ❀ ✖ ❀ ✖','#7a4a5a',13),
+  SP(10),
+  L('e v e r y   r o s e','#e8e2f2',24),
+  SP(10),
+  L('✖  pretty from a distance','#c9bfd8',13,'left'),
+  L('✖  closer costs blood','#a83248',13,'left'),
+  L('✖  I did warn you','#c9bfd8',13,'left'),
+  SP(10),
+  L('✖ ❀ ✖ ❀ ✖ ❀ ✖ ❀ ✖ ❀ ✖','#7a4a5a',13),
+]},
+
+'Eclipse':{emo:'●',blocks:[
+  SP(12),
+  L('○   ◐   ●   ◑   ○','#8a7f9c',18),
+  SP(12),
+  L('t o t a l i t y','#e8e2f2',26,'center',{b:1}),
+  SP(10),
+  L('for four minutes','#b0a5c0',13),
+  L('nothing else mattered','#b0a5c0',13),
+  SP(12),
+  L('○   ◑   ●   ◐   ○','#8a7f9c',18),
+]},
+
+/* Süßes Katzenprofil, angelehnt an ein echtes 3dx-Profil */
+'Needy':{emo:'ᓚ',blocks:[
+  SP(6),
+  {t:'frame',c:'#8a8494',s:13,width:230,corners:'┌┐└┘',left:'│',right:'│',inner:[
+    L('♡ your name ♡','#ff5c9d',13),
+  ]},
+  SP(8),
+  // Einrückung 2/0/3/3 wie im Original — die Zeilen stehen bewusst versetzt
+  {t:'art',c:'#9a94a4',s:14,lines:[
+    '  ／l、',
+    '（ﾟ､ ｡ 7',
+    '   l、~ヽ',
+    '   じしf_,)ノ',
+  ]},
+  SP(8),
+  L('~  ♡  n e e d y  ♡  ~','#ff5c9d',16),
+  SP(8),
+  {t:'cols',c:'#dedae8',s:13,bullet:'',gap:70,left:true,cols:[
+    ['♡ being talked to','♡ 3am company'],
+    ['ㄨ colds','ㄨ dry replies']]},
+  SP(8),
+  {t:'rule',c:'#8a8494',s:12,char:'~',mid:'♡',end:'☆'},
+  L('13:13','#8a8494',11,'left'),   // links: spart die Einrückung
+]},
+
+/* Raute: Zeilen werden breiter und wieder schmaler */
+'Diamond':{emo:'◇',blocks:[
+  SP(10),
+  L('♡','#ff8fbf',13),
+  L('you','#dedae8',13),
+  L('soft · loud','#dedae8',13),
+  L('kind · honest · warm','#dedae8',13),
+  L('chaotic · tired · curious · here','#f3eefc',15,'center',{b:1}),
+  L('late · often · gladly','#dedae8',13),
+  L('say · hello','#dedae8',13),
+  L('please','#dedae8',13),
+  L('♡','#ff8fbf',13),
+]},
+
+/* ---------- Onyx: sechs Layouts für Männer ----------
+   Zentrierte Zeilen kosten 80-100 Zeichen (die Einrückung zählt mit), ein
+   einzeln zentriertes Symbol bis zu 78. Deshalb hier: Überschrift und Trenner
+   in EINER Zeile, Fließtext ohne Farbe (c:null spart je 23 Zeichen) und die
+   beiden HUD-Layouts linksbündig, wo die Einrückung ganz entfällt. */
+
+/* 1 — Dark Gentleman: Anthrazit und Silber, klare Linien, ruhig */
+'Gentleman':{emo:'♠',blocks:[
+  SP(16),
+  L('A L E X A N D E R','#eceaf0',21),
+  L('────────  32  ·  Germany  ·  GMT+1  ────────','#7a7684',12),
+  SP(14),
+  L('──────────  ♠  A B O U T  ♠  ──────────','#a09bad',12),
+  L('Quiet company and a good whisky.',null,13),
+  L('I listen more than I talk.',null,13),
+  SP(12),
+  L('─────────  I N T E R E S T S  ─────────','#a09bad',12),
+  L('Tailoring  ·  Jazz  ·  Chess  ·  Long drives',null,13),
+  SP(12),
+  L('───────  L O O K I N G   F O R  ───────','#a09bad',12),
+  L('Someone with patience and taste.',null,13),
+]},
+
+/* 2 — Cyber / Neon: linksbündiges HUD, eckig, Cyan und Violett */
+'Neondrive':{emo:'⌇',blocks:[
+  SP(8),
+  L('  //  N Y X','#4de8ff',20,'left'),
+  L('  [ 27 ]   [ BERLIN ]   [ ONLINE ]','#6aa8ff',12,'left'),
+  L('  ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬','#2f5f80',11,'left'),
+  SP(8),
+  L('  >  A B O U T','#b07cff',12,'left'),
+  L('  Night shift, headset on,',null,13,'left'),
+  L('  three monitors and one coffee.',null,13,'left'),
+  SP(8),
+  L('  >  L O A D O U T','#b07cff',12,'left'),
+  {t:'cols',c:'#7fd4ff',s:12,bullet:'⌇ ',gap:34,left:true,cols:[
+    ['synthwave','netrunning'],
+    ['ramen','arcades']]},
+  SP(8),
+  L('  >  S E E K I N G','#b07cff',12,'left'),
+  L('  Co-op partner, not a spectator.',null,13,'left'),
+  SP(8),
+  L('  ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬','#2f5f80',11,'left'),
+]},
+
+/* 3 — Minimal Male: zwei Farben, viel Luft, kaum Zeichen */
+'Understated':{emo:'▪',blocks:[
+  SP(26),
+  L('J O N A S','#eceaf0',24),
+  SP(12),
+  L('29   ·   Netherlands','#8a8894',13),
+  SP(22),
+  L('─────────','#4e4c55',12),
+  SP(22),
+  L('About','#8a8894',12),
+  L('I keep it simple. Coffee, bikes',null,14),
+  L('and long weekends.',null,14),
+  SP(20),
+  L('Looking for','#8a8894',12),
+  L('Real conversation first.',null,14),
+]},
+
+/* 4 — Red Black: selbstbewusst und kantig, Dunkelrot auf Schwarz */
+'Crossfire':{emo:'×',blocks:[
+  SP(16),
+  L('D A M I A N','#eae6e8',22),
+  L('×  ──────  30  //  Spain  //  CET  ──────  ×','#8f3641',12),
+  SP(14),
+  L('──────────  A B O U T  ──────────','#b02a3a',12),
+  L('Not here to impress anyone.',null,13),
+  L('I say what I mean, and I mean it.',null,13),
+  SP(12),
+  L('───────────  R U L E S  ───────────','#b02a3a',12),
+  L('No games  ×  No drama  ×  No filters',null,13),
+  SP(12),
+  L('──────  L O O K I N G   F O R  ──────','#b02a3a',12),
+  L('Someone who can keep up.',null,13),
+]},
+
+/* 5 — Gamer: HUD mit Feldliste und Balken, linksbündig */
+'Respawn':{emo:'▶',blocks:[
+  SP(8),
+  L('█  R Y D E R','#7cf0c0',19,'left'),
+  L('  LVL 28   ·   EU-WEST   ·   ONLINE','#6f8f9f',12,'left'),
+  SP(10),
+  {t:'kv',c:'#5fbf9f',s:12,items:[
+    ['MAIN GAME','Valorant — Immortal'],
+    ['SECOND','Elden Ring, forever'],
+    ['STATUS','Mic on, ego off'],
+  ]},
+  SP(10),
+  {t:'bars',c:'#7cf0c0',s:12,items:[['AIM',8],['CALM',5],['SLEEP',2]]},
+  SP(10),
+  L('  ▶  A B O U T','#5fbf9f',12,'left'),
+  L('  Solo queue survivor. I lose well',null,13,'left'),
+  L('  and win quietly.',null,13,'left'),
+  SP(10),
+  L('  ▶  L O O K I N G   F O R','#5fbf9f',12,'left'),
+  L('  A duo partner, not a coach.',null,13,'left'),
+]},
+
+/* 6 — Gothic Male: Kathedrale statt Rüschen, Silber und Bordeaux */
+'Vespers':{emo:'♰',blocks:[
+  SP(16),
+  L('V I N C E N T','#d8d4dc',21),
+  L('♰  ═══════  34  ·  Vienna  ·  1889  ═══════  ♰','#7c626e',12),
+  SP(14),
+  L('────────  ✟  A B O U T  ✟  ────────','#a8404f',12),
+  L('Old buildings, older music',null,13),
+  L('and manners long out of fashion.',null,13),
+  SP(12),
+  L('────────  I N T E R E S T S  ────────','#a8404f',12),
+  L('Cathedrals  ·  Organ  ·  Absinthe',null,13),
+  SP(12),
+  L('──────  L O O K I N G   F O R  ──────','#a8404f',12),
+  L('Someone unafraid of quiet.',null,13),
+]},
+
+};
+
+/* ALL bleibt name → blocks, damit die Prüfskripte weiter funktionieren */
+const META = {};
+const ALL = {};
+for(const [grp,set] of [['bild',FROM_IMAGES],['neu',INVENTED]])
+  for(const [n,v] of Object.entries(set)){ ALL[n]=v.blocks; META[n]={emo:v.emo,grp}; }
+
+/* Kategorien für die Galerie — nach Stimmung, nicht nach Bauweise.
+   Reihenfolge innerhalb einer Kategorie bleibt chronologisch (alt → neu). */
+const CATS = {
+  'Soft':     ['Velvet','Daydream','Moonlit','Heart','Tarot','Fortune','Constellation'],
+  'Bold':     ['Signature','Wired','Static','Caution','Dogtag','Scoreboard','Bartab','Blueprint','Vault','Loading','Vinyl'],
+  'Playful':  ['Receipt','Boarding','Forecast','Overheard','Label','Playlist','Recipe','Character','Balance','Nametag','Certificate',
+               'Season','Prescription','Needy'],
+  'Clean':    ['Bare','Ladder','Hourglass','Scatter','Nightshift','Dossier','Dictionary','Diamond','Compass','Museum',
+               'Polaroid','Library','Overcast'],
+  'Detailed': ['Halo','Ultimatum','Inventory','Overload','Meters','Chapters'],
+  'Ornate':   ['Aurora','Prism','Grimoire','Neon','Seance','Silk','Chandelier','Ember','Butterfly','Petals'],
+  'Girly':    ['Bubblegum','Slumber','Bows','Diary','Sparkle','Sweettooth','Pointe','Highness'],
+  'Goth':     ['Crypt','Nevermore','Requiem','Coffin','Cathedral','Ouija','Thorns','Eclipse'],
+  'Steel':    ['Manual','Rank','Poker','Coordinates','Radio','Bounty',
+               'Highway','Barcode','Toolbox','Chess','Tavern','Platform'],
+  'Onyx':     ['Gentleman','Neondrive','Understated','Crossfire','Respawn','Vespers'],
+};
+
+let current = Object.keys(ALL)[0];
+let PW = 480, FONT = 'Arial';   // 3dx: Feld 480px, Arial
+/* Der Lineal-Test beweist nur, dass die echte Grenze zwischen 476 und 483px
+   liegt, und Unity bricht an WORTgrenzen um (ein zu breites Wort rutscht ganz
+   weg). Deshalb nie bis 480 auffüllen, sondern mit Sicherheitsabstand. */
+/* ---------- Schriftstile ----------
+   1:1 aus Gifty übernommen (src/engine/fonts.ts). Das sind keine echten
+   Schriftarten, sondern Unicode-Zeichen, die wie andere Schriften aussehen —
+   deshalb funktionieren sie überall, auch in 3dx. */
+const FM={a:'α',b:'в',c:'¢',d:'∂',e:'є',f:'f',g:'g',h:'н',i:'ι',j:'נ',k:'к',l:'ℓ',m:'м',n:'η',o:'σ',p:'ρ',q:'q',r:'я',s:'ѕ',t:'т',u:'υ',v:'ν',w:'ω',x:'χ',y:'у',z:'z'};
+const SM={a:'ᴀ',b:'ʙ',c:'ᴄ',d:'ᴅ',e:'ᴇ',f:'ꜰ',g:'ɢ',h:'ʜ',i:'ɪ',j:'ᴊ',k:'ᴋ',l:'ʟ',m:'ᴍ',n:'ɴ',o:'ᴏ',p:'ᴘ',q:'ǫ',r:'ʀ',s:'s',t:'ᴛ',u:'ᴜ',v:'ᴠ',w:'ᴡ',x:'x',y:'ʏ',z:'ᴢ'};
+const TM={a:'ล',b:'в',c:'¢',d:'∂',e:'э',f:'ƒ',g:'φ',h:'ђ',i:'เ',j:'נ',k:'к',l:'ℓ',m:'м',n:'и',o:'๏',p:'ק',q:'ợ',r:'я',s:'ร',t:'†',u:'µ',v:'√',w:'ω',x:'җ',y:'ý',z:'ž'};
+const UM={a:'ɐ',b:'q',c:'ɔ',d:'p',e:'ǝ',f:'ɟ',g:'ƃ',h:'ɥ',i:'ı',j:'ɾ',k:'ʞ',l:'ʃ',m:'ɯ',n:'u',o:'o',p:'d',q:'b',r:'ɹ',s:'s',t:'ʇ',u:'n',v:'ʌ',w:'ʍ',x:'x',y:'ʎ',z:'z',
+  '0':'0','1':'Ɩ','2':'ᄅ','3':'Ɛ','4':'ㄣ','5':'ϛ','6':'9','7':'ㄥ','8':'8','9':'6',
+  '.':'˙',',':"'",'?':'¿','!':'¡','(':')',')':'(','[':']',']':'[','{':'}','}':'{','<':'>','>':'<','&':'⅋','_':'‾'};
+
+const FONTS = {normal:'Aa', fancy:'αв', smallcaps:'ꜱᴄ', thai:'ล†', flipped:'ɟlıp'};
+
+// jedes Sonderzeichen zurück auf ASCII — aber keine Rückabbildung auf
+// normale Buchstaben, sonst würde getippter Text stillschweigend umgeschrieben
+const FONT_REVERSE = (()=>{ const r={};
+  [FM,SM,TM,UM].forEach(m=>Object.keys(m).forEach(k=>{
+    const v=m[k]; if(v!==k && !/^[a-zA-Z]$/.test(v)) r[v]=k; }));
+  return r; })();
+
+function applyFont(text, style){
+  if(!style || style==='normal') return text;
+  const ascii = [...text].map(c=>FONT_REVERSE[c]||c).join('');
+  if(style==='fancy')     return [...ascii].map(c=>FM[c.toLowerCase()]||c).join('');
+  if(style==='smallcaps') return [...ascii].map(c=>SM[c.toLowerCase()]||c).join('');
+  if(style==='thai')      return [...ascii].map(c=>TM[c.toLowerCase()]||c).join('');
+  if(style==='flipped')   return ascii.split('\n')
+    .map(l=>[...l].map(c=>UM[c.toLowerCase()]||c).reverse().join('')).join('\n');
+  return ascii;
+}
+
+const DEF_COLOR = '#e8e2f2';  // 3dx-Standardfarbe: dafür braucht es kein <color>-Tag
+const SAFE = 444;   // Ziel beim Auffüllen (Spalten, Menü, rechtsbündig)
+const HARD = 444;   // Warnschwelle = dieselbe Grenze, bis zu der aufgefüllt wird
+/* Warum so viel Abstand zu 480: die Breitenrechnung ist ein Modell, kein
+   Messwert. Kleine Fehler summieren sich über 60+ Zeichen, und Unity wirft
+   dann ein GANZES Wort in die nächste Zeile — aus 4px zu viel wird eine
+   zerstörte Zeile. 36px Reserve kosten optisch fast nichts. */
+let blocks = clone(ALL[current]);
+
+function clone(x){return norm(JSON.parse(JSON.stringify(x)))}
+/* Größen MÜSSEN ganzzahlig sein: der Code gibt <size=13> aus, also muss
+   auch mit 13 gerechnet werden — sonst bricht die Zeile im Spiel um. */
+function norm(bl){
+  for(const b of bl){
+    if(typeof b.s === 'number') b.s = Math.round(b.s);
+    if(b.inner) norm(b.inner);
+  }
+  return bl;
+}
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+/* ---------- Pixel-Messung ----------
+   3dx rendert mit Arial und RUNDET jede Glyphenbreite auf ganze Pixel.
+   Belegt durch den Leerzeichen-Test: 40 Leerzeichen ergaben bei den Größen
+   11/12/13/14/16/18/20 die Breiten 3/3/4/4/4/5/6 px — exakt round(0,278*Größe).
+   Abschneiden hätte bei 13 und 14 eine 3 ergeben; genau dort waren die
+   Layouts kaputt. Die em-Werte unten sind so gewählt, dass sie mit Runden
+   zu BEIDEN In-Game-Messungen passen (30er-Ketten bei Größe 13, ▔ bei 11). */
+const GLYPH_EM = {
+  '·':0.31, '↳':0.46, '⋆':0.54, '»':0.54, '«':0.54,
+  // Striche und Blöcke sind NICHT gleich breit, auch wenn sie bei Größe 13
+  // beide 9px messen: bei Größe 11 ist ─ dann 8px, ▔ aber nur 7px.
+  '─':0.71,'═':0.71,'╶':0.71,'╴':0.71,'│':0.71,'┈':0.71,
+  '▔':0.67,'▁':0.67,'█':0.67,'░':0.67,'▒':0.67,'▓':0.67,'▬':0.67,
+  '★':0.85,'☆':0.85,
+  // in-game gemessen (30er-Ketten bei Größe 13):
+  // Kapitälchen sind schmaler als gedacht, geometrische Formen deutlich
+  'ɪ':0.38,'ᴀ':0.46,'ᴇ':0.46,'ᴏ':0.46,'ᴍ':0.54,
+  '•':0.38,'°':0.38,'˚':0.31,
+  '❤':1.0,'◐':1.0,'◑':1.0,
+  '●':0.61,'○':0.61,'■':0.61,'□':0.61,'◆':0.61,'◇':0.61,'◈':0.61,'◎':0.61,
+  '✦':1.0,'✧':1.0,'♡':1.0,'♥':1.0,'☾':1.0,'☽':1.0,'☁':1.0,'☀':1.0,
+  '✖':1.0,'✗':1.0,'✓':1.0,'√':1.0,'✿':1.0,'❁':1.0,'❀':1.0,
+  '▲':1.0,'▼':1.0,'➡':1.0,'♪':1.0,'♫':1.0,'∘':1.0,'♠':1.0,'✩':1.0,
+  '╭':1.0,'╮':1.0,'╰':1.0,'╯':1.0,'┌':1.0,'┐':1.0,'└':1.0,'┘':1.0,
+  '「':1.0,'」':1.0,'▪':1.0,'▫':1.0,'｡':1.0,
+};
+const CV = document.createElement('canvas').getContext('2d');
+const _cache = new Map();
+function charW(ch,size,bold,ital){
+  const key = ch+size+(bold?'b':'')+(ital?'i':'');
+  let v = _cache.get(key);
+  if(v!==undefined) return v;
+  if(ch===' ') v = Math.round(0.278*size);
+  else if(GLYPH_EM[ch]!==undefined) v = Math.round(GLYPH_EM[ch]*size);
+  else{
+    const cp = ch.codePointAt(0);
+    // kombinierende Zeichen (die kleinen Ringe/Punkte über Buchstaben)
+    // sitzen auf dem Vorgänger und haben KEINE eigene Breite
+    if(cp>=0x0300 && cp<=0x036F) v = 0;
+    // Kapitälchen wie ᴀɴɪᴍᴇ — liegen über mehrere Unicode-Blöcke verstreut
+    else if((cp>=0x1D00 && cp<=0x1D7F) || 'ɢɴʀʙʜʟʏꜱɪ'.includes(ch))
+                                    v = Math.round(0.46*size);
+    else if(cp>0x2500 && cp<0x25A0) v = Math.round(0.66*size);
+    // geometrische Formen (■ ● ○ ◆ ▲) sind KEINE Quadrate, sondern ~0,61
+    else if(cp>=0x25A0 && cp<=0x25CF) v = Math.round(0.61*size);
+    // halbbreite Katakana (ﾟ ､ ｡ ｯ …) sind nur halb so breit wie die
+    // vollbreiten — sonst zerläuft jedes Kaomoji
+    else if(cp>=0xFF61 && cp<=0xFF9F) v = Math.round(0.5*size);
+    else if(cp>0x2100)              v = Math.round(1.0*size);
+    else { CV.font = `${ital?'italic ':''}${bold?'bold ':''}${size}px ${FONT}`;
+           v = Math.round(CV.measureText(ch).width); }
+  }
+  _cache.set(key,v); return v;
+}
+function w(text,size,bold,ital){
+  let t=0; for(const ch of text) t += charW(ch,size,bold,ital); return t;
+}
+const spaceW = (size,b,i) => charW(' ',size,b,i) || Math.round(size*0.278);
+function padTo(s,targetPx,size,b,i){
+  // abrunden — ein Leerzeichen zu viel und die Zeile bricht im Spiel um
+  const n = Math.floor((targetPx - w(s,size,b,i)) / spaceW(size,b,i));
+  return s + ' '.repeat(Math.max(0,n));
+}
+function indent(s,align,size,b,i){
+  if(align==='left') return s;
+  // zentriert: echte Feldmitte, damit es optisch stimmt.
+  // rechtsbündig: bis SAFE, sonst endet die Zeile exakt am Rand und bricht um.
+  const px = align==='center' ? (PW - w(s,size,b,i))/2 : SAFE - w(s,size,b,i);
+  return ' '.repeat(Math.max(0,Math.floor(px/spaceW(size,b,i)))) + s;
+}
+
+/* ---------- Blöcke → Zeilen ---------- */
+function toLines(bl){
+  const out=[];
+  let bi = 0;   // Nummer des Bausteins, aus dem die Zeile stammt
+  const put=(text,src,align)=>out.push({text,c:src.c,s:src.s,b:src.b,i:src.i,a:align||'left',bi});
+  for(const b of bl){
+    if(b.t==='line'){ put(applyFont(b.text,b.f),b,b.a); }
+    else if(b.t==='seg'){
+      // Zeile aus mehreren Stücken mit je eigener Größe/Farbe.
+      // Die Einrückung wandert INS erste Stück, damit die Leerzeichen
+      // dessen Größe haben und die Rechnung stimmt.
+      const total = b.parts.reduce((a,p)=> a + w(p.text,p.s,p.b,p.i), 0);
+      const first = b.parts[0];
+      const free  = b.a==='right' ? SAFE-total : (PW-total)/2;
+      const n = b.a==='left' ? 0
+              : Math.max(0, Math.floor(free/spaceW(first.s,first.b,first.i)));
+      out.push({ parts:b.parts, pad:' '.repeat(n), a:'left', bi,
+                 text:' '.repeat(n)+b.parts.map(p=>p.text).join(''),
+                 c:first.c, s:first.s, b:first.b, i:first.i });
+    }
+    else if(b.t==='art'){
+      // Mehrzeilige Zeichnung: der BLOCK wird zentriert, nicht jede Zeile
+      // einzeln — sonst zerfällt die Figur.
+      const breit = Math.max(...b.lines.map(l => w(l,b.s,b.b,b.i)));
+      const pad = ' '.repeat(Math.max(0, Math.floor((PW-breit)/2/spaceW(b.s,b.b,b.i))));
+      b.lines.forEach(l => { put(pad+l, b, 'left'); out[out.length-1].art = true; });
+    }
+    else if(b.t==='rule'){
+      // Trennlinie über die volle Breite, optional mit Zeichen in der Mitte.
+      // Wächst symmetrisch, bis sie SAFE erreicht — nie von Hand abzählen.
+      const mid = b.mid ? ` ${b.mid} ` : '';
+      const eL  = b.end ? b.end + ' ' : '';
+      const eR  = b.end ? ' ' + b.end : '';
+      const build = k => eL + b.char.repeat(k) + mid + b.char.repeat(k) + eR;
+      // Die Linie wird anschließend zentriert, also kommt links noch
+      // (PW-Breite)/2 dazu. Damit sie trotzdem bei SAFE endet, darf sie nur
+      // 2*SAFE-PW breit werden — sonst schiebt die Zentrierung sie über den Rand.
+      const target = 2*SAFE - PW;
+      let n = 1;
+      while(w(build(n+1), b.s, b.b, b.i) <= target) n++;
+      put(build(n), b, 'center');
+    }
+    else if(b.t==='cols'){
+      // Spaltenbreite richtet sich nach dem längsten Eintrag der Spalte,
+      // der ganze Block wird dann zentriert. Feste Drittel sähen linkslastig
+      // aus, sobald die letzte Spalte kurze Wörter enthält.
+      const rows = Math.max(...b.cols.map(c=>c.length));
+      const gap  = b.gap ?? 28;
+      const cw   = b.cols.map(c => Math.max(...c.map(x => x ? w(b.bullet+x,b.s,b.b,b.i) : 0)));
+      const total= cw.reduce((a,x)=>a+x,0) + gap*(b.cols.length-1);
+      // linksbündig spart die komplette Zentrier-Einrückung
+      const pos  = []; let acc = b.left ? 0 : Math.max(0,(PW-total)/2);
+      for(let ci=0; ci<b.cols.length; ci++){ pos.push(acc); acc += cw[ci]+gap; }
+      for(let r=0;r<rows;r++){
+        let s='';
+        // bullet enthält den Abstand selbst ('↳ ' vs '»')
+        b.cols.forEach((c,ci)=>{ if(c[r]) s = padTo(s,pos[ci],b.s,b.b,b.i) + b.bullet + c[r]; });
+        put(s,b,'left');
+      }
+    }
+    else if(b.t==='grid3'){
+      // wie bei cols: Spaltenbreite nach Inhalt, Block zentriert
+      const gap = b.gap ?? 28;
+      const cw = [0,1,2].map(ci => Math.max(...b.items.filter((_,k)=>k%3===ci)
+                                     .map(x => w(x,b.s,b.b,b.i))));
+      const total = cw.reduce((a,x)=>a+x,0) + gap*2;
+      const pos = []; let acc = Math.max(0,(PW-total)/2);
+      for(let ci=0; ci<3; ci++){ pos.push(acc); acc += cw[ci]+gap; }
+      for(let r=0;r<b.items.length;r+=3){
+        let s='';
+        b.items.slice(r,r+3).forEach((x,ci)=>{ s = padTo(s,pos[ci],b.s,b.b,b.i) + x; });
+        put(s,b,'left');
+      }
+    }
+    else if(b.t==='lr'){
+      put(padTo(b.left, SAFE - w(b.right,b.s,b.b,b.i), b.s,b.b,b.i) + b.right, b, 'left');
+    }
+    else if(b.t==='kv'){
+      b.items.forEach(([k,v])=> put(padTo('  '+k, SAFE*0.34, b.s,b.b,b.i) + v, b, 'left'));
+    }
+    else if(b.t==='bars'){
+      b.items.forEach(([k,v])=>{
+        const bar='█'.repeat(v)+'░'.repeat(10-v);
+        const start=(SAFE - w('xxxxxxxxxxxx'+bar,b.s,b.b,b.i))/2;
+        put(padTo(padTo('',Math.max(0,start),b.s,b.b,b.i)+k, start+w('xxxxxxxxxxxx',b.s,b.b,b.i), b.s,b.b,b.i)+bar, b,'left');
+      });
+    }
+    else if(b.t==='menu'){
+      b.items.forEach(([l,r])=>{
+        let dots='';
+        while(w(l+' '+dots+'· '+r, b.s,b.b,b.i) <= SAFE) dots += '·';
+        put(l+' '+dots+' '+r, b, 'left');
+      });
+    }
+    else if(b.t==='player'){
+      put(indent(b.title,'center',b.s,b.b,b.i),b,'left');
+      put(indent(`${b.cur} ──────•─────── ${b.total}`,'center',b.s,b.b,b.i),b,'left');
+      put(indent('⇄ ◁◁ ‖ ▷▷ ↻','center',b.s,b.b,b.i),b,'left');
+    }
+    else if(b.t==='frame'){
+      // Ein Kasten kostet viele Leerzeichen (jede Zeile links UND rechts gefüllt).
+      // Schmaler = deutlich billiger, deshalb eigene Breite statt voller 480px.
+      const FW = b.width || PW;
+      // schmalere Kästen werden als Ganzes zentriert
+      const off = b.width ? ' '.repeat(Math.max(0,Math.floor((PW-FW)/2/spaceW(b.s)))) : '';
+      const ec = b.corners || '╭╮╰╯';   // Ecken frei wählbar
+      put(off+(()=>{ let s=ec[0]; while(w(s+'─'+ec[1],b.s)<FW) s+='─'; return s+ec[1]; })(),b,'left');
+      const rows=b.inner.filter(x=>x.text.trim());
+      const h=Math.max(b.left.length,b.right.length,rows.length);
+      for(let r=0;r<h;r++){
+        const lc=b.left[r]||' ', rc=b.right[r]||'';
+        const src=rows[r]||b, mid=rows[r]?rows[r].text:'';
+        let s = padTo(lc, (FW - w(mid,src.s,src.b,src.i))/2, b.s) + mid;
+        if(rc) s = padTo(s, FW - w(rc,b.s), src.s, src.b, src.i) + rc;   // nur wenn Buchstabe da
+        out.push({text:off+s, c:src.c, s:src.s, b:src.b, i:src.i, a:'left', bi});
+      }
+      put(off+(()=>{ let s=ec[2]; while(w(s+'─'+ec[3],b.s)<FW) s+='─'; return s+ec[3]; })(),b,'left');
+    }
+    bi++;
+  }
+  return out;
+}
+
+/* ---------- Rendern ---------- */
+function render(){
+  const lines = toLines(blocks);
+
+  // Tags sparen: gemeinsame GRÖSSE einmal außen, darin nur die Farbwechsel.
+  const flat = lines.map((ln,k)=>{
+    const empty = !ln.text.trim();
+    const src = empty ? (lines.slice(0,k).reverse().find(x=>x.text.trim()) || ln) : ln;
+    // Zeilen aus mehreren Stücken bringen ihren Code selbst mit und
+    // nehmen am Tag-Sparen nicht teil (eigener, nie gleicher Schlüssel).
+    if(ln.parts) return { parts: ln.parts, pad: ln.pad, txt: ln.text,
+                          c: ln.c, s: Math.round(ln.s), b: !!ln.b, i: !!ln.i, solo: k };
+    // Leerzeichen am Zeilenende sind unsichtbar und reine Verschwendung
+    return { txt: empty ? '' : indent(ln.text, ln.a, ln.s, ln.b, ln.i).replace(/ +$/,''),
+             c: src.c, s: Math.round(src.s), b: !!src.b, i: !!src.i };
+  });
+  const code = [];
+  for(let p=0; p<flat.length; ){
+    // Zeile aus mehreren Stücken: eigener Code, kein Tag-Sparen
+    if(flat[p].parts){
+      code.push(flat[p].parts.map((pt,k)=>{
+        let t = (k===0 ? flat[p].pad : '') + pt.text;
+        if(pt.i) t = `<i>${t}</i>`;
+        if(pt.b) t = `<b>${t}</b>`;
+        // ohne Farbe kein <color>-Tag: spart je Stelle rund 24 Zeichen
+        if(pt.c) t = `<color=${pt.c}>${t}</color>`;
+        return `<size=${Math.round(pt.s)}>${t}</size>`;
+      }).join(''));
+      p++; continue;
+    }
+    const {s,b,i} = flat[p];
+    let q=p; while(q<flat.length && !flat[q].parts && flat[q].s===s && flat[q].b===b && flat[q].i===i) q++;
+    const group = flat.slice(p,q), parts=[];
+    for(let k=0; k<group.length; ){
+      const c = group[k].c, texts=[];
+      while(k<group.length && group[k].c===c) texts.push(group[k++].txt);
+      // ohne Farbe kein <color>-Tag: spart je Block rund 24 Zeichen
+      parts.push(c ? `<color=${c}>${texts.join('\n')}</color>` : texts.join('\n'));
+    }
+    let body = parts.join('\n');
+    if(i) body = `<i>${body}</i>`;
+    if(b) body = `<b>${body}</b>`;
+    code.push(`<size=${s}>${body}</size>`);
+    p=q;
+  }
+
+  // Vorschau: jede Glyphe auf ihre gemessene Pixelbreite gezwungen
+  let wide = 0;
+  $('preview').style.width = PW+'px';
+  /* Jede Glyphe bekommt ihre in 3dx gemessene Breite. */
+  const glyphsOf = (t,s,b,i) => [...t].map(ch=>
+    `<span style="display:inline-block;width:${charW(ch,s,b,i)}px">${ch===' '?'&nbsp;':esc(ch)}</span>`).join('');
+
+  $('preview').innerHTML = lines.map(ln=>{
+    if(!ln.text.trim()) return `<div style="height:${ln.s}px"></div>`;
+
+    // Zeile aus mehreren Stücken: jedes Stück mit eigener Größe/Farbe
+    if(ln.parts){
+      const total = ln.parts.reduce((a,p)=> a + w(p.text,p.s,p.b,p.i), 0)
+                  + w(ln.pad, ln.parts[0].s, ln.parts[0].b, ln.parts[0].i);
+      const over = total > HARD; if(over) wide++;
+      const inner = ln.parts.map((p,k)=>
+        `<span style="color:${p.c||DEF_COLOR};font-size:${p.s}px;${p.b?'font-weight:700;':''}${p.i?'font-style:italic;':''}">`
+        + glyphsOf((k===0?ln.pad:'')+p.text, p.s, p.b, p.i) + `</span>`).join('');
+      return `<div class="pline" data-bi="${ln.bi}" title="Click to edit"`
+        + ` style="line-height:1.4;${over?'background:rgba(255,80,110,.22);':''}">${inner}</div>`;
+    }
+
+    const t = indent(ln.text, ln.a, ln.s, ln.b, ln.i);
+    const over = w(t, ln.s, ln.b, ln.i) > HARD;
+    if(over) wide++;
+
+    // Zeichnungen als normalen Text rendern: einzeln in Kästchen gezwungen
+    // überlappen sich japanische Zeichen im Browser und die Figur zerfällt
+    if(ln.art) return `<div class="pline" data-bi="${ln.bi}" title="Click to edit"`
+      + ` style="color:${ln.c||DEF_COLOR};font-size:${ln.s}px;white-space:pre">${esc(t)}</div>`;
+
+    return `<div class="pline" data-bi="${ln.bi}"`
+      + ` title="${over?'Too wide — will wrap in game':'Click to edit'}"`
+      + ` style="color:${ln.c||DEF_COLOR};font-size:${ln.s}px;`
+      + `${ln.b?'font-weight:700;':''}${ln.i?'font-style:italic;':''}`
+      + `${over?'background:rgba(255,80,110,.22);':''}">${glyphsOf(t,ln.s,ln.b,ln.i)}</div>`;
+  }).join('');
+  $('wide').textContent = wide ? `⚠ ${wide} line${wide>1?'s':''} too wide` : '';
+
+  // deutliches Banner über der Vorschau, sobald etwas nicht funktioniert
+  const codeLen = code.join('\n').length;
+  const probleme = [];
+  if(wide) probleme.push(`<b>${wide} line${wide>1?'s':''} too wide</b> — marked in red below.`
+    + `<small>3dx wraps them, which breaks the layout. Shorten the text or lower the size.</small>`);
+  if(codeLen > 1000) probleme.push(`<b>${codeLen-1000} characters over the limit</b>`
+    + `<small>3dx cuts off at 1000 and the raw tags become visible. Remove a whole line — shortening a centred one makes it longer.</small>`);
+  const al = $('alert');
+  al.hidden = probleme.length === 0;
+  al.innerHTML = probleme.join('<hr style="border:0;border-top:1px solid rgba(255,255,255,.15);margin:10px 0">');
+
+  const out = code.join('\n');
+  $('code').value = out;
+  $('chars').textContent = out.length;
+  $('fill').style.width = Math.min(100, out.length/10) + '%';
+  const over = out.length > 1000;
+  $('meter').classList.toggle('over', over);
+  // Über 1000 schneidet 3dx ab und der rohe Code landet im Profil → sperren
+  const cb = $('copyBtn');
+  cb.disabled = over;
+  cb.style.opacity = over ? .45 : 1;
+  cb.style.cursor  = over ? 'not-allowed' : 'pointer';
+  cb.textContent   = over ? `${out.length-1000} characters over limit` : 'Copy profile code';
+
+  // Klartext-Anzeige im Copy-Bereich (reine Darstellung, gleiche Zahlen)
+  const st = $('readyState'), sz = $('readySize');
+  if(st){
+    const problem = over || wide;
+    st.textContent = over ? 'Too long for 3DX'
+                   : wide ? 'Some lines will wrap'
+                   : 'Ready for 3DX ✓';
+    st.classList.toggle('bad', !!problem);
+    sz.textContent = `Profile size: ${out.length} / 1000 characters`
+      + (over ? '' : ` · ${1000-out.length} remaining`);
+  }
+}
+
+/* ---------- Bausteine links ---------- */
+const KIND={line:'',cols:'Columns',lr:'Left / Right',frame:'Frame',grid3:'Grid',
+            player:'Player',kv:'Fields',bars:'Bars',menu:'Dotted',rule:'Divider',seg:'Mixed',
+            art:'Drawing'};
+/* Kurzerklärung pro Bausteintyp — erscheint als Tooltip auf der Karte */
+const HINT={
+  line:  'A single line of text',
+  blank: 'An empty line, just for spacing',
+  cols:  'Two or three columns side by side',
+  lr:    'One text on the left, one on the right edge',
+  frame: 'A box with letters running down both sides',
+  grid3: 'A three-column grid, for tags and hashtags',
+  player:'A fake music player with a progress bar',
+  kv:    'Label on the left, value next to it',
+  bars:  'Rating bars — drag the slider to set the level',
+  menu:  'Text, a row of dots, then a value — like a menu',
+  rule:  'A divider line across the full width',
+  seg:   'One line combining several sizes and colours',
+  art:   'A multi-line drawing — centred as one piece so it keeps its shape',
+};
+/* Wert an einem Pfad wie "cols.1.2" oder "inner.3.text" setzen */
+function setAt(obj, path, value){
+  const p = path.split('.');
+  let o = obj;
+  for(let k=0; k<p.length-1; k++) o = o[p[k]];
+  o[p[p.length-1]] = value;
+}
+
+function drawBlocks(){
+  $('blocks').innerHTML = blocks.map((b,i)=>{
+    const leer  = b.t==='line' && !b.text.trim();
+    const label = b.t==='line' ? (b.text.trim()||'Blank line') : KIND[b.t];
+    const hint  = leer ? HINT.blank : (HINT[b.t]||'');
+    const inp = (path,val,ph='') =>
+      `<input type="text" data-bi="${i}" data-path="${path}" placeholder="${ph}"`
+      + ` value="${esc(String(val??'')).replace(/"/g,'&quot;')}">`;
+    const lbl = t => `<span class="flabel">${t}</span>`;
+    const rows = [];
+
+    if(b.t==='line' && b.text.trim()){
+      rows.push(`<div class="row">${inp('text',b.text)}</div>`);
+      rows.push(`<div class="row fmt">
+        <span class="seg">${['left','center','right'].map((v,k)=>
+          `<button class="${b.a===v?'on':''}" data-align="${i}" data-v="${v}">${['left','centre','right'][k]}</button>`).join('')}</span>
+        <select data-bi="${i}" data-path="f" title="Font">
+          ${Object.entries(FONTS).map(([k,lab])=>
+            `<option value="${k}"${(b.f||'normal')===k?' selected':''}>${lab}</option>`).join('')}
+        </select>
+        <input class="num" type="number" min="8" max="40" value="${b.s}"
+               data-bi="${i}" data-path="s" data-num="1" title="Size">
+        </div>`);
+    }
+    else if(b.t==='seg'){
+      b.parts.forEach((p,k)=> rows.push(
+        `<div class="row"><button class="dot" data-bi="${i}" data-cpath="parts.${k}.c"`
+        + ` style="background:${p.c||DEF_COLOR}" title="Change colour"></button>`
+        + `${lbl(p.s+'px')}${inp(`parts.${k}.text`,p.text)}</div>`));
+    }
+    else if(b.t==='frame'){
+      rows.push(`<div class="row">${lbl('left')}${inp('left',b.left)}</div>`);
+      rows.push(`<div class="row">${lbl('right')}${inp('right',b.right)}</div>`);
+      b.inner.forEach((x,k)=>{ if(x.text && x.text.trim())
+        rows.push(`<div class="row">${lbl(x.s+'px')}${inp(`inner.${k}.text`,x.text)}</div>`); });
+    }
+    else if(b.t==='cols'){
+      b.cols.forEach((c,ci)=> c.forEach((x,ri)=>
+        rows.push(`<div class="row">${lbl((ci+1)+'·'+(ri+1))}${inp(`cols.${ci}.${ri}`,x)}</div>`)));
+    }
+    else if(b.t==='grid3'){
+      b.items.forEach((x,k)=> rows.push(`<div class="row">${inp(`items.${k}`,x)}</div>`));
+    }
+    else if(b.t==='art'){
+      b.lines.forEach((x,k)=> rows.push(`<div class="row">${inp(`lines.${k}`,x)}</div>`));
+    }
+    else if(b.t==='kv' || b.t==='menu'){
+      b.items.forEach((it,k)=> rows.push(
+        `<div class="row pair">${inp(`items.${k}.0`,it[0])}${inp(`items.${k}.1`,it[1])}</div>`));
+    }
+    else if(b.t==='bars'){
+      b.items.forEach((it,k)=> rows.push(
+        `<div class="row">${inp(`items.${k}.0`,it[0])}`
+        + `<input type="range" min="0" max="10" value="${it[1]}" data-bi="${i}" data-path="items.${k}.1" data-num="1">`
+        + `<span class="sz">${it[1]}</span></div>`));
+    }
+    else if(b.t==='lr'){
+      rows.push(`<div class="row pair">${inp('left',b.left)}${inp('right',b.right)}</div>`);
+    }
+    else if(b.t==='player'){
+      rows.push(`<div class="row">${inp('title',b.title)}</div>`);
+      rows.push(`<div class="row pair">${inp('cur',b.cur)}${inp('total',b.total)}</div>`);
+    }
+    else if(b.t==='rule'){
+      rows.push(`<div class="row">${lbl('middle')}${inp('mid',b.mid,'none')}</div>`);
+      rows.push(`<div class="row">${lbl('ends')}${inp('end',b.end,'none')}</div>`);
+    }
+
+    return `<div class="block" id="blk-${i}" data-idx="${i}" draggable="true">
+      <div class="block-head" title="${hint}">
+        <span class="grip" title="Drag to reorder">⠿</span>
+        <button class="dot" data-bi="${i}" data-cpath="c"
+                style="background:${b.c||DEF_COLOR}" title="Change colour"></button>
+        <span class="block-name${leer?' faint':''}">${esc(label).slice(0,24)}</span>
+        ${KIND[b.t]?`<span class="tagpill" title="${hint}">${KIND[b.t]}</span>`:''}
+        <span class="tools">
+          <button data-dup="${i}" title="Duplicate">⧉</button>
+          <button data-del="${i}" title="Delete">✕</button>
+        </span>
+      </div>${rows.length?`<div class="block-body">${rows.join('')}</div>`:''}</div>`;
+  }).join('');
+}
+
+/* ---------- Vorlagen-Galerie ---------- */
+/* Nur die gewählte Kategorie zeigen — bei 40 Vorlagen scrollt man sonst ewig */
+function gruppen(){
+  const zugeordnet = new Set(Object.values(CATS).flat());
+  const rest = Object.keys(ALL).filter(n => !zugeordnet.has(n));
+  return { ...CATS, ...(rest.length ? {'Other': rest} : {}) };
+}
+let activeCat = Object.keys(CATS)[0];
+
+let suche = '';
+function drawGallery(folgeAktueller = true){
+  const save = blocks;
+  const G = gruppen();
+  // Kategorie der aktuellen Vorlage aufschlagen — außer beim Reiterwechsel
+  if(folgeAktueller){
+    const catOf = Object.entries(G).find(([,ns]) => ns.includes(current));
+    if(catOf) activeCat = catOf[0];
+  }
+
+  // bei einer Suche zählen die Reiter nicht — dann alle Vorlagen durchsuchen
+  const treffer = suche
+    ? Object.keys(ALL).filter(n => n.toLowerCase().includes(suche))
+    : (G[activeCat] || []);
+
+  $('catTabs').innerHTML = Object.entries(G).map(([cat,ns])=>
+    `<button class="cat-tab${!suche && cat===activeCat?' on':''}" data-c="${cat}">${cat}<b>${ns.length}</b></button>`
+  ).join('');
+
+  $('gallery').innerHTML = treffer.filter(n=>ALL[n]).map(n=>{
+    blocks = clone(ALL[n]); render();
+    const len = $('code').value.length;
+    return `<button class="card${n===current?' on':''}" data-l="${n}">
+      <span class="emo">${META[n].emo}</span>
+      <span class="nm">${n}</span>
+      <span class="sub">${len} chars</span></button>`;
+  }).join('');
+
+  blocks = save; render();
+  $('galinfo').textContent = $('gallery').hidden
+    ? `Using “${current}”`
+    : suche
+      ? `${treffer.length} match${treffer.length===1?'':'es'} for “${suche}”`
+      : Object.keys(ALL).length + ' templates in ' + Object.keys(G).length + ' groups';
+}
+/* Die Galerie ist gross; wer seine Vorlage gewaehlt hat, klappt sie weg. */
+function galerieZeigen(offen){
+  $('catTabs').hidden = $('gallery').hidden = !offen;
+  document.querySelector('.section-head').classList.toggle('collapsed', !offen);
+  const t=$('galToggle');
+  t.textContent = offen ? 'Hide ▴' : 'Show ▾';
+  t.setAttribute('aria-expanded', String(offen));
+  try{ localStorage.setItem('profilly.gallery', offen ? '1' : '0'); }catch(_){}
+}
+$('galToggle').addEventListener('click',()=>{ galerieZeigen($('gallery').hidden); drawGallery(); });
+try{ if(localStorage.getItem('profilly.gallery')==='0') galerieZeigen(false); }catch(_){}
+
+$('search').addEventListener('input',e=>{
+  suche = e.target.value.trim().toLowerCase();
+  if($('gallery').hidden) galerieZeigen(true);   // Suchen klappt wieder auf
+  drawGallery(false);
+});
+$('catTabs').addEventListener('click',e=>{
+  const b=e.target.closest('[data-c]'); if(!b)return;
+  activeCat=b.dataset.c;
+  suche=''; $('search').value='';     // Reiterklick hebt die Suche auf
+  drawGallery(false);
+});
+$('gallery').addEventListener('click',e=>{
+  const b=e.target.closest('[data-l]'); if(!b)return;
+  current=b.dataset.l; blocks=clone(ALL[current]);
+  document.querySelectorAll('.card').forEach(c=>c.classList.toggle('on',c.dataset.l===current));
+  drawBlocks(); render();
+});
+/* Klick in die Vorschau → passender Baustein wird hervorgehoben,
+   in den Blick gescrollt und sein Textfeld fokussiert */
+$('preview').addEventListener('click',e=>{
+  const ln = e.target.closest('[data-bi]'); if(!ln) return;
+  const el = $('blk-'+ln.dataset.bi); if(!el) return;
+  document.querySelectorAll('.block.hit').forEach(x=>x.classList.remove('hit'));
+  el.classList.add('hit');
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+  const inp = el.querySelector('input[type=text]');
+  if(inp){ inp.focus(); inp.select(); }
+  setTimeout(()=>el.classList.remove('hit'), 2500);
+});
+
+function onFieldChange(e){
+  const t = e.target;
+  if(t.dataset.bi===undefined || t.dataset.path===undefined) return;
+  const val = t.dataset.num ? +t.value : t.value;
+  setAt(blocks[+t.dataset.bi], t.dataset.path, val);
+  // Zahl neben dem Balken-Regler mitziehen — nur dort gibt es sie
+  if(t.type==='range' && t.nextElementSibling) t.nextElementSibling.textContent = val;
+  render();
+}
+$('blocks').addEventListener('input', onFieldChange);
+$('blocks').addEventListener('change', onFieldChange);   // für die Font-Auswahl
+$('blocks').addEventListener('click',e=>{
+  const t=e.target.closest('[data-align]');
+  if(t){ blocks[t.dataset.align].a=t.dataset.v; drawBlocks(); render(); return; }
+  const dup=e.target.closest('[data-dup]');
+  if(dup){ const i=+dup.dataset.dup;
+    blocks.splice(i+1, 0, JSON.parse(JSON.stringify(blocks[i])));
+    drawBlocks(); render(); return; }
+  const del=e.target.closest('[data-del]');
+  if(del){ blocks.splice(+del.dataset.del, 1); drawBlocks(); render(); return; }
+  const d=e.target.closest('.dot[data-cpath]');
+  if(d) openPicker(+d.dataset.bi, d.dataset.cpath);
+});
+
+/* ---------- Bausteine per Ziehen umsortieren ---------- */
+let dragFrom = null;
+/* Nur der Griff zieht. Sonst startet jeder Zug daneben — etwa neben einem
+   Balkenregler — ein Verschieben des ganzen Bausteins. */
+let amGriff = false;
+$('blocks').addEventListener('mousedown',e=>{ amGriff = !!e.target.closest('.grip'); });
+$('blocks').addEventListener('dragstart',e=>{
+  if(!amGriff){ e.preventDefault(); return; }
+  const el=e.target.closest('.block'); if(!el)return;
+  dragFrom = +el.dataset.idx;
+  el.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+});
+$('blocks').addEventListener('dragover',e=>{
+  e.preventDefault();
+  const el=e.target.closest('.block'); if(!el)return;
+  document.querySelectorAll('.block.dropzone').forEach(x=>x.classList.remove('dropzone'));
+  el.classList.add('dropzone');
+});
+$('blocks').addEventListener('drop',e=>{
+  e.preventDefault();
+  const el=e.target.closest('.block');
+  document.querySelectorAll('.block.dropzone').forEach(x=>x.classList.remove('dropzone'));
+  if(!el || dragFrom===null) return;
+  const to = +el.dataset.idx;
+  if(to!==dragFrom){
+    const [mv] = blocks.splice(dragFrom,1);
+    blocks.splice(to, 0, mv);
+    drawBlocks(); render();
+  }
+  dragFrom = null;
+});
+$('blocks').addEventListener('dragend',()=>{
+  document.querySelectorAll('.block.dragging,.block.dropzone')
+    .forEach(x=>x.classList.remove('dragging','dropzone'));
+  dragFrom = null; amGriff = false;
+});
+
+/* ---------- Baustein hinzufügen ---------- */
+const NEUE_BLOECKE = [
+  ['Line',    ()=>({t:'line',text:'new line',c:null,s:13,a:'center'})],
+  ['Blank',   ()=>({t:'line',text:'',c:null,s:10,a:'center'})],
+  ['Divider', ()=>({t:'rule',c:null,s:12,char:'─',mid:'✦'})],
+  ['Columns', ()=>({t:'cols',c:null,s:13,bullet:'· ',gap:30,cols:[['one','two'],['three','four']]})],
+  ['Fields',  ()=>({t:'kv',c:null,s:13,items:[['label','value'],['label','value']]})],
+  ['Dotted',  ()=>({t:'menu',c:null,s:13,items:[['item','value'],['item','value']]})],
+  ['Bars',    ()=>({t:'bars',c:null,s:12,items:[['first',7],['second',4]]})],
+  ['Left / Right', ()=>({t:'lr',c:null,s:13,left:'  left',right:'right  '})],
+  ['Grid',    ()=>({t:'grid3',c:null,s:13,items:['#one','#two','#three','#four','#five','#six']})],
+  ['Frame',   ()=>({t:'frame',c:null,s:13,width:330,left:'A',right:'B',
+                    inner:[{t:'line',text:'inside the box',c:null,s:14,a:'center'}]})],
+];
+$('addBtn').addEventListener('click',()=>{
+  const m=$('addMenu');
+  if(!m.innerHTML) m.innerHTML = NEUE_BLOECKE.map(([name],k)=>
+    `<button data-add="${k}">${name}<small>${HINT[NEUE_BLOECKE[k][1]().t]||''}</small></button>`).join('');
+  m.hidden = !m.hidden;
+});
+$('addMenu').addEventListener('click',e=>{
+  const b=e.target.closest('[data-add]'); if(!b)return;
+  blocks.push(NEUE_BLOECKE[+b.dataset.add][1]());
+  $('addMenu').hidden = true;
+  drawBlocks(); render();
+  $('blk-'+(blocks.length-1))?.scrollIntoView({behavior:'smooth',block:'center'});
+});
+
+/* ---------- Zurueck zur Vorlage ---------- */
+/* Der erste Klick fragt nach — sonst ist die Arbeit mit einem Rutsch weg. */
+let resetTimer = 0;
+function resetEntspannen(){
+  clearTimeout(resetTimer); resetTimer = 0;
+  const b = $('resetBtn');
+  b.textContent = 'Reset';
+  b.classList.remove('armed');
+}
+$('resetBtn').addEventListener('click',()=>{
+  const b = $('resetBtn');
+  if(!resetTimer){
+    b.textContent = 'Discard changes?';
+    b.classList.add('armed');
+    resetTimer = setTimeout(resetEntspannen, 3500);
+    return;
+  }
+  resetEntspannen();
+  blocks = clone(ALL[current]);
+  drawBlocks(); render();
+});
+
+/* ---------- Farbwähler ---------- */
+/* Die Farben, die in den Vorlagen tatsächlich vorkommen */
+const PALETTE = [
+  '#ffffff','#f3eefc','#dedae8','#c9c4d6','#9b96ad','#7f7a8d','#6f7780',
+  '#ff2d95','#ff6fae','#ff8fbf','#ffb3d4','#ffadad','#e05a7a','#ff6a3d',
+  '#c77dff','#b28fe0','#9a8fd6','#a89ac4','#8f7fd6','#7ac6e8','#8fb8d8',
+  '#4de8ff','#6ee7a8','#5f8f5f','#e8dcae','#e8c96a','#f0d000','#a08050',
+];
+
+/* Vollständige Farbtabelle: eine Graustufenzeile plus 14 Farbtöne
+   in acht Helligkeitsstufen — deckt praktisch jede Farbe ab. */
+const HUES = [0,15,32,45,58,80,120,155,180,200,220,255,285,320];
+const LEVELS = [
+  {s:82,l:86},{s:84,l:76},{s:86,l:66},{s:88,l:56},
+  {s:84,l:46},{s:78,l:36},{s:70,l:26},{s:58,l:16},
+];
+function hsl2hex(h,s,l){
+  s/=100; l/=100;
+  const a=s*Math.min(l,1-l), k=n=>(n+h/30)%12;
+  const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+  const to=x=>Math.round(255*x).toString(16).padStart(2,'0');
+  return '#'+to(f(0))+to(f(8))+to(f(4));
+}
+const SPECTRUM = (()=>{
+  const out = [];
+  // Graustufen zuerst
+  for(let i=0;i<14;i++) out.push(hsl2hex(0,0,100 - i*(100/13)));
+  // dann jede Helligkeitsstufe als eigene Zeile
+  for(const lv of LEVELS) for(const h of HUES) out.push(hsl2hex(h,lv.s,lv.l));
+  return out;
+})();
+
+let cpTarget = null;   // {bi, path}
+
+function getAt(obj, path){
+  return path.split('.').reduce((o,k)=> o?.[k], obj);
+}
+const swatch = cur => c =>
+  `<button data-c="${c}" class="${c.toLowerCase()===String(cur).toLowerCase()?'on':''}"`
+  + ` style="background:${c}" title="${c}"></button>`;
+
+function openPicker(bi, path){
+  cpTarget = {bi, path};
+  const cur = getAt(blocks[bi], path);
+  $('cpFav').innerHTML  = PALETTE.map(swatch(cur)).join('');
+  $('cpGrid').innerHTML = SPECTRUM.map(swatch(cur)).join('');
+  $('cpHex').value = cur || '';
+  $('cpNative').value = cur || DEF_COLOR;
+  $('cpPrev').style.background = cur || DEF_COLOR;
+  $('cpick').hidden = false;
+}
+function setColour(c){
+  if(!cpTarget) return;
+  setAt(blocks[cpTarget.bi], cpTarget.path, c);
+  $('cpPrev').style.background = c || DEF_COLOR;
+  drawBlocks(); render();
+}
+function onSwatch(e){
+  const b=e.target.closest('[data-c]'); if(!b)return;
+  $('cpHex').value = b.dataset.c;
+  $('cpNative').value = b.dataset.c;
+  setColour(b.dataset.c);
+  document.querySelectorAll('.cpick-grid button').forEach(x=>x.classList.toggle('on',x===b));
+}
+$('cpGrid').addEventListener('click', onSwatch);
+$('cpFav').addEventListener('click', onSwatch);
+$('cpHex').addEventListener('input',e=>{
+  let v = e.target.value.trim();
+  if(v && !v.startsWith('#')) v = '#'+v;
+  // erst übernehmen, wenn es ein vollständiger Hexcode ist
+  if(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)){ setColour(v); $('cpNative').value = v; }
+});
+$('cpNative').addEventListener('input',e=>{
+  $('cpHex').value = e.target.value;
+  setColour(e.target.value);
+});
+$('cpNone').addEventListener('click',()=>{ setColour(null); $('cpick').hidden = true; });
+$('cpClose').addEventListener('click',()=>{ $('cpick').hidden = true; });
+$('cpick').addEventListener('click',e=>{ if(e.target===$('cpick')) $('cpick').hidden = true; });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('cpick').hidden = true; });
+$('copyBtn').addEventListener('click',async()=>{
+  const ta=$('code');
+  const warVersteckt = ta.hidden;
+  ta.hidden = false;                       // zum Markieren kurz sichtbar
+  ta.focus(); ta.select();
+  let ok=false;
+  try{ await navigator.clipboard.writeText(ta.value); ok=true; }
+  catch(e){ try{ ok=document.execCommand('copy'); }catch(_){} }
+  if(warVersteckt && ok) ta.hidden = true;
+
+  const b=$('copyBtn');
+  b.textContent = ok ? '✓ Copied!' : 'Press Ctrl+C to copy';
+  b.classList.toggle('done',ok);
+  const h=$('howtoLine');
+  if(h && ok){ h.dataset.old ??= h.textContent; h.textContent = 'Now paste it into your 3DX profile.'; }
+  setTimeout(()=>{
+    b.textContent='Copy profile code'; b.classList.remove('done');
+    if(h && h.dataset.old) h.textContent = h.dataset.old;
+  },2200);
+});
+
+/* Code-Feld ein- und ausklappen */
+$('showCode').addEventListener('click',()=>{
+  const ta=$('code'), btn=$('showCode');
+  ta.hidden = !ta.hidden;
+  btn.textContent = ta.hidden ? 'Show generated code ▾' : 'Hide generated code ▴';
+  btn.setAttribute('aria-expanded', String(!ta.hidden));
+});
+drawBlocks(); drawGallery();
+</script>
+</body>
+</html>
