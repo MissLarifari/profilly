@@ -17,7 +17,15 @@ Live-Vorschau im nachgebauten Profilfenster, automatische Ausrichtung, Zeichenz�
 
 ## Deployen
 
-`index.html` muss unter `/profile-editor/index.html` auf dem Server liegen. Mehr braucht es nicht.
+```
+node deploy.mjs "was sich geändert hat"
+```
+
+Prüft die Vorlagen, pusht, stößt den Webhook an und wartet, bis die neue Datei
+wirklich ausgeliefert wird. Es meldet Erfolg erst, wenn sie oben ist.
+
+**Dieses Repo muss öffentlich bleiben.** Der Server klont es ohne Zugangsdaten;
+steht es auf privat, meldet der Webhook brav `deploy started` und tut nichts.
 
 ## Vorlagen prüfen
 
