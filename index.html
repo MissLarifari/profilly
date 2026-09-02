@@ -7,27 +7,52 @@
 <title>Profilly — 3DX Profile Editor by Lari</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23c77dff'/%3E%3Cstop offset='1' stop-color='%23ff6fae'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='1.5' y='1.5' width='29' height='29' rx='9.5' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='12.5' r='4.3' fill='%23fff'/%3E%3Cpath d='M7.4 25.6c0-4.7 3.9-7.6 8.6-7.6s8.6 2.9 8.6 7.6' fill='%23fff'/%3E%3C/svg%3E">
 <style>
+  /* ============================================================
+     Farben und Größen an EINER Stelle. Wer hier etwas ändert,
+     ändert es überall — es gibt bewusst nur drei Textstufen.
+     Kontrastwerte gegen --surface sind nachgemessen, siehe Kommentar.
+     ============================================================ */
   :root{
-    /* Grundflächen: fast schwarz mit Pflaumen-Unterton */
-    --bg:#08070c;
-    --surface:#141019;        /* Karten und Bausteine */
-    --surface-hi:#1a1523;     /* dieselbe Fläche, angehoben */
-    --sunken:#0b0910;         /* Eingabefelder, leicht eingelassen */
-    --line:rgba(255,255,255,.055);
-    --line-hi:rgba(255,255,255,.10);
-    /* Schrift: weiches Weiß, helles Lavendel, gedecktes Grauviolett */
-    --text:#eceaf3; --body:#c6c1d4; --muted:#8b8599; --dim:#6b6579;
-    /* Akzente — nur gezielt einsetzen */
-    --acc:#c77dff; --acc2:#ff6fae;
-    --acc-tint:rgba(199,125,255,.085);
-    --acc-line:rgba(199,125,255,.38);
-    --ok:#8ccfa8; --bad:#ff6b82;
-    --shadow:0 1px 2px rgba(0,0,0,.5), 0 6px 18px rgba(0,0,0,.28);
+    --bg:#0a0810;                 /* Seitengrund, fast schwarz mit Pflaume */
+    --surface:#17121f;            /* Karten, Bausteine, Bedienflächen */
+    --surface-elevated:#211a2c;   /* dieselbe Fläche, angehoben (Hover, aktiv) */
+    --sunken:#0d0a13;             /* Eingabefelder, leicht eingelassen */
+
+    --border:rgba(255,255,255,.11);
+    --border-strong:rgba(255,255,255,.20);
+
+    --text-primary:#f4f2f8;       /* 16.2:1 — Überschriften, Namen, Werte */
+    --text-secondary:#cfcadd;     /* 10.4:1 — Fließtext, Beschriftungen */
+    --text-muted:#a49dba;         /*  6.4:1 — Hilfetext. Nie darunter. */
+
+    --accent:#c98bff;
+    --accent-hover:#dcaeff;
+    --accent-tint:rgba(201,139,255,.13);
+    --accent-border:rgba(201,139,255,.45);
+    --accent2:#ff6fae;            /* nur Identität: Logo, Copy-Knopf */
+
+    --ok:#7fd8a4; --bad:#ff7b90;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.30);
+    --radius:12px;
+
+    /* Frühere Namen als Aliase — so gelten die neuen Werte sofort überall,
+       ohne jede einzelne Regel anzufassen. --dim war zu blass und zeigt
+       jetzt auf --text-muted. */
+    --text:var(--text-primary);
+    --body:var(--text-secondary);
+    --muted:var(--text-muted);
+    --dim:var(--text-muted);
+    --line:var(--border);
+    --line-hi:var(--border-strong);
+    --acc:var(--accent);
+    --acc2:var(--accent2);
+    --acc-tint:var(--accent-tint);
+    --acc-line:var(--accent-border);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--body);
-    font:13.5px/1.6 'Segoe UI',system-ui,sans-serif;min-height:100vh;
-    padding:0 28px 80px;-webkit-font-smoothing:antialiased}
+  body{background:var(--bg);color:var(--text-secondary);
+    font:15px/1.6 'Segoe UI',system-ui,sans-serif;min-height:100vh;
+    padding:0 28px 96px;-webkit-font-smoothing:antialiased}
   /* Tiefe statt Farbe: sehr zurückhaltender Pflaumen-Schimmer, und zwar
      erst unterhalb des Kopfes — dadurch wirkt die Kopfzeile dunkler. */
   body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
@@ -35,217 +60,238 @@
       radial-gradient(64% 46% at 16% 34%, rgba(150, 90,200,.13), transparent 66%),
       radial-gradient(56% 40% at 88% 22%, rgba(190, 70,130,.08), transparent 66%),
       radial-gradient(72% 52% at 50% 104%, rgba(120,100,190,.09), transparent 68%)}
-  .wrap{max-width:966px;margin:0 auto}
-  ::selection{background:rgba(199,125,255,.3);color:#fff}
-  body::-webkit-scrollbar{width:11px}
+  .wrap{max-width:1000px;margin:0 auto}
+  ::selection{background:rgba(201,139,255,.32);color:#fff}
+  body::-webkit-scrollbar{width:12px}
   body::-webkit-scrollbar-track{background:transparent}
-  body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:7px;
+  body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:7px;
     border:3px solid transparent;background-clip:padding-box}
-  body::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.16);background-clip:padding-box}
-  button:focus-visible,a:focus-visible,.dot:focus-visible{
-    outline:1px solid var(--acc-line);outline-offset:2px}
+  body::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.22);background-clip:padding-box}
+  /* Sichtbarer Tastaturfokus auf allem, was man bedienen kann */
+  a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,
+  [tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 
   /* ---------- Kopf ---------- */
-  /* flach, niedrig, nur eine feine Linie darunter */
-  header{display:flex;align-items:center;gap:12px;
-    padding:17px 0 15px;border-bottom:1px solid var(--line)}
-  .logo{width:27px;height:27px;flex:none;opacity:.95}
-  .mark{font-size:20px;font-weight:600;letter-spacing:.05em;color:var(--text)}
-  .byline{font-size:11.5px;color:var(--dim);align-self:center;
-    border-left:1px solid var(--line);padding-left:13px;margin-left:2px}
-  .byline span{color:var(--muted)}
-  /* Links auf Schwester-Tool und Discord — sekundär, also dunkel und ruhig */
+  header{display:flex;align-items:center;gap:13px;
+    padding:18px 0 16px;border-bottom:1px solid var(--border)}
+  .logo{width:29px;height:29px;flex:none}
+  .mark{font-size:22px;font-weight:600;letter-spacing:.04em;color:var(--text-primary)}
+  .byline{font-size:13px;color:var(--text-muted);align-self:center;
+    border-left:1px solid var(--border);padding-left:13px;margin-left:2px}
+  .byline span{color:var(--text-secondary)}
   .chip-link{align-self:center;text-decoration:none;background:transparent;
-    border:1px solid var(--line);border-radius:8px;
-    padding:5px 11px;font-size:11.5px;color:var(--muted);
+    border:1px solid var(--border);border-radius:8px;
+    padding:7px 13px;font-size:13.5px;color:var(--text-secondary);
     display:flex;align-items:center;gap:7px;transition:.16s;white-space:nowrap}
   .chip-link:first-of-type{margin-left:auto}
-  .chip-link:hover{color:var(--text);border-color:var(--line-hi);background:var(--surface)}
+  .chip-link:hover{color:var(--text-primary);border-color:var(--border-strong);
+    background:var(--surface)}
+  .chip-link:active{background:var(--surface-elevated)}
   .chip-link span{color:inherit}
-  .chip-link svg{opacity:.7}
-  .chip-link.discord:hover{border-color:rgba(120,132,255,.4)}
-  /* Fortschritt: eine der wenigen Stellen mit Akzentfarbe */
-  .badge{display:flex;align-items:center;gap:14px;font-size:11.5px;margin-left:14px}
-  .badge .warn{color:var(--bad)}
-  .meter{display:flex;align-items:center;gap:9px;color:var(--dim)}
-  .meter .bar{width:76px;height:3px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden}
-  .meter .fill{height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc));transition:width .15s}
-  .meter b{color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+  .chip-link svg{opacity:.85}
+  .chip-link.discord:hover{border-color:rgba(120,132,255,.5)}
+  .badge{display:flex;align-items:center;gap:14px;font-size:13px;margin-left:14px}
+  .badge .warn{color:var(--bad);font-weight:600}
+  .meter{display:flex;align-items:center;gap:9px;color:var(--text-muted)}
+  .meter .bar{width:82px;height:4px;border-radius:2px;background:rgba(255,255,255,.13);overflow:hidden}
+  .meter .fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .15s}
+  .meter b{color:var(--text-secondary);font-weight:600;font-variant-numeric:tabular-nums}
   .meter.over .fill{background:var(--bad)}
   .meter.over b{color:var(--bad)}
 
+  /* Einordnung direkt unter dem Kopf: Profilly ist kein Ersatz fuer den
+     ueblichen Profil-Editor, sondern eine Vorlagensammlung. */
+  .lead{max-width:640px;margin:20px 0 0;font-size:14.5px;line-height:1.6;
+    color:var(--text-secondary)}
+  .lead b{color:var(--text-primary);font-weight:600}
+
   /* ---------- Schrittleiste ---------- */
-  /* nur eine leise Zeile, kein Kästchen pro Schritt */
+  /* Der aktive Schritt ist deutlich hervorgehoben, die anderen bleiben
+     trotzdem gut lesbar. Welcher aktiv ist, setzt ein IntersectionObserver
+     weiter unten — reine Anzeige, am Editor ändert das nichts. */
   .wizard{list-style:none;display:flex;flex-wrap:wrap;align-items:center;
-    margin:20px 0 30px;font-size:11.5px;color:var(--dim)}
-  .wizard li{display:flex;align-items:center;gap:8px}
-  .wizard li+li::before{content:'';display:block;width:18px;height:1px;
-    background:var(--line-hi);margin:0 15px}
+    margin:18px 0 34px;font-size:13.5px}
+  .wizard li{display:flex;align-items:center;gap:9px;color:var(--text-muted);
+    padding:7px 13px;border-radius:999px;border:1px solid transparent;
+    cursor:pointer;transition:.18s}
+  .wizard li:hover{color:var(--text-secondary);background:var(--surface)}
+  .wizard li.on{color:var(--text-primary);background:var(--accent-tint);
+    border-color:var(--accent-border);font-weight:500}
+  .wizard li+li::before{content:'';display:block;width:20px;height:1px;
+    background:var(--border-strong);margin:0 6px}
   .wizard b{display:inline-flex;align-items:center;justify-content:center;
-    width:17px;height:17px;border-radius:50%;flex:none;font-size:10px;font-weight:600;
-    background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+    width:21px;height:21px;border-radius:50%;flex:none;font-size:12px;font-weight:600;
+    background:var(--surface-elevated);border:1px solid var(--border);
+    color:var(--text-secondary);transition:.18s}
+  .wizard li.on b{background:var(--accent);border-color:var(--accent);color:#1c0f28}
   /* Schrittnummer in den Abschnitts-Überschriften */
   h2 i{display:inline-flex;align-items:center;justify-content:center;
-    width:17px;height:17px;border-radius:50%;margin-right:9px;font-style:normal;
-    font-size:10px;font-weight:600;vertical-align:1px;
-    background:var(--acc-tint);border:1px solid var(--acc-line);color:var(--acc)}
+    width:23px;height:23px;border-radius:50%;margin-right:11px;font-style:normal;
+    font-size:12.5px;font-weight:600;vertical-align:-1px;
+    background:var(--accent-tint);border:1px solid var(--accent-border);color:var(--accent)}
 
-  /* ---------- Überschriften ---------- */
-  h2{font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-    color:var(--text);margin-bottom:14px}
-  .note{font-size:11.5px;color:var(--dim);margin:-8px 0 18px}
-  .section-head{display:flex;align-items:center;gap:14px;margin:0 0 15px}
+  /* ---------- Überschriften und Hilfetext ---------- */
+  h2{font-size:18px;font-weight:600;letter-spacing:.005em;
+    color:var(--text-primary);margin-bottom:14px}
+  .note{font-size:13.5px;color:var(--text-muted);margin:-8px 0 20px;line-height:1.55}
+  .section-head{display:flex;align-items:center;gap:14px;margin:0 0 16px;flex-wrap:wrap}
   .section-head h2{margin-bottom:0}
-  .section-head span{color:var(--dim);font-size:11.5px}
-  .section-head.collapsed{margin-bottom:44px}
-  .collapse{background:transparent;border:1px solid var(--line);color:var(--dim);
-    border-radius:8px;padding:6px 11px;font:inherit;font-size:11px;cursor:pointer;
-    flex:none;letter-spacing:.03em;transition:.16s}
-  .collapse:hover{color:var(--text);border-color:var(--line-hi);background:var(--surface)}
+  .section-head span{color:var(--text-muted);font-size:13.5px}
+  .section-head.collapsed{margin-bottom:40px}
+  .collapse{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);
+    border-radius:9px;padding:8px 14px;font:inherit;font-size:13.5px;cursor:pointer;
+    flex:none;transition:.16s}
+  .collapse:hover{color:var(--text-primary);border-color:var(--border-strong);
+    background:var(--surface-elevated)}
+  .collapse:active{transform:translateY(1px)}
+  .collapse.armed{color:#ffb0bd;border-color:rgba(255,123,144,.5);background:rgba(255,123,144,.12)}
   .section-head .collapse{margin-left:auto}
-  .collapse.armed{color:#ff9aac;border-color:rgba(255,107,130,.42);background:rgba(255,107,130,.08)}
   .cat-tabs[hidden],.cat-grid[hidden]{display:none}
 
   /* ---------- Copy-Bereich ---------- */
-  .ready{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-    margin:0 0 14px;font-size:11.5px}
+  .ready{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    margin:0 0 16px;font-size:13.5px}
   .ready-state{color:var(--ok);font-weight:600}
   .ready-state.bad{color:var(--bad)}
-  .ready-size{color:var(--dim);margin-left:auto;font-variant-numeric:tabular-nums}
-  .btn.big{width:100%;padding:12px;font-size:12.5px;border-radius:9px;letter-spacing:.04em}
-  .howto{margin-top:12px;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.04em}
-  .disclose{display:block;width:100%;margin-top:20px;background:none;
-    border:none;border-top:1px solid var(--line);
-    color:var(--dim);font:inherit;font-size:11px;cursor:pointer;
-    padding:13px 0 0;border-radius:0;letter-spacing:.03em;transition:color .15s}
-  .disclose:hover{color:var(--muted)}
+  .ready-size{color:var(--text-muted);margin-left:auto;font-variant-numeric:tabular-nums}
+  .btn.big{width:100%;padding:15px;font-size:15px;border-radius:11px;letter-spacing:.02em}
+  .howto{margin-top:14px;text-align:center;font-size:13px;color:var(--text-muted);letter-spacing:.02em}
+  .disclose{display:block;width:100%;margin-top:22px;background:none;
+    border:none;border-top:1px solid var(--border);
+    color:var(--text-muted);font:inherit;font-size:13.5px;cursor:pointer;
+    padding:15px 0 0;border-radius:0;transition:color .15s}
+  .disclose:hover{color:var(--text-primary)}
 
   /* ---------- Vorlagen-Galerie ---------- */
-  .cat-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px}
-  .cat-tab{background:transparent;border:1px solid var(--line);color:var(--muted);
-    border-radius:8px;padding:6px 12px;font:inherit;font-size:11.5px;cursor:pointer;
+  .cat-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .cat-tab{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);
+    border-radius:9px;padding:8px 14px;font:inherit;font-size:13.5px;cursor:pointer;
     display:flex;align-items:center;gap:7px;transition:.16s}
-  .cat-tab:hover{color:var(--text);border-color:var(--line-hi);background:var(--surface)}
-  .cat-tab.on{background:var(--acc-tint);border-color:var(--acc-line);color:var(--acc)}
-  .cat-tab b{font-weight:400;opacity:.5;font-size:10px}
-  .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));
-    gap:7px;margin-bottom:34px}
-  /* flache Zeile statt hoher Kachel — 89 Vorlagen sollen nicht die halbe Seite fressen.
-     Ausgewählt: feiner Akzentrahmen und ein schmaler Streifen links. */
+  .cat-tab:hover{color:var(--text-primary);border-color:var(--border-strong);
+    background:var(--surface-elevated)}
+  .cat-tab.on{background:var(--accent-tint);border-color:var(--accent-border);
+    color:var(--accent);font-weight:500}
+  .cat-tab b{font-weight:400;color:var(--text-muted);font-size:12px}
+  .cat-tab.on b{color:var(--accent)}
+  .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(184px,1fr));
+    gap:8px;margin-bottom:40px}
   .card{position:relative;background:var(--surface);
-    border:1px solid var(--line);border-radius:8px;
-    padding:8px 11px;cursor:pointer;text-align:left;font:inherit;color:var(--body);
-    display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);
+    border:1px solid var(--border);border-radius:10px;
+    padding:10px 13px;cursor:pointer;text-align:left;font:inherit;color:var(--text-secondary);
+    display:flex;align-items:center;gap:11px;box-shadow:var(--shadow);
     transition:background .16s,border-color .16s}
-  .card:hover{background:var(--surface-hi);border-color:var(--line-hi)}
-  .card.on{border-color:var(--acc-line);background:var(--surface-hi);
-    box-shadow:var(--shadow),inset 2px 0 0 var(--acc2)}
-  .card .emo{font-size:14px;line-height:1;opacity:.75;flex:none;width:15px;text-align:center}
-  .card .nm{font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:0;
+  .card:hover{background:var(--surface-elevated);border-color:var(--border-strong)}
+  .card:active{transform:translateY(1px)}
+  .card.on{border-color:var(--accent-border);background:var(--surface-elevated);
+    box-shadow:var(--shadow),inset 2px 0 0 var(--accent2)}
+  .card .emo{font-size:15px;line-height:1;opacity:.85;flex:none;width:16px;text-align:center}
+  .card .nm{font-size:13.5px;font-weight:600;color:var(--text-primary);flex:1;min-width:0;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .card.on .nm{color:var(--acc)}
-  .card .sub{font-size:10px;color:var(--dim);flex:none;font-variant-numeric:tabular-nums}
+  .card.on .nm{color:var(--accent)}
+  .card .sub{font-size:12px;color:var(--text-muted);flex:none;font-variant-numeric:tabular-nums}
 
   /* ---------- Arbeitsbereich ---------- */
-  /* Zwei Spalten, viel Luft dazwischen. Keine Rahmen um die Bereiche —
-     Gruppen entstehen durch Abstand, nicht durch weitere Kästen. */
-  .grid{display:grid;grid-template-columns:minmax(0,420px) 494px;gap:52px;align-items:start}
-  .panel{background:none;border:0;padding:0;box-shadow:none}
-  /* Vorschau bleibt beim Scrollen stehen — sonst arbeitet man blind */
-  .stage{position:sticky;top:22px;display:grid;gap:34px}
-  #search{margin-left:auto;width:180px;background:var(--sunken);color:var(--text);
-    border:1px solid var(--line);border-radius:8px;padding:6px 12px;
-    font:inherit;font-size:11.5px;transition:.16s}
-  #search::placeholder{color:var(--dim)}
-  #search:focus{outline:none;border-color:var(--acc-line);width:220px}
-  #search::-webkit-search-cancel-button{filter:invert(.55)}
+  /* Drei ruhige Flächen statt vieler Kästchen: Editor, Vorschau, Copy.
+     Getrennt wird über Fläche und Abstand, nicht über schwere Rahmen. */
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 494px;gap:26px;align-items:start}
+  .panel{background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+  /* Die Vorschau ist der wichtigste Bereich: etwas heller und deutlicher abgesetzt. */
+  .stage > .panel:first-child{background:var(--surface-elevated);
+    border-color:var(--border-strong)}
+  .stage{position:sticky;top:22px;display:grid;gap:22px}
+  #search{margin-left:auto;width:220px;background:var(--sunken);color:var(--text-primary);
+    border:1px solid var(--border-strong);border-radius:9px;padding:9px 14px;
+    font:inherit;font-size:14px;transition:.16s}
+  #search::placeholder{color:var(--text-muted)}
+  #search:focus{outline:none;border-color:var(--accent);width:260px;
+    box-shadow:0 0 0 3px var(--accent-tint)}
+  #search::-webkit-search-cancel-button{filter:invert(.7)}
 
   /* ---------- Bausteine ---------- */
-  .block{border:1px solid var(--line);border-radius:10px;
-    background:var(--surface);margin-bottom:6px;overflow:hidden;
-    box-shadow:var(--shadow);transition:border-color .18s,background .18s}
-  .block:hover{background:var(--surface-hi)}
-  .block:focus-within{border-color:var(--line-hi);background:var(--surface-hi)}
-  .block.hit{border-color:var(--acc-line)}
+  .block{border:1px solid var(--border);border-radius:10px;
+    background:var(--surface-elevated);margin-bottom:8px;overflow:hidden;
+    transition:border-color .18s,background .18s}
+  .block:hover{border-color:var(--border-strong)}
+  .block:focus-within{border-color:var(--accent-border)}
+  .block.hit{border-color:var(--accent-border)}
   .block.dragging{opacity:.35}
-  .block.dropzone{border-color:var(--acc-line)}
-  .block-head{display:flex;align-items:center;gap:9px;padding:7px 10px 6px 7px}
-  /* Griff zum Umsortieren */
-  .grip{cursor:grab;color:var(--dim);font-size:13px;line-height:1;padding:2px 3px;
-    flex:none;user-select:none;opacity:.4;transition:opacity .15s}
-  .block:hover .grip{opacity:.85}
+  .block.dropzone{border-color:var(--accent-border)}
+  .block-head{display:flex;align-items:center;gap:10px;padding:9px 11px 8px 8px}
+  .grip{cursor:grab;color:var(--text-muted);font-size:15px;line-height:1;padding:2px 3px;
+    flex:none;user-select:none;opacity:.7;transition:opacity .15s}
+  .block:hover .grip{opacity:1}
   .grip:active{cursor:grabbing}
-  .dot{width:9px;height:9px;border-radius:50%;flex:none;cursor:pointer;padding:0;
-    border:none;box-shadow:0 0 0 1px rgba(255,255,255,.18);transition:box-shadow .15s}
-  .dot:hover{box-shadow:0 0 0 2px rgba(255,255,255,.35)}
-  .block-name{font-size:11.5px;color:var(--muted);white-space:nowrap;
+  .dot{width:12px;height:12px;border-radius:50%;flex:none;cursor:pointer;padding:0;
+    border:none;box-shadow:0 0 0 1px rgba(255,255,255,.3);transition:box-shadow .15s}
+  .dot:hover{box-shadow:0 0 0 2px rgba(255,255,255,.55)}
+  .block-name{font-size:13.5px;color:var(--text-secondary);white-space:nowrap;
     overflow:hidden;text-overflow:ellipsis;flex:1}
-  .block-name.faint{color:var(--dim);font-style:italic}
-  .tagpill{font-size:10px;color:var(--dim);flex:none;letter-spacing:.05em}
-  /* Duplizieren und Löschen sind zweitrangig: erst beim Hinschauen sichtbar */
+  .block-name.faint{color:var(--text-muted);font-style:italic}
+  .tagpill{font-size:12px;color:var(--text-muted);flex:none}
   .tools{display:flex;gap:2px;flex:none;opacity:0;visibility:hidden;transition:opacity .15s}
   .block:hover .tools,.block:focus-within .tools{opacity:1;visibility:visible}
-  @media (hover:none){.tools{opacity:1;visibility:visible}.grip{opacity:.85}}
-  .tools button{background:none;border:none;color:var(--dim);cursor:pointer;
-    font-size:11.5px;padding:3px 5px;border-radius:5px;line-height:1;transition:.15s}
-  .tools button:hover{color:var(--text);background:rgba(255,255,255,.07)}
-  .tools button[data-del]:hover{color:#ff9aac;background:rgba(255,107,130,.12)}
-  .block-body{padding:0 10px 9px;display:grid;gap:6px}
-  .row{display:flex;align-items:center;gap:8px;min-width:0}
-  /* Formatierzeile tritt zurück, solange man den Baustein nicht bearbeitet */
-  .row.fmt{opacity:.55;transition:opacity .18s}
+  @media (hover:none){.tools{opacity:1;visibility:visible}}
+  .tools button{background:none;border:none;color:var(--text-muted);cursor:pointer;
+    font-size:14px;padding:5px 7px;border-radius:6px;line-height:1;transition:.15s}
+  .tools button:hover{color:var(--text-primary);background:rgba(255,255,255,.1)}
+  .tools button[data-del]:hover{color:#ffb0bd;background:rgba(255,123,144,.16)}
+  .block-body{padding:0 11px 11px;display:grid;gap:7px}
+  .row{display:flex;align-items:center;gap:9px;min-width:0}
+  /* Formatierzeile tritt zurück, bleibt aber lesbar */
+  .row.fmt{opacity:.8;transition:opacity .18s}
   .block:hover .row.fmt,.block:focus-within .row.fmt{opacity:1}
 
   /* ---------- Eingabefelder ---------- */
-  input[type=text]{flex:1;min-width:0;background:var(--sunken);color:var(--text);
-    border:1px solid rgba(255,255,255,.04);border-radius:7px;padding:6px 10px;
-    font:inherit;font-size:12.5px;transition:border-color .15s,box-shadow .15s;
-    box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
-  input[type=text]::placeholder{color:var(--dim)}
-  input[type=text]:hover{border-color:var(--line)}
-  input[type=text]:focus{outline:none;border-color:var(--acc-line);
-    box-shadow:inset 0 1px 2px rgba(0,0,0,.5), 0 0 0 2px rgba(199,125,255,.11)}
-  .seg{display:flex;background:var(--sunken);border:1px solid rgba(255,255,255,.04);
-    border-radius:7px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
-  .seg button{background:none;border:none;color:var(--dim);padding:3px 9px;
-    font:inherit;font-size:10.5px;cursor:pointer;transition:.15s}
-  .seg button:hover{color:var(--body)}
-  .seg button.on{background:rgba(255,255,255,.07);color:var(--text)}
-  .sz{font-size:10.5px;color:var(--dim);margin-left:auto;font-variant-numeric:tabular-nums}
-  .flabel{font-size:10px;color:var(--dim);flex:none;min-width:34px;letter-spacing:.03em}
-  .block-body select,input.num{background:var(--sunken);color:var(--body);
-    border:1px solid rgba(255,255,255,.04);border-radius:6px;font:inherit;font-size:11.5px;
-    flex:none;box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
-  .block-body select{padding:4px 5px}
-  input.num{width:50px;text-align:center;padding:5px 4px}
-  .block-body select:focus,input.num:focus{outline:none;border-color:var(--acc-line)}
+  input[type=text]{flex:1;min-width:0;background:var(--sunken);color:var(--text-primary);
+    border:1px solid var(--border-strong);border-radius:8px;padding:9px 12px;
+    font:inherit;font-size:14px;transition:border-color .15s,box-shadow .15s}
+  input[type=text]::placeholder{color:var(--text-muted)}
+  input[type=text]:hover{border-color:rgba(255,255,255,.28)}
+  input[type=text]:focus{outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-tint)}
+  .seg{display:flex;background:var(--sunken);border:1px solid var(--border-strong);
+    border-radius:8px;overflow:hidden}
+  .seg button{background:none;border:none;color:var(--text-muted);padding:6px 12px;
+    font:inherit;font-size:13px;cursor:pointer;transition:.15s}
+  .seg button:hover{color:var(--text-primary);background:rgba(255,255,255,.06)}
+  .seg button.on{background:rgba(255,255,255,.13);color:var(--text-primary);font-weight:500}
+  .sz{font-size:13px;color:var(--text-muted);margin-left:auto;font-variant-numeric:tabular-nums}
+  .flabel{font-size:12.5px;color:var(--text-muted);flex:none;min-width:42px}
+  .block-body select,input.num{background:var(--sunken);color:var(--text-primary);
+    border:1px solid var(--border-strong);border-radius:7px;font:inherit;font-size:13.5px;
+    flex:none}
+  .block-body select{padding:6px 7px}
+  input.num{width:58px;text-align:center;padding:7px 5px}
+  .block-body select:hover,input.num:hover{border-color:rgba(255,255,255,.28)}
+  .block-body select:focus,input.num:focus{outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-tint)}
   .row.pair input{flex:1 1 0;min-width:0}
   .block-body input[type=text]{min-width:0}
-  /* hohe Trefferflaeche, damit man den Regler nicht verfehlt */
-  input[type=range]{flex:1;min-width:0;accent-color:var(--acc);height:18px;cursor:pointer;
-    background:transparent}
-  /* Baustein hinzufügen — sekundär, also dunkel und ruhig */
-  .add{width:100%;margin-top:9px;padding:10px;background:transparent;
-    border:1px dashed var(--line-hi);color:var(--dim);border-radius:9px;
-    cursor:pointer;font:inherit;font-size:12px;transition:.16s}
-  .add:hover{border-color:var(--acc-line);color:var(--acc);background:var(--acc-tint)}
-  .addmenu{margin-top:9px;display:grid;grid-template-columns:1fr 1fr;gap:6px;
-    padding:10px;border-radius:10px;background:rgba(0,0,0,.24);border:1px solid var(--line)}
+  input[type=range]{flex:1;min-width:0;accent-color:var(--accent);height:4px}
+  /* Zweitrangige Aktion: sichtbar, aber ruhig */
+  .add{width:100%;margin-top:10px;padding:12px;background:var(--surface-elevated);
+    border:1px dashed var(--border-strong);color:var(--text-secondary);border-radius:10px;
+    cursor:pointer;font:inherit;font-size:14px;transition:.16s}
+  .add:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-tint)}
+  .add:active{transform:translateY(1px)}
+  .addmenu{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:7px;
+    padding:11px;border-radius:10px;background:var(--sunken);border:1px solid var(--border)}
   .addmenu[hidden]{display:none}
-  .addmenu button{background:var(--surface);border:1px solid var(--line);color:var(--body);
-    border-radius:7px;padding:8px 10px;font:inherit;font-size:11.5px;cursor:pointer;
-    text-align:left;transition:.15s}
-  .addmenu button:hover{border-color:var(--acc-line);background:var(--surface-hi);color:var(--text)}
-  .addmenu button small{display:block;color:var(--dim);font-size:10px;margin-top:2px}
+  .addmenu button{background:var(--surface-elevated);border:1px solid var(--border);
+    color:var(--text-secondary);border-radius:8px;padding:10px 11px;font:inherit;
+    font-size:13.5px;cursor:pointer;text-align:left;transition:.15s}
+  .addmenu button:hover{border-color:var(--accent-border);background:var(--accent-tint);
+    color:var(--text-primary)}
+  .addmenu button small{display:block;color:var(--text-muted);font-size:12px;margin-top:3px}
 
   /* ---------- Vorschau ---------- */
-  /* Kein Rahmen, keine Deko — das Profilfenster steht für sich. */
   /* Warnbanner mittig über der Vorschau — fällt sofort auf */
-  .alert{margin:0 0 16px;padding:12px 16px;border-radius:10px;text-align:center;
-    background:rgba(255,107,130,.10);border:1px solid rgba(255,107,130,.32);
-    color:#ffc2cf;font-size:12px;line-height:1.55}
-  .alert b{color:#ff9aac;font-weight:600}
-  .alert small{display:block;margin-top:3px;color:#c79ba6;font-size:11px}
+  .alert{margin:0 0 16px;padding:13px 17px;border-radius:10px;text-align:center;
+    background:rgba(255,123,144,.13);border:1px solid rgba(255,123,144,.4);
+    color:#ffc8d3;font-size:13.5px;line-height:1.55}
+  .alert b{color:#ffa8b6;font-weight:600}
+  .alert small{display:block;margin-top:4px;color:#dcaeb8;font-size:12.5px}
   /* Profilfenster nachgebaut. Maße wie im Spiel: Fenster 494x547,
      Textfeld bei x=8, y=215, exakt 480px breit. */
   .popup{width:494px;height:547px;position:relative;border-radius:5px;overflow:hidden;
@@ -277,60 +323,85 @@
   .pline:hover{outline:1px dashed rgba(199,125,255,.5);outline-offset:1px}
 
   /* ---------- Knöpfe und Code ---------- */
-  /* dunkel und zurückhaltend — Verlauf bekommt nur der Copy-Knopf */
-  .btn{background:var(--surface);border:1px solid var(--line);color:var(--body);
-    font:inherit;font-size:12px;padding:7px 13px;border-radius:8px;cursor:pointer;
-    transition:.16s}
-  .btn:hover{background:var(--surface-hi);border-color:var(--line-hi);color:var(--text)}
-  .copy{background:linear-gradient(100deg,#d4568c,#9560d2);border:1px solid transparent;
-    color:#fff;font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
-  .copy:hover{background:linear-gradient(100deg,#e0629a,#a06ddd);
-    border-color:transparent;color:#fff}
-  .copy.done,.copy.done:hover{background:#4e8b6b;color:#fff}
-  /* Der erzeugte Code bleibt optisch im Hintergrund, bis man ihn aufklappt */
-  textarea{background:var(--sunken);border:1px solid rgba(255,255,255,.04);border-radius:9px;
-    padding:12px 14px;font:11px/1.7 'Consolas','JetBrains Mono',monospace;color:#8e8aa2;
-    width:100%;height:160px;resize:vertical;display:block;margin-top:12px;
-    box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
-  textarea:focus{outline:none;border-color:var(--acc-line);color:var(--body)}
+  /* Nur EIN Knopf ist primär: der zum Kopieren. Alles andere ist ruhig. */
+  .btn{background:var(--surface-elevated);border:1px solid var(--border-strong);
+    color:var(--text-secondary);font:inherit;font-size:14px;padding:9px 15px;
+    border-radius:9px;cursor:pointer;transition:.16s}
+  .btn:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.3);
+    color:var(--text-primary)}
+  .btn:active{transform:translateY(1px)}
+  .copy{background:linear-gradient(100deg,var(--accent2),var(--accent));
+    border:1px solid transparent;color:#1b0f22;font-weight:700}
+  .copy:hover{background:linear-gradient(100deg,#ff85bb,var(--accent-hover));
+    border-color:transparent;color:#1b0f22}
+  .copy:active{transform:translateY(1px)}
+  .copy:disabled{cursor:not-allowed}
+  .copy.done,.copy.done:hover{background:var(--ok);color:#0b2417}
+  textarea{background:var(--sunken);border:1px solid var(--border);border-radius:9px;
+    padding:13px 15px;font:12.5px/1.7 'Consolas','JetBrains Mono',monospace;
+    color:var(--text-secondary);width:100%;height:170px;resize:vertical;display:block;
+    margin-top:14px}
+  textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
   /* ohne das schlaegt display:block das hidden-Attribut und das Feld bleibt sichtbar */
   textarea[hidden]{display:none}
 
   /* ---------- Farbwähler ---------- */
   .cpick{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
-    background:rgba(5,4,8,.72);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+    background:rgba(5,4,8,.74);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
   .cpick[hidden]{display:none}
-  .cpick-box{width:430px;padding:20px;border-radius:14px;
-    background:#141019;border:1px solid var(--line-hi);
+  .cpick-box{width:460px;padding:22px;border-radius:14px;
+    background:var(--surface-elevated);border:1px solid var(--border-strong);
     box-shadow:0 24px 70px rgba(0,0,0,.7)}
-  .cpick-head{display:flex;align-items:center;gap:10px;margin-bottom:15px;
-    font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
-  .cpick-prev{width:20px;height:20px;border-radius:6px;border:1px solid var(--line-hi)}
-  .cpick-x{margin-left:auto;background:none;border:none;color:var(--dim);
-    cursor:pointer;font-size:13px;padding:2px 5px;border-radius:5px}
-  .cpick-x:hover{color:var(--text);background:rgba(255,255,255,.07)}
-  .cpick-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--dim);margin:14px 0 8px}
+  .cpick-head{display:flex;align-items:center;gap:11px;margin-bottom:16px;
+    font-size:16px;font-weight:600;color:var(--text-primary)}
+  .cpick-prev{width:24px;height:24px;border-radius:7px;border:1px solid var(--border-strong)}
+  .cpick-x{margin-left:auto;background:none;border:none;color:var(--text-muted);
+    cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px}
+  .cpick-x:hover{color:var(--text-primary);background:rgba(255,255,255,.1)}
+  .cpick-label{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--text-muted);margin:16px 0 9px}
   .cpick-label:first-of-type{margin-top:0}
   .cpick-grid{display:grid;gap:4px}
   .cpick-grid.fav{grid-template-columns:repeat(14,1fr)}
   .cpick-grid.all{grid-template-columns:repeat(14,1fr);gap:2px}
   .cpick-grid button{aspect-ratio:1;cursor:pointer;padding:0;transition:transform .1s}
-  .cpick-grid.fav button{border-radius:6px;border:1px solid rgba(255,255,255,.14)}
+  .cpick-grid.fav button{border-radius:6px;border:1px solid rgba(255,255,255,.2)}
   .cpick-grid.all button{border-radius:3px;border:none}
   .cpick-grid button:hover{transform:scale(1.35);position:relative;z-index:2;
     box-shadow:0 0 0 2px #fff,0 3px 10px rgba(0,0,0,.6)}
-  .cpick-grid button.on{box-shadow:0 0 0 2px var(--acc);position:relative;z-index:1}
-  .cpick-none{width:100%;margin-top:14px;font-size:11.5px}
+  .cpick-grid button.on{box-shadow:0 0 0 2px var(--accent);position:relative;z-index:1}
+  .cpick-none{width:100%;margin-top:16px;font-size:13.5px}
   #cpHex{flex:1;font-family:'Consolas',monospace}
-  #cpNative{width:34px;height:30px;padding:2px;border-radius:7px;flex:none;cursor:pointer;
-    background:var(--sunken);border:1px solid var(--line)}
+  #cpNative{width:40px;height:38px;padding:3px;border-radius:8px;flex:none;cursor:pointer;
+    background:var(--sunken);border:1px solid var(--border-strong)}
 
   /* ---------- schmale Fenster ---------- */
-  @media (max-width:1000px){
-    body{padding:0 16px 60px}
-    .grid{grid-template-columns:1fr;gap:38px}
+  /* Schrift wird NICHT kleiner, nur der Aufbau wird einspaltig. */
+  @media (max-width:1020px){
+    body{padding:0 18px 72px}
+    .grid{grid-template-columns:1fr;gap:26px}
     .stage{position:static}
+    .panel{padding:18px}
+  }
+  @media (max-width:620px){
+    body{padding:0 14px 64px}
+    header{flex-wrap:wrap;gap:10px;padding:14px 0 12px}
+    .byline{border-left:0;padding-left:0;margin-left:0}
+    .chip-link:first-of-type{margin-left:0}
+    .badge{margin-left:0;width:100%}
+    /* Verbindungsstriche weg: beim Umbrechen haengen sie sonst am Zeilenanfang */
+    .wizard{gap:8px;margin:16px 0 26px}
+    .wizard li+li::before{display:none}
+    .wizard li{padding:8px 14px;border:1px solid var(--border);background:var(--surface)}
+    .wizard li.on{border-color:var(--accent-border)}
+    .section-head{gap:10px}
+    #search{width:100%;margin-left:0;order:3}
+    #search:focus{width:100%}
+    .cat-grid{grid-template-columns:1fr 1fr;margin-bottom:30px}
+    .addmenu{grid-template-columns:1fr}
+    .cpick-box{width:calc(100vw - 28px);padding:16px}
+    .panel{padding:16px}
+    h2{font-size:17px}
   }
 </style>
 </head>
@@ -386,6 +457,13 @@
       </span>
     </div>
   </header>
+
+  <p class="lead">
+    <b>Profilly gives you ready-made profile layouts to customize.</b>
+    Pick a template, replace the placeholder text with your own, then copy and
+    paste it into 3DX. You’re not creating or adding new layouts — you’re simply
+    personalizing the ones already provided.
+  </p>
 
   <ol class="wizard">
     <li><b>1</b> Choose a template</li>
@@ -452,7 +530,7 @@ const SP = s => ({t:'line',text:'',c:'#000',s:s||8,a:'center'});
 
 const FROM_IMAGES = {
 'Velvet':{emo:'✧',blocks:[
-  L('✧·:·✧·:·✧ ───────── ✦ L A R I ✦ ───────── ✧·:·✧·:·✧','#ff8fbf',13),
+  L('✧·:·✧·:·✧ ─────── ✦ Y O U R  N A M E ✦ ─────── ✧·:·✧·:·✧','#ff8fbf',13),
   SP(6),
   L('Host ✦ Night Owl ✦ Music Nerd','#ff3d7f',15,'center',{b:1}),
   L('✦ Curious • Chatty • Slightly Chaotic ✦','#b9b4c8',13,'center',{i:1}),
@@ -1674,7 +1752,7 @@ const INVENTED = {
 /* 1 — Dark Gentleman: Anthrazit und Silber, klare Linien, ruhig */
 'Gentleman':{emo:'♠',blocks:[
   SP(16),
-  L('A L E X A N D E R','#eceaf0',21),
+  L('Y O U R  N A M E','#eceaf0',21),
   L('────────  32  ·  Germany  ·  GMT+1  ────────','#7a7684',12),
   SP(14),
   L('──────────  ♠  A B O U T  ♠  ──────────','#a09bad',12),
@@ -1691,7 +1769,7 @@ const INVENTED = {
 /* 2 — Cyber / Neon: linksbündiges HUD, eckig, Cyan und Violett */
 'Neondrive':{emo:'⌇',blocks:[
   SP(8),
-  L('  //  N Y X','#4de8ff',20,'left'),
+  L('  //  Y O U R  N A M E','#4de8ff',20,'left'),
   L('  [ 27 ]   [ BERLIN ]   [ ONLINE ]','#6aa8ff',12,'left'),
   L('  ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬','#2f5f80',11,'left'),
   SP(8),
@@ -1713,7 +1791,7 @@ const INVENTED = {
 /* 3 — Minimal Male: zwei Farben, viel Luft, kaum Zeichen */
 'Understated':{emo:'▪',blocks:[
   SP(26),
-  L('J O N A S','#eceaf0',24),
+  L('Y O U R  N A M E','#eceaf0',24),
   SP(12),
   L('29   ·   Netherlands','#8a8894',13),
   SP(22),
@@ -1730,7 +1808,7 @@ const INVENTED = {
 /* 4 — Red Black: selbstbewusst und kantig, Dunkelrot auf Schwarz */
 'Crossfire':{emo:'×',blocks:[
   SP(16),
-  L('D A M I A N','#eae6e8',22),
+  L('Y O U R  N A M E','#eae6e8',22),
   L('×  ──────  30  //  Spain  //  CET  ──────  ×','#8f3641',12),
   SP(14),
   L('──────────  A B O U T  ──────────','#b02a3a',12),
@@ -1747,7 +1825,7 @@ const INVENTED = {
 /* 5 — Gamer: HUD mit Feldliste und Balken, linksbündig */
 'Respawn':{emo:'▶',blocks:[
   SP(8),
-  L('█  R Y D E R','#7cf0c0',19,'left'),
+  L('█  Y O U R  N A M E','#7cf0c0',19,'left'),
   L('  LVL 28   ·   EU-WEST   ·   ONLINE','#6f8f9f',12,'left'),
   SP(10),
   {t:'kv',c:'#5fbf9f',s:12,items:[
@@ -1769,7 +1847,7 @@ const INVENTED = {
 /* 6 — Gothic Male: Kathedrale statt Rüschen, Silber und Bordeaux */
 'Vespers':{emo:'♰',blocks:[
   SP(16),
-  L('V I N C E N T','#d8d4dc',21),
+  L('Y O U R  N A M E','#d8d4dc',21),
   L('♰  ═══════  34  ·  Vienna  ·  1889  ═══════  ♰','#7c626e',12),
   SP(14),
   L('────────  ✟  A B O U T  ✟  ────────','#a8404f',12),
@@ -1789,7 +1867,7 @@ const INVENTED = {
 /* 1 — Profil als Quelltext. Linksbündig, dadurch bleibt Platz für Details. */
 'Sourcecode':{emo:'▮',blocks:[
   SP(10),
-  L('  using namespace  L A R I ;','#7fd4ff',15,'left'),
+  L('  using namespace  Y O U R  N A M E ;','#7fd4ff',15,'left'),
   L('  #include  < profile.h >','#6f8fa8',12,'left'),
   SP(10),
   L('  int main ( )','#c9a6ff',13,'left'),
@@ -1826,7 +1904,7 @@ const INVENTED = {
        cols-Block, weil ein bars-Block sich selbst mittig setzt. */
 'Weekdays':{emo:'▬',blocks:[
   SP(12),
-  L('L A R I','#e6e4ec',20),
+  L('Y O U R  N A M E','#e6e4ec',20),
   L('─────────  m o o d   b o a r d  ─────────','#6f8f84',12),
   SP(12),
   {t:'cols',c:'#8fd8c0',s:12,bullet:'',gap:16,cols:[
@@ -1851,7 +1929,7 @@ const INVENTED = {
   ]},
   SP(22),
   L('──────────','#5f5a6c',12),
-  L('Lari  ·  28  ·  Lisbon',null,13),
+  L('your name  ·  28  ·  Lisbon',null,13),
 ]},
 
 /* 5 — Ornament oben links, Gegenstück unten rechts. Dazwischen fast nichts. */
@@ -1859,7 +1937,7 @@ const INVENTED = {
   SP(10),
   L('⁘  ✧  ⁘','#c8a4b4',16,'left'),
   SP(26),
-  L('L A R I','#f0eef4',22),
+  L('Y O U R  N A M E','#f0eef4',22),
   SP(14),
   L('soft spoken, sharp minded','#9a94a4',13,'center',{i:1}),
   SP(26),
@@ -1869,7 +1947,7 @@ const INVENTED = {
 /* 6 — Selbstverliehene Titel in einer Reihe. */
 'Titles':{emo:'◈',blocks:[
   SP(16),
-  L('┌────────────  L A R I  ────────────┐','#8e8a97',13),
+  L('┌────────────  Y O U R  N A M E  ────────────┐','#8e8a97',13),
   SP(12),
   L('◇  Reader of Books  ◆  Keeper of Bad Ideas  ◆  Giver of Headpats  ◇','#c9c4d2',12),
   SP(12),
@@ -1879,7 +1957,7 @@ const INVENTED = {
   SP(12),
   // 30 Striche = 296px, die obere Zeile misst 298px — so schliesst der Kasten.
   // Wird der Name geaendert, muss die Strichzahl mitwandern.
-  L('└──────────────────────────────┘','#8e8a97',13),
+  L('└──────────────────────────────────────┘','#8e8a97',13),
 ]},
 
 /* 7 — Ober- und Unterschiene rahmen das ganze Profil ein. */
@@ -1909,18 +1987,18 @@ const INVENTED = {
   SP(14),
   L('R E S I D E N T   D J','#ff8fbf',15),
   SP(12),
-  L('Lari  ·  12.07.2026  ·  ♡','#8a8490',12),
+  L('your partner  ·  12.07.2026  ·  ♡','#8a8490',12),
   SP(14),
   {t:'grid3',c:'#8a8490',s:11,gap:26,items:[
-    'DISCORD  lari','GALLERY  lari.pics','X  @misslarifari']},
+    'DISCORD  yourname','GALLERY  your.pics','X  @yourhandle']},
 ]},
 
 /* 9 — Gegenüberliegende Ecken auf EINER Zeile, dazu Tags mit Pipes. */
 'Handles':{emo:'⌒',blocks:[
   SP(12),
-  {t:'lr',c:'#7f9c8f',s:11,left:'  @ misslarifari',right:'COOLBEANS  '},
+  {t:'lr',c:'#7f9c8f',s:11,left:'  @ yourhandle',right:'COOLBEANS  '},
   SP(12),
-  L('L A R I','#f0eff2',22),
+  L('Y O U R  N A M E','#f0eff2',22),
   L('aries  &  ambivert','#8a9490',12),
   SP(14),
   L('⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒','#5f6c66',12),
@@ -1934,7 +2012,7 @@ const INVENTED = {
 'Sleeve':{emo:'♪',blocks:[
   SP(12),
   L('┌──────────────────────────────┐','#8a7a52',12),
-  L('»  L A R I  «','#e8d8a8',15),
+  L('»  Y O U R  N A M E  «','#e8d8a8',15),
   L('└──────────────────────────────┘','#8a7a52',12),
   SP(14),
   L('Everything Sounds Better At Three','#f0ead8',16,'center',{i:1}),
@@ -1960,13 +2038,13 @@ const INVENTED = {
   L('«  what are you into, then?','#8fd8c0',13,'left'),
   L('better.  »',null,13,'right'),
   SP(14),
-  L('Lari  ·  27  ·  still typing','#6f8f84',12),
+  L('your name  ·  27  ·  still typing','#6f8f84',12),
 ]},
 
 /* 12 — Akrostichon: die Anfangsbuchstaben ergeben den Namen. */
 'Acrostic':{emo:'✦',blocks:[
   SP(22),
-  L('─────────  L A R I  ─────────','#8a8496',12),
+  L('─────────  Y O U R  N A M E  ─────────','#8a8496',12),
   SP(14),
   {t:'cols',c:null,s:14,bullet:'',gap:24,cols:[
     ['L','A','R','I'],
@@ -1982,7 +2060,7 @@ const INVENTED = {
        alle enden bei derselben Breite, also bleibt die Spalte buendig. */
 'Bootlog':{emo:'▮',blocks:[
   SP(12),
-  L('  L A R I   ·   v3.1','#8fd8a8',16,'left'),
+  L('  Y O U R  N A M E   ·   v3.1','#8fd8a8',16,'left'),
   L('  ─────────────────────────','#3e5e4a',11,'left'),
   SP(10),
   {t:'menu',c:'#c8d8cc',s:12,items:[
@@ -2005,7 +2083,7 @@ const INVENTED = {
        ist mit Leerzeichen rechtsbuendig gemacht, damit sie an die Linie stoesst. */
 'Diptych':{emo:'│',blocks:[
   SP(18),
-  L('L A R I','#eceaf2',22),
+  L('Y O U R  N A M E','#eceaf2',22),
   SP(16),
   {t:'cols',c:null,s:14,bullet:'',gap:22,cols:[
     ['   soft','  quiet','patient','   warm'],
@@ -2025,8 +2103,8 @@ const INVENTED = {
   L('STILL AWAKE AT FOUR IN THE MORNING','#e8e4ee',14),
   L('by our own correspondent','#8a8694',11,'center',{i:1}),
   SP(10),
-  L('Sources close to Lari confirm that she',null,13),
-  L('has no intention whatsoever of changing.',null,13),
+  L('Sources close to you confirm that you',null,13),
+  L('have no intention whatsoever of changing.',null,13),
   SP(12),
   L('continued on page four  »','#8a8694',12),
 ]},
@@ -2034,7 +2112,7 @@ const INVENTED = {
 /* 16 — Geschwärzt. █ ist eine bewaehrte Glyphe, funktioniert also in 3dx. */
 'Redacted':{emo:'█',blocks:[
   SP(16),
-  L('L A R I','#f0eef2',22),
+  L('Y O U R  N A M E','#f0eef2',22),
   L('──────  F I L E   3 1 / A  ──────','#8a5a5e',12),
   SP(14),
   L('I like ██████ people and ████ music.',null,13),
@@ -2048,7 +2126,7 @@ const INVENTED = {
        Punkte exakt unter den Buchstaben. */
 'Hours':{emo:'●',blocks:[
   SP(18),
-  L('L A R I','#f0ead8',20),
+  L('Y O U R  N A M E','#f0ead8',20),
   L('──────  W H E N   I ’ M   A R O U N D  ──────','#8a7a52',12),
   SP(14),
   {t:'cols',c:'#e8d8a8',s:14,bullet:'',gap:20,cols:[
@@ -2075,7 +2153,7 @@ const INVENTED = {
 
 'Temptation':{emo:'◆',blocks:[
   SP(16),
-  L('L I L I T H','#eddfe3',21),
+  L('Y O U R  N A M E','#eddfe3',21),
   L('────────  28  ·  Prague  ·  CET  ────────','#8f2440',12),
   SP(14),
   L('❝ I am not a phase you grow out of ❞','#e0a8b4',14,'center',{i:1}),
@@ -2089,7 +2167,7 @@ const INVENTED = {
 
 'After Dark':{emo:'☾',blocks:[
   SP(10),
-  L('  //  K A I','#a888e0',20,'left'),
+  L('  //  Y O U R  N A M E','#a888e0',20,'left'),
   L('  [ 02:14 ]   [ BERLIN ]   [ STILL UP ]','#7a6f9c',12,'left'),
   L('  ─────────────────────────','#4a4460',11,'left'),
   SP(8),
@@ -2107,7 +2185,7 @@ const INVENTED = {
 
 'Red Flags':{emo:'×',blocks:[
   SP(14),
-  L('N O V A','#e8dcde',22),
+  L('Y O U R  N A M E','#e8dcde',22),
   // Trenner so breit wie die gepunkteten Zeilen darunter: sonst wirkt der
   // Kopf schmal und der Block darunter ausgefranst. Lange Zeilen sind
   // ausserdem BILLIGER, weil die Einrueckung wegfaellt.
@@ -2129,7 +2207,7 @@ const INVENTED = {
 'Brat':{emo:'✦',blocks:[
   SP(14),
   L('B R A T','#ff4d9d',26),
-  L('─────  Rae  ·  24  ·  Barcelona  ─────','#b06c8c',12),
+  L('─────  your name  ·  24  ·  Barcelona  ─────','#b06c8c',12),
   SP(14),
   {t:'seg',s:13,a:'center',parts:[
     {text:'you can ',c:'#ffffff',s:14},
@@ -2151,7 +2229,7 @@ const INVENTED = {
   // mit Leerzeichen der Rahmengroesse, rendert sie aber in der Innengroesse.
   // Rechte Seite leer lassen spart die Auffuell-Leerzeichen.
   {t:'frame',c:'#7d1830',s:18,width:300,corners:'╭╮╰╯',left:'',right:'',inner:[
-    L('E V E L Y N',null,18),
+    L('Y O U R  N A M E',null,18),
   ]},
   SP(10),
   L('─────  31  ·  Milan  ·  all yours  ─────','#d1447a',12),
@@ -2172,7 +2250,7 @@ const INVENTED = {
   L('─────────────────────────','#7a6c3e',12),
   SP(10),
   {t:'kv',c:'#e8dcc0',s:12,items:[
-    ['NAME','Rowan'],
+    ['NAME','your name'],
     ['AGE','33'],
     ['CITY','Vienna'],
     ['DRESS CODE','Black, and mean it'],
@@ -2185,7 +2263,7 @@ const INVENTED = {
 
 'Tease':{emo:'✧',blocks:[
   SP(30),
-  L('M I A','#f0e4ee',24),
+  L('Y O U R  N A M E','#f0e4ee',24),
   SP(16),
   L('you first.','#e88fc0',15,'center',{i:1}),
   SP(26),
@@ -2198,7 +2276,7 @@ const INVENTED = {
 'Dangerous':{emo:'▲',blocks:[
   SP(10),
   L('█  D A N G E R O U S','#b2242c',19,'left'),
-  L('  ADRIAN   ·   34   ·   ANTWERP','#9a9298',12,'left'),
+  L('  YOUR NAME   ·   34   ·   ANTWERP','#9a9298',12,'left'),
   SP(10),
   {t:'bars',c:'#b2242c',s:12,items:[['CONTROL',9],['PATIENCE',7],['MERCY',3]]},
   SP(10),
@@ -2213,7 +2291,7 @@ const INVENTED = {
 
 'Soft Submission':{emo:'❀',blocks:[
   SP(18),
-  L('e l l i e','#f0e6ea',24),
+  L('y o u r  n a m e','#f0e6ea',24),
   L('────────  25  ·  soft hours  ────────','#a382a0',12),
   SP(14),
   L('I am easiest to reach when you are gentle.',null,13),
@@ -2245,7 +2323,7 @@ const INVENTED = {
 'Protocol':{emo:'▪',blocks:[
   SP(10),
   L('  P R O T O C O L','#d6d0dd',18,'left'),
-  L('  Sasha  ·  29  ·  Rotterdam','#8a84a0',12,'left'),
+  L('  your name  ·  29  ·  Rotterdam','#8a84a0',12,'left'),
   L('  ─────────────────────────','#4e4a5e',11,'left'),
   SP(8),
   {t:'menu',c:null,s:12,items:[
@@ -2262,7 +2340,7 @@ const INVENTED = {
 
 'Sinful':{emo:'†',blocks:[
   SP(14),
-  L('S E R A P H I N E','#d8d2d8',20),
+  L('Y O U R  N A M E','#d8d2d8',20),
   L('†  ═════════  30  ·  Lisbon  ═════════  †','#8a2038',12),
   SP(12),
   L('────────  A B O U T  ────────','#a83248',12),
@@ -2279,7 +2357,7 @@ const INVENTED = {
   SP(24),
   L('  N O   S T R I N G S','#eceaf0',20,'left'),
   SP(16),
-  L('  Jules  ·  30  ·  Oslo','#7d7888',13,'left'),
+  L('  your name  ·  30  ·  Oslo','#7d7888',13,'left'),
   SP(20),
   L('  ─────────────','#4a4652',12,'left'),
   SP(20),
@@ -2292,7 +2370,7 @@ const INVENTED = {
 'Touch Me':{emo:'✧',blocks:[
   SP(16),
   L('t o u c h   m e','#e07ab0',22),
-  L('────────  Noa  ·  26  ·  Lyon  ────────','#8f5a9c',12),
+  L('────────  your name  ·  26  ·  Lyon  ────────','#8f5a9c',12),
   SP(14),
   {t:'grid3',c:'#d8b8d0',s:12,gap:30,items:[
     '✧ slow hands','✧ bad jokes','✧ late calls',
@@ -2308,7 +2386,7 @@ const INVENTED = {
   SP(14),
   // eine Innenzeile, exakt in Rahmengroesse — sonst sitzt der Name schief
   {t:'frame',c:'#8a7548',s:17,width:340,corners:'┌┐└┘',left:'│',right:'│',inner:[
-    L('C O R N E L I A',null,17),
+    L('Y O U R  N A M E',null,17),
   ]},
   SP(10),
   L('────────  b. 1874  ·  Bath  ────────','#a89060',12),
@@ -2322,7 +2400,7 @@ const INVENTED = {
 
 'Witchy':{emo:'✦',blocks:[
   SP(14),
-  L('W R E N','#e0e6dc',22),
+  L('Y O U R  N A M E','#e0e6dc',22),
   L('✦  ──────  moon in scorpio  ──────  ✦','#7f9c7f',12),
   SP(12),
   L('───────  I N   T H E   J A R S  ───────','#9b8fc0',12),
@@ -2336,7 +2414,7 @@ const INVENTED = {
 
 'Dark Romantic':{emo:'❥',blocks:[
   SP(20),
-  L('a n n e l i e s e','#ecdfe2',22),
+  L('y o u r  n a m e','#ecdfe2',22),
   SP(12),
   L('❝ love me at my most unreasonable ❞','#c98fa0',14,'center',{i:1}),
   SP(20),
@@ -2350,7 +2428,7 @@ const INVENTED = {
 
 'Luxury':{emo:'◈',blocks:[
   SP(18),
-  L('V A L E N T I N E','#f0ead8',21),
+  L('Y O U R  N A M E','#f0ead8',21),
   L('─────────────────────────','#8a7a4e',12),
   SP(14),
   {t:'lr',c:'#c9b47a',s:12,left:'  AGE',right:'32  '},
@@ -2363,7 +2441,7 @@ const INVENTED = {
 
 'Elegant':{emo:'◇',blocks:[
   SP(20),
-  L('C L A R A','#f2f0f5',24),
+  L('Y O U R  N A M E','#f2f0f5',24),
   SP(12),
   L('◇  ──────  29  ·  Copenhagen  ──────  ◇','#8e8a97',12),
   SP(18),
@@ -2375,7 +2453,7 @@ const INVENTED = {
 
 'Modern':{emo:'▮',blocks:[
   SP(16),
-  L('  ▮  T H E O','#f0eff4',20,'left'),
+  L('  ▮  Y O U R  N A M E','#f0eff4',20,'left'),
   L('  31 / Berlin / designer','#6dbfa8',12,'left'),
   SP(14),
   L('  A B O U T','#6dbfa8',11,'left'),
@@ -2389,7 +2467,7 @@ const INVENTED = {
 
 'Soft Dark':{emo:'○',blocks:[
   SP(24),
-  L('m a e v e','#ddd8e4',23),
+  L('y o u r  n a m e','#ddd8e4',23),
   SP(14),
   L('27  ·  Ghent  ·  quiet type','#8a8496',13),
   SP(20),
@@ -2444,7 +2522,7 @@ const INVENTED = {
   SP(12),
   {t:'lr',c:'#8a8690',s:11,left:'  ISSUE 07',right:'2026  '},
   SP(14),
-  L('M I S S L A R I F A R I','#f2f0f4',19),
+  L('Y O U R  N A M E','#f2f0f4',19),
   L('────────  after hours.  ────────','#8a8690',12),
   SP(14),
   L('  THE PERSON','#8a8690',11,'left'),
@@ -2465,7 +2543,7 @@ const INVENTED = {
   L('  ──────────────────────────────','#4a4650',11,'left'),
   SP(12),
   {t:'lr',c:null,s:12,left:'  FILE',right:'0916  '},
-  {t:'lr',c:null,s:12,left:'  SUBJECT',right:'MissLarifari  '},
+  {t:'lr',c:null,s:12,left:'  SUBJECT',right:'your name  '},
   {t:'lr',c:null,s:12,left:'  STATUS',right:'still at large  '},
   SP(14),
   L('  [ ✓ ]   photographed',null,12,'left'),
@@ -2483,7 +2561,7 @@ const INVENTED = {
   SP(12),
   L('⊙═══════⊙═══════⊙═══════⊙','#7a7078',12),
   SP(12),
-  L('Y O U R N A M E','#e8e4e8',20),
+  L('Y O U R  N A M E','#e8e4e8',20),
   L('chained to chaos','#9a8a86',13,'center',{i:1}),
   SP(14),
   {t:'art',c:'#b0a4a0',s:12,lines:[
@@ -2503,7 +2581,7 @@ const INVENTED = {
   {t:'art',c:'#a8b4cc',s:14,lines:[
     '                ✦                  ',
     '      ·                    ☾       ',
-    '   L A R I                     ·   ',
+    '   Y O U R  N A M E                     ·   ',
   ]},
   SP(16),
   L('somewhere',null,14),
@@ -2563,7 +2641,7 @@ const INVENTED = {
   L('R O O M   0916','#c9a86a',15),
   SP(14),
   L('  GUEST','#8a7a52',10,'left'),
-  L('  MissLarifari',null,14,'left'),
+  L('  your name',null,14,'left'),
   SP(10),
   {t:'kv',c:null,s:12,items:[
     ['CHECK IN','midnight'],
@@ -2579,13 +2657,12 @@ const INVENTED = {
 'Arcana':{emo:'☾',blocks:[
   SP(12),
   {t:'art',c:'#c9a86a',s:14,lines:[
-    '┌────────────────────┐',
-    '│         XIX                                      │',
-    '│          ☾                                       │',
-    '│      L A R I                                   │',
-    '│     THE CHAOS                           │',
-    '│          ✦                                       │',
-    '└────────────────────┘',
+    '┌────────────────────                 ┐',
+    '│         XIX                                                       │',
+    '│          ☾                                                        │',
+    '│      Y O U R  N A M E                                   │',
+    '│     THE CHAOS                                            │',
+    '└────────────────────                 ┘',
   ]},
   SP(14),
   L('upright','#8a7a52',11),
@@ -2623,13 +2700,13 @@ const INVENTED = {
 'Pinboard':{emo:'▭',blocks:[
   SP(16),
   {t:'art',c:'#c8c2cc',s:12,lines:[
-    '┌────────────┐                      ',
-    '│  midnight  │                      ',
-    '│    ☾  ✦    │                      ',
+    '┌────────────┐                       ',
+    '│  midnight  │                                         ',
+    '│    ☾  ✦    │                                           ',
     '└─────♡──────┘                      ',
-    '                      ┌────────────┐',
-    '                      │ bad ideas  │',
-    '                      │     ✟      │',
+    '                      ┌──────────── ┐',
+    '                      │ bad ideas                    │',
+    '                      │     ✟                              │',
     '                      └────✦───────┘',
   ]},
   SP(18),
@@ -2658,14 +2735,14 @@ const INVENTED = {
 'Terminal':{emo:'▮',blocks:[
   SP(16),
   {t:'art',c:'#7fd8a0',s:13,lines:[
-    '┌─  profile.exe  ───  □  ×                         ┐',
-    '│   > user:    lari                                         │',
-    '│   > status:  online                                    │',
-    '│   > mood:    unstable                                │',
-    '│   loading personality...                              │',
-    '│   ████████████░░   86%                   │',
-    '│   > don’t click me_                                   │',
-    '└───────────────────────────┘',
+    '┌─  profile.exe  ───  □  ×                                    ┐',
+    '│   > user:    your name                                         │',
+    '│   > status:  online                                               │',
+    '│   > mood:    unstable                                          │',
+    '│   loading personality...                                         │',
+    '│   ████████████░░   86%                              │',
+    '│   > don’t click me_                                              │',
+    '└───────────────────────────           ┘',
   ]},
 ]},
 
@@ -2676,8 +2753,8 @@ const INVENTED = {
   L('W A N T E D','#f0e8d8',24),
   L('═════════════════════════════','#8a7a5a',12),
   SP(12),
-  L('L A R I','#e8e0d0',16),
-  L('alias  ·  MissLarifari','#9a9080',11),
+  L('Y O U R  N A M E','#e8e0d0',16),
+  L('alias  ·  your handle','#9a9080',11),
   SP(12),
   {t:'kv',c:null,s:12,items:[
     ['LAST SEEN','somewhere loud'],
@@ -2696,7 +2773,7 @@ const INVENTED = {
   L('══════════════════════════════════════','#6a4a58',12),
   SP(10),
   L('B A C K S T A G E','#ff6fae',20),
-  L('L A R I','#e8e2ea',14),
+  L('Y O U R  N A M E','#e8e2ea',14),
   SP(12),
   {t:'cols',c:null,s:12,bullet:'',gap:34,cols:[
     ['GATE','ZONE','VALID'],
@@ -2765,7 +2842,7 @@ const INVENTED = {
 /* 20 — CHARAKTERBOGEN. Werteraster oben, Fertigkeiten darunter. */
 'Statsheet':{emo:'◈',blocks:[
   SP(12),
-  L('L A R I','#ece4d4',19),
+  L('Y O U R  N A M E','#ece4d4',19),
   L('LVL 28   ·   CHAOTIC GOOD','#9a8f7a',12),
   L('─────────────────────────────','#6a5f4a',12),
   SP(12),
@@ -3613,6 +3690,50 @@ $('showCode').addEventListener('click',()=>{
   btn.setAttribute('aria-expanded', String(!ta.hidden));
 });
 drawBlocks(); drawGallery();
+
+/* ---------- Schrittleiste: welcher Schritt gerade dran ist ----------
+   Reine Anzeige. Setzt nur die Klasse .on auf einem <li> und scrollt auf
+   Klick hin — an Editor, Vorschau und Code-Erzeugung aendert das nichts.
+
+   Bewusst NICHT an die Scrollposition gebunden: der Copy-Bereich sitzt im
+   klebenden rechten Streifen und wandert deshalb nie nach oben. Schritt 2
+   und 3 waeren daran gar nicht zu unterscheiden. Stattdessen zaehlt, was
+   zuletzt getan wurde. */
+(() => {
+  const schritte = [...document.querySelectorAll('.wizard li')];
+  const ziele = [
+    document.querySelector('.section-head'),            // 1 Vorlage waehlen
+    document.querySelector('.grid .panel'),             // 2 Profil bearbeiten
+    document.querySelector('.stage .panel:last-child'), // 3 nach 3DX kopieren
+  ];
+  if (schritte.length !== 3 || ziele.some(z => !z)) return;
+
+  const setzen = i => schritte.forEach((li, k) => li.classList.toggle('on', k === i));
+  setzen(0);
+
+  const hin = i => {
+    // Schritt 3 steht ganz unten: dorthin scrollen statt an seinen Anfang,
+    // sonst passiert sichtbar nichts.
+    if (i === 2) scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+    else ziele[i].scrollIntoView({behavior: 'smooth', block: 'start'});
+  };
+
+  schritte.forEach((li, i) => {
+    li.tabIndex = 0;
+    li.setAttribute('role', 'button');
+    li.addEventListener('click', () => { setzen(i); hin(i); });
+    li.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setzen(i); hin(i); }
+    });
+  });
+
+  // Vorlage gewaehlt -> Schritt 2. Etwas bearbeitet -> bleibt Schritt 2.
+  $('gallery').addEventListener('click', e => { if (e.target.closest('[data-l]')) setzen(1); });
+  $('blocks').addEventListener('input', () => setzen(1));
+  // Code kopiert oder aufgeklappt -> Schritt 3.
+  $('copyBtn').addEventListener('click', () => setzen(2));
+  $('showCode').addEventListener('click', () => setzen(2));
+})();
 </script>
 </body>
 </html>
