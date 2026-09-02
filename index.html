@@ -1783,6 +1783,1006 @@ const INVENTED = {
   L('Someone unafraid of quiet.',null,13),
 ]},
 
+/* ---------- test: Bauformen, inspiriert von echten Profilen aus Laris
+   Freundesliste. Uebernommen wurde jeweils nur die STRUKTUR, nie der Text. ---------- */
+
+/* 1 — Profil als Quelltext. Linksbündig, dadurch bleibt Platz für Details. */
+'Sourcecode':{emo:'▮',blocks:[
+  SP(10),
+  L('  using namespace  L A R I ;','#7fd4ff',15,'left'),
+  L('  #include  < profile.h >','#6f8fa8',12,'left'),
+  SP(10),
+  L('  int main ( )','#c9a6ff',13,'left'),
+  L('  {',null,13,'left'),
+  L('      printf ( 31 · Amsterdam · GMT+1 );',null,13,'left'),
+  L('      printf ( builds things after midnight );',null,13,'left'),
+  L('      // coffee, synths, terrible puns','#5f8f6f',12,'left'),
+  L('  }',null,13,'left'),
+  SP(8),
+  L('  input [ Q ] ( )','#c9a6ff',13,'left'),
+  L('  {',null,13,'left'),
+  L('      printf ( say something real );',null,13,'left'),
+  L('  }',null,13,'left'),
+]},
+
+/* 2 — Hausregeln, römisch nummeriert. Zwei Spalten halten die Nummern bündig. */
+'Commandments':{emo:'✟',blocks:[
+  SP(14),
+  L('────────  H O U S E   R U L E S  ────────','#9a9098',12),
+  SP(12),
+  {t:'cols',c:null,s:13,bullet:'',gap:20,cols:[
+    ['I.','II.','III.','IV.','V.'],
+    ['Ask before you assume',
+     'Trust is given once',
+     'Time given is time earned',
+     'Actions, then words',
+     'My tone answers yours']]},
+  SP(14),
+  L('────────  ✟  ────────','#8f3038',12),
+  L('Selective, not unfriendly.',null,13),
+]},
+
+/* 3 — Zwei Balkenspalten nebeneinander. Die Balken stehen als Text im
+       cols-Block, weil ein bars-Block sich selbst mittig setzt. */
+'Weekdays':{emo:'▬',blocks:[
+  SP(12),
+  L('L A R I','#e6e4ec',20),
+  L('─────────  m o o d   b o a r d  ─────────','#6f8f84',12),
+  SP(12),
+  {t:'cols',c:'#8fd8c0',s:12,bullet:'',gap:16,cols:[
+    ['Lazy','Loud','Creative','Punctual'],
+    ['█████░','███░░░','██████','█░░░░░'],
+    ['Monday','Wednesday','Friday','Sunday'],
+    ['██░░░░','████░░','██████','███░░░']]},
+  SP(12),
+  L('Results may vary. So do I.',null,13),
+]},
+
+/* 4 — Treppe. art zentriert den Block als Ganzes, die Einrückung bleibt. */
+'Cascade':{emo:'⌇',blocks:[
+  SP(24),
+  {t:'art',c:'#cfc8de',s:15,lines:[
+    'i want',
+    '   the quiet kind',
+    '      of attention',
+    '         that is still there',
+    '            when the room',
+    '               empties out',
+  ]},
+  SP(22),
+  L('──────────','#5f5a6c',12),
+  L('Lari  ·  28  ·  Lisbon',null,13),
+]},
+
+/* 5 — Ornament oben links, Gegenstück unten rechts. Dazwischen fast nichts. */
+'Corners':{emo:'⁘',blocks:[
+  SP(10),
+  L('⁘  ✧  ⁘','#c8a4b4',16,'left'),
+  SP(26),
+  L('L A R I','#f0eef4',22),
+  SP(14),
+  L('soft spoken, sharp minded','#9a94a4',13,'center',{i:1}),
+  SP(26),
+  L('⁘  ✧  ⁘','#c8a4b4',16,'right'),
+]},
+
+/* 6 — Selbstverliehene Titel in einer Reihe. */
+'Titles':{emo:'◈',blocks:[
+  SP(16),
+  L('┌────────────  L A R I  ────────────┐','#8e8a97',13),
+  SP(12),
+  L('◇  Reader of Books  ◆  Keeper of Bad Ideas  ◆  Giver of Headpats  ◇','#c9c4d2',12),
+  SP(12),
+  L('──────────  ⊙  ──────────','#5f5c68',12),
+  SP(10),
+  L('What do I think of your opinion? I don’t.',null,13,'center',{i:1}),
+  SP(12),
+  // 30 Striche = 296px, die obere Zeile misst 298px — so schliesst der Kasten.
+  // Wird der Name geaendert, muss die Strichzahl mitwandern.
+  L('└──────────────────────────────┘','#8e8a97',13),
+]},
+
+/* 7 — Ober- und Unterschiene rahmen das ganze Profil ein. */
+'Rails':{emo:'▬',blocks:[
+  SP(12),
+  L('▬▬▬▬▬▬▬▬▬▬  ✟  ▬▬▬▬▬▬▬▬▬▬','#a8202e',12),
+  SP(10),
+  L('★  OVERTHINKER  ✟  NIGHT OWL  ✟  HONEST  ★','#e0dcde',12),
+  SP(12),
+  L('✖ Drama   ✖ Fakes   ✖ Small talk   ✖ Guessing games',null,12),
+  SP(12),
+  L('I match your energy. Up to you.',null,14),
+  SP(12),
+  L('★  MUSIC  ✟  FILMS  ✟  LONG DRIVES  ★','#e0dcde',12),
+  SP(10),
+  L('▬▬▬▬▬▬▬▬▬▬  ✟  ▬▬▬▬▬▬▬▬▬▬','#a8202e',12),
+]},
+
+/* 8 — Club-/Markenprofil mit Linkzeile unten. */
+'Marquee':{emo:'✦',blocks:[
+  SP(14),
+  L('L  A  R  I','#ff6fae',24),
+  L('─────────────────────────','#6a5a66',12),
+  SP(10),
+  L('IN MY OWN LANE, DOING ME','#e8e2ea',13),
+  L('∘  unfiltered, mostly harmless  ∘','#8a8490',12),
+  SP(14),
+  L('R E S I D E N T   D J','#ff8fbf',15),
+  SP(12),
+  L('Lari  ·  12.07.2026  ·  ♡','#8a8490',12),
+  SP(14),
+  {t:'grid3',c:'#8a8490',s:11,gap:26,items:[
+    'DISCORD  lari','GALLERY  lari.pics','X  @misslarifari']},
+]},
+
+/* 9 — Gegenüberliegende Ecken auf EINER Zeile, dazu Tags mit Pipes. */
+'Handles':{emo:'⌒',blocks:[
+  SP(12),
+  {t:'lr',c:'#7f9c8f',s:11,left:'  @ misslarifari',right:'COOLBEANS  '},
+  SP(12),
+  L('L A R I','#f0eff2',22),
+  L('aries  &  ambivert','#8a9490',12),
+  SP(14),
+  L('⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒','#5f6c66',12),
+  L('LIKES  ·  gaming | anime | music | dark humour',null,12),
+  L('─────────────────────────','#5f6c66',12),
+  L('DISLIKES  ·  colds | drama | small talk',null,12),
+  L('⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒⌒','#5f6c66',12),
+]},
+
+/* 10 — Songblock. Eigene Zeilen, kein zitierter Liedtext. */
+'Sleeve':{emo:'♪',blocks:[
+  SP(12),
+  L('┌──────────────────────────────┐','#8a7a52',12),
+  L('»  L A R I  «','#e8d8a8',15),
+  L('└──────────────────────────────┘','#8a7a52',12),
+  SP(14),
+  L('Everything Sounds Better At Three','#f0ead8',16,'center',{i:1}),
+  SP(12),
+  L('the city gets honest after midnight',null,13),
+  L('and so do i, apparently',null,13),
+  L('come find me where the music is',null,13),
+  L('and the talking is optional',null,13),
+]},
+
+/* 11 — Chatverlauf. Ein Sprecher links, der andere rechts — das braucht
+       keine Namen und liest sich sofort als Gespräch. */
+'Transcript':{emo:'»',blocks:[
+  SP(14),
+  L('──────  T R A N S C R I P T  ──────','#6f8f84',12),
+  SP(12),
+  L('«  hey','#8fd8c0',13,'left'),
+  L('hey  »',null,13,'right'),
+  SP(6),
+  L('«  what are you into','#8fd8c0',13,'left'),
+  L('ask me properly and find out  »',null,13,'right'),
+  SP(6),
+  L('«  what are you into, then?','#8fd8c0',13,'left'),
+  L('better.  »',null,13,'right'),
+  SP(14),
+  L('Lari  ·  27  ·  still typing','#6f8f84',12),
+]},
+
+/* 12 — Akrostichon: die Anfangsbuchstaben ergeben den Namen. */
+'Acrostic':{emo:'✦',blocks:[
+  SP(22),
+  L('─────────  L A R I  ─────────','#8a8496',12),
+  SP(14),
+  {t:'cols',c:null,s:14,bullet:'',gap:24,cols:[
+    ['L','A','R','I'],
+    ['late nights and longer playlists',
+     'always three tabs too many',
+     'rarely bored, never idle',
+     'impossible to rush']]},
+  SP(16),
+  L('That is the whole profile, really.','#8a8496',12,'center',{i:1}),
+]},
+
+/* 13 — Systemstart. Drei menu-Bloecke, damit die Fehlzeile rot sein kann;
+       alle enden bei derselben Breite, also bleibt die Spalte buendig. */
+'Bootlog':{emo:'▮',blocks:[
+  SP(12),
+  L('  L A R I   ·   v3.1','#8fd8a8',16,'left'),
+  L('  ─────────────────────────','#3e5e4a',11,'left'),
+  SP(10),
+  {t:'menu',c:'#c8d8cc',s:12,items:[
+    ['  [ OK ]   humour','loaded'],
+    ['  [ OK ]   patience','loaded'],
+    ['  [ OK ]   late nights','loaded'],
+  ]},
+  {t:'menu',c:'#e05a6a',s:12,items:[
+    ['  [FAIL]   small talk','not found'],
+  ]},
+  {t:'menu',c:'#c8d8cc',s:12,items:[
+    ['  [ OK ]   honesty','loaded'],
+  ]},
+  SP(10),
+  L('  ─────────────────────────','#3e5e4a',11,'left'),
+  L('  system ready. say something.',null,12,'left'),
+]},
+
+/* 14 — Zwei Hälften, getrennt durch eine senkrechte Linie. Die linke Spalte
+       ist mit Leerzeichen rechtsbuendig gemacht, damit sie an die Linie stoesst. */
+'Diptych':{emo:'│',blocks:[
+  SP(18),
+  L('L A R I','#eceaf2',22),
+  SP(16),
+  {t:'cols',c:null,s:14,bullet:'',gap:22,cols:[
+    ['   soft','  quiet','patient','   warm'],
+    ['│','│','│','│'],
+    ['sharp','loud','never','honest']]},
+  SP(18),
+  L('Depends entirely on you.','#9a94a8',12,'center',{i:1}),
+]},
+
+/* 15 — Zeitungsseite: Kopf, Schlagzeile, Autorenzeile, Meldung, Verweis. */
+'Frontpage':{emo:'▤',blocks:[
+  SP(12),
+  L('═══════════════════════════════','#7a7680',12),
+  L('T H E   N I G H T   E D I T I O N','#f0eef2',14),
+  L('═══════════════════════════════','#7a7680',12),
+  SP(12),
+  L('STILL AWAKE AT FOUR IN THE MORNING','#e8e4ee',14),
+  L('by our own correspondent','#8a8694',11,'center',{i:1}),
+  SP(10),
+  L('Sources close to Lari confirm that she',null,13),
+  L('has no intention whatsoever of changing.',null,13),
+  SP(12),
+  L('continued on page four  »','#8a8694',12),
+]},
+
+/* 16 — Geschwärzt. █ ist eine bewaehrte Glyphe, funktioniert also in 3dx. */
+'Redacted':{emo:'█',blocks:[
+  SP(16),
+  L('L A R I','#f0eef2',22),
+  L('──────  F I L E   3 1 / A  ──────','#8a5a5e',12),
+  SP(14),
+  L('I like ██████ people and ████ music.',null,13),
+  L('My type is ███████████.',null,13),
+  L('Ask me about ██████ if you dare.',null,13),
+  SP(14),
+  L('██  classified until further notice  ██','#8a5a5e',12),
+]},
+
+/* 17 — Wochenstreifen. Sieben Spalten mit je zwei Zeilen halten die
+       Punkte exakt unter den Buchstaben. */
+'Hours':{emo:'●',blocks:[
+  SP(18),
+  L('L A R I','#f0ead8',20),
+  L('──────  W H E N   I ’ M   A R O U N D  ──────','#8a7a52',12),
+  SP(14),
+  {t:'cols',c:'#e8d8a8',s:14,bullet:'',gap:20,cols:[
+    ['M','○'],['T','●'],['W','●'],['T','○'],['F','●'],['S','●'],['S','●']]},
+  SP(16),
+  L('Mostly evenings. Always late.',null,13),
+  L('Message me anyway.','#8a7a52',12),
+]},
+
+/* 18 — Untertitel eines Films: Zeitmarke klein, Satz gross. */
+'Subtitles':{emo:'▭',blocks:[
+  SP(20),
+  L('[ 00:14:32 ]','#6f8496',11),
+  L('I don’t do small talk.','#f2f0f4',15),
+  SP(16),
+  L('[ 00:41:07 ]','#6f8496',11),
+  L('Ask me something real.','#f2f0f4',15),
+  SP(16),
+  L('[ 01:07:55 ]','#6f8496',11),
+  L('...still here?','#f2f0f4',15),
+]},
+
+/* ---------- Spicy / Seductive ---------- */
+
+'Temptation':{emo:'◆',blocks:[
+  SP(16),
+  L('L I L I T H','#eddfe3',21),
+  L('────────  28  ·  Prague  ·  CET  ────────','#8f2440',12),
+  SP(14),
+  L('❝ I am not a phase you grow out of ❞','#e0a8b4',14,'center',{i:1}),
+  SP(14),
+  L('─────────  A B O U T  ─────────','#a8607a',12),
+  L('Slow, deliberate and worth the wait.',null,13),
+  SP(12),
+  L('──────  L O O K I N G   F O R  ──────','#a8607a',12),
+  L('Someone who reads between the lines.',null,13),
+]},
+
+'After Dark':{emo:'☾',blocks:[
+  SP(10),
+  L('  //  K A I','#a888e0',20,'left'),
+  L('  [ 02:14 ]   [ BERLIN ]   [ STILL UP ]','#7a6f9c',12,'left'),
+  L('  ─────────────────────────','#4a4460',11,'left'),
+  SP(8),
+  L('  M O O D','#a888e0',12,'left'),
+  L('  Low light, low voice, no rush.',null,13,'left'),
+  SP(8),
+  L('  M U S I C','#a888e0',12,'left'),
+  L('  Deep house  ·  Trip-hop  ·  Silence',null,13,'left'),
+  SP(8),
+  L('  S T A T U S','#a888e0',12,'left'),
+  L('  Out most nights. Find me near the bar.',null,13,'left'),
+  SP(8),
+  L('  ─────────────────────────','#4a4460',11,'left'),
+]},
+
+'Red Flags':{emo:'×',blocks:[
+  SP(14),
+  L('N O V A','#e8dcde',22),
+  // Trenner so breit wie die gepunkteten Zeilen darunter: sonst wirkt der
+  // Kopf schmal und der Block darunter ausgefranst. Lange Zeilen sind
+  // ausserdem BILLIGER, weil die Einrueckung wegfaellt.
+  L('×  ─────────────  27  ·  Lisbon  ─────────────  ×','#a8202e',12),
+  SP(12),
+  L('────────────  R E D   F L A G S  ────────────','#c02c3a',12),
+  {t:'menu',c:null,s:12,items:[
+    ['  Texts back instantly','guilty'],
+    ['  Falls fast, lands badly','guilty'],
+    ['  Reads into everything','probably'],
+    ['  Never says no first','always'],
+    ['  Bites','allegedly'],
+  ]},
+  SP(10),
+  // Unterschrift am selben rechten Rand wie die Punktreihen
+  {t:'lr',c:'#8a5a60',s:12,left:'  consider yourself warned',right:'—  N.  '},
+]},
+
+'Brat':{emo:'✦',blocks:[
+  SP(14),
+  L('B R A T','#ff4d9d',26),
+  L('─────  Rae  ·  24  ·  Barcelona  ─────','#b06c8c',12),
+  SP(14),
+  {t:'seg',s:13,a:'center',parts:[
+    {text:'you can ',c:'#ffffff',s:14},
+    {text:'try',c:'#ff4d9d',s:22,b:1},
+    {text:' to tame me',c:'#ffffff',s:14}]},
+  SP(16),
+  // Ueberschrift in die Spalte hinein: nur so sitzt sie garantiert darueber.
+  // Die Spaltenbreite richtet sich nach dem laengsten Eintrag.
+  {t:'cols',c:null,s:13,bullet:'',gap:44,cols:[
+    ['✦  W O R K S','   compliments','   being chased','   patience'],
+    ['×  D O E S   N O T','   orders','   being rushed','   lectures']]},
+  SP(16),
+  L('─────  ask nicely and see what happens  ─────','#b06c8c',12),
+]},
+
+'Obsession':{emo:'♥',blocks:[
+  SP(12),
+  // Rahmengroesse MUSS der Innengroesse entsprechen: die Engine fuellt die Zeile
+  // mit Leerzeichen der Rahmengroesse, rendert sie aber in der Innengroesse.
+  // Rechte Seite leer lassen spart die Auffuell-Leerzeichen.
+  {t:'frame',c:'#7d1830',s:18,width:300,corners:'╭╮╰╯',left:'',right:'',inner:[
+    L('E V E L Y N',null,18),
+  ]},
+  SP(10),
+  L('─────  31  ·  Milan  ·  all yours  ─────','#d1447a',12),
+  SP(12),
+  L('Everything I do, I do completely.',null,14),
+  L('That includes wanting you.',null,14),
+  SP(14),
+  L('────────  L I K E S  ────────','#a83258',12),
+  L('Undivided attention  ·  Long nights',null,13),
+  SP(12),
+  L('──────  L O O K I N G   F O R  ──────','#a83258',12),
+  L('One person. All of it.',null,13),
+]},
+
+'Private Room':{emo:'◇',blocks:[
+  SP(14),
+  L('P R I V A T E   R O O M','#c9a227',19),
+  L('─────────────────────────','#7a6c3e',12),
+  SP(10),
+  {t:'kv',c:'#e8dcc0',s:12,items:[
+    ['NAME','Rowan'],
+    ['AGE','33'],
+    ['CITY','Vienna'],
+    ['DRESS CODE','Black, and mean it'],
+    ['ENTRY','By invitation'],
+  ]},
+  SP(12),
+  L('◇  ─────────────────────  ◇','#7a6c3e',12),
+  L('Ask for the room at the back.',null,13),
+]},
+
+'Tease':{emo:'✧',blocks:[
+  SP(30),
+  L('M I A','#f0e4ee',24),
+  SP(16),
+  L('you first.','#e88fc0',15,'center',{i:1}),
+  SP(26),
+  L('─────────','#7e4a7e',12),
+  SP(24),
+  L('I do not chase.',null,14),
+  L('I am chased.',null,14),
+]},
+
+'Dangerous':{emo:'▲',blocks:[
+  SP(10),
+  L('█  D A N G E R O U S','#b2242c',19,'left'),
+  L('  ADRIAN   ·   34   ·   ANTWERP','#9a9298',12,'left'),
+  SP(10),
+  {t:'bars',c:'#b2242c',s:12,items:[['CONTROL',9],['PATIENCE',7],['MERCY',3]]},
+  SP(10),
+  L('  E N E R G Y','#c9c9cf',12,'left'),
+  L('  Calm until I am not.',null,13,'left'),
+  SP(8),
+  L('  L I M I T S','#c9c9cf',12,'left'),
+  L('  Stated once, kept forever.',null,13,'left'),
+  SP(8),
+  L('  ─────────────────────────','#5a5a62',11,'left'),
+]},
+
+'Soft Submission':{emo:'❀',blocks:[
+  SP(18),
+  L('e l l i e','#f0e6ea',24),
+  L('────────  25  ·  soft hours  ────────','#a382a0',12),
+  SP(14),
+  L('I am easiest to reach when you are gentle.',null,13),
+  SP(14),
+  {t:'cols',c:'#c9a0a8',s:13,bullet:'· ',gap:60,cols:[
+    ['warmth','being led'],
+    ['patience','quiet praise']]},
+  SP(14),
+  L('──────  L O O K I N G   F O R  ──────','#a382a0',12),
+  L('Someone steady. I do the rest.',null,13),
+]},
+
+'Dominion':{emo:'♠',blocks:[
+  SP(18),
+  L('D O M I N I O N','#eceaf0',20),
+  L('─────────────────────────','#6a6478',12),
+  SP(12),
+  {t:'kv',c:'#b09ac0',s:12,items:[
+    ['ROLE','Dominant, quietly'],
+    ['ENERGY','Patient. Exact.'],
+    ['LIKES','Trust given freely'],
+    ['LIMITS','Discussed, never assumed'],
+    ['LOOKING FOR','Someone who asks'],
+  ]},
+  SP(14),
+  L('♠  ─────────────────────  ♠','#6a6478',12),
+]},
+
+'Protocol':{emo:'▪',blocks:[
+  SP(10),
+  L('  P R O T O C O L','#d6d0dd',18,'left'),
+  L('  Sasha  ·  29  ·  Rotterdam','#8a84a0',12,'left'),
+  L('  ─────────────────────────','#4e4a5e',11,'left'),
+  SP(8),
+  {t:'menu',c:null,s:12,items:[
+    ['  ROLE','switch, mostly top'],
+    ['  DYNAMIC','slow burn, negotiated'],
+    ['  LIKES','ropes, patience, praise'],
+    ['  LIMITS','anything unspoken'],
+    ['  HARD LIMITS','pain, humiliation'],
+  ]},
+  SP(8),
+  L('  ─────────────────────────','#4e4a5e',11,'left'),
+  L('  DM STATUS   ·   open, be specific','#9a8fb8',12,'left'),
+]},
+
+'Sinful':{emo:'†',blocks:[
+  SP(14),
+  L('S E R A P H I N E','#d8d2d8',20),
+  L('†  ═════════  30  ·  Lisbon  ═════════  †','#8a2038',12),
+  SP(12),
+  L('────────  A B O U T  ────────','#a83248',12),
+  L('Raised on hymns, ruined by poetry.',null,13),
+  SP(12),
+  L('────────  M O O D  ────────','#a83248',12),
+  L('Candlelight and bad decisions.',null,13),
+  SP(12),
+  L('──────  L O O K I N G   F O R  ──────','#a83248',12),
+  L('A confessor with a sense of humour.',null,13),
+]},
+
+'No Strings':{emo:'─',blocks:[
+  SP(24),
+  L('  N O   S T R I N G S','#eceaf0',20,'left'),
+  SP(16),
+  L('  Jules  ·  30  ·  Oslo','#7d7888',13,'left'),
+  SP(20),
+  L('  ─────────────','#4a4652',12,'left'),
+  SP(20),
+  L('  Honest about what this is.',null,14,'left'),
+  L('  Kind about what it is not.',null,14,'left'),
+  SP(18),
+  L('  Say what you want. I will do the same.','#7d7888',12,'left'),
+]},
+
+'Touch Me':{emo:'✧',blocks:[
+  SP(16),
+  L('t o u c h   m e','#e07ab0',22),
+  L('────────  Noa  ·  26  ·  Lyon  ────────','#8f5a9c',12),
+  SP(14),
+  {t:'grid3',c:'#d8b8d0',s:12,gap:30,items:[
+    '✧ slow hands','✧ bad jokes','✧ late calls',
+    '✧ neck kisses','✧ long walks','✧ worse ideas']},
+  SP(14),
+  L('──────  L O O K I N G   F O R  ──────','#8f5a9c',12),
+  L('Someone who starts things.',null,13),
+]},
+
+/* ---------- weitere Gothic-Layouts ---------- */
+
+'Victorian':{emo:'❦',blocks:[
+  SP(14),
+  // eine Innenzeile, exakt in Rahmengroesse — sonst sitzt der Name schief
+  {t:'frame',c:'#8a7548',s:17,width:340,corners:'┌┐└┘',left:'│',right:'│',inner:[
+    L('C O R N E L I A',null,17),
+  ]},
+  SP(10),
+  L('────────  b. 1874  ·  Bath  ────────','#a89060',12),
+  SP(14),
+  L('──────  O F   T H E   H O U S E  ──────','#a89060',12),
+  L('Letters answered. Calls returned rarely.',null,13),
+  SP(12),
+  L('─────────  P U R S U I T S  ─────────','#a89060',12),
+  L('Botany  ·  Correspondence  ·  Grudges',null,13),
+]},
+
+'Witchy':{emo:'✦',blocks:[
+  SP(14),
+  L('W R E N','#e0e6dc',22),
+  L('✦  ──────  moon in scorpio  ──────  ✦','#7f9c7f',12),
+  SP(12),
+  L('───────  I N   T H E   J A R S  ───────','#9b8fc0',12),
+  {t:'cols',c:null,s:13,bullet:'· ',gap:54,cols:[
+    ['mugwort','black salt'],
+    ['old letters','someone’s name']]},
+  SP(12),
+  L('────────  H O U S E   R U L E S  ────────','#9b8fc0',12),
+  L('Knock. Take your shoes off. Be honest.',null,13),
+]},
+
+'Dark Romantic':{emo:'❥',blocks:[
+  SP(20),
+  L('a n n e l i e s e','#ecdfe2',22),
+  SP(12),
+  L('❝ love me at my most unreasonable ❞','#c98fa0',14,'center',{i:1}),
+  SP(20),
+  L('──────────────','#6a4a52',12),
+  SP(18),
+  L('Rain, old films, longer letters.',null,14),
+  L('I do nothing halfway.',null,14),
+]},
+
+/* ---------- weitere Clean-Layouts ---------- */
+
+'Luxury':{emo:'◈',blocks:[
+  SP(18),
+  L('V A L E N T I N E','#f0ead8',21),
+  L('─────────────────────────','#8a7a4e',12),
+  SP(14),
+  {t:'lr',c:'#c9b47a',s:12,left:'  AGE',right:'32  '},
+  {t:'lr',c:'#c9b47a',s:12,left:'  BASED',right:'Monaco  '},
+  {t:'lr',c:'#c9b47a',s:12,left:'  SPEAKS',right:'EN · FR · IT  '},
+  SP(14),
+  L('◈  ─────────────────────  ◈','#8a7a4e',12),
+  L('Good taste is the only currency.',null,13),
+]},
+
+'Elegant':{emo:'◇',blocks:[
+  SP(20),
+  L('C L A R A','#f2f0f5',24),
+  SP(12),
+  L('◇  ──────  29  ·  Copenhagen  ──────  ◇','#8e8a97',12),
+  SP(18),
+  L('Quiet rooms, good paper, better coffee.',null,14),
+  SP(18),
+  L('─────────  L O O K I N G   F O R  ─────────','#8e8a97',12),
+  L('Conversation that goes somewhere.',null,13),
+]},
+
+'Modern':{emo:'▮',blocks:[
+  SP(16),
+  L('  ▮  T H E O','#f0eff4',20,'left'),
+  L('  31 / Berlin / designer','#6dbfa8',12,'left'),
+  SP(14),
+  L('  A B O U T','#6dbfa8',11,'left'),
+  L('  I make things simpler than I found them.',null,13,'left'),
+  SP(12),
+  L('  N O W','#6dbfa8',11,'left'),
+  L('  Building something. Ask me about it.',null,13,'left'),
+  SP(12),
+  L('  ─────────────────────────','#3e4a46',11,'left'),
+]},
+
+'Soft Dark':{emo:'○',blocks:[
+  SP(24),
+  L('m a e v e','#ddd8e4',23),
+  SP(14),
+  L('27  ·  Ghent  ·  quiet type','#8a8496',13),
+  SP(20),
+  L('· · · · · · ·','#5a5566',13),
+  SP(20),
+  L('Slow mornings and long playlists.',null,14),
+  L('I like people who are easy to be around.',null,13),
+]},
+
+/* ---------- Props: jede Vorlage ahmt ein anderes Objekt oder Dokument nach.
+   art-Kaesten sind auf gleiche PIXELBREITE gerichtet, nicht auf gleiche
+   Zeichenzahl — sonst franst der rechte Rand aus (entwuerfe/kasten-richten.mjs). ---------- */
+
+/* 1 — DARK ALTAR. Kasten nur links offen: asymmetrisch und billiger. */
+'Maleficium':{emo:'☾',blocks:[
+  SP(12),
+  L('☾   M A L E F I C I U M   ☽','#b09ac0',18),
+  L('──────  †  a b o u t  †  ──────','#8a7a90',12),
+  L('chaos dressed in black',null,13),
+  L('soft voice  ·  sharp mind',null,13),
+  SP(12),
+  {t:'art',c:'#9a8aa8',s:12,lines:[
+    '┌────────  ✦  ────────',
+    '│   music       darkwave',
+    '│   mood        nocturnal',
+    '│   weakness    bad ideas',
+    '└─────────────────────',
+  ]},
+  SP(12),
+  L('†   enter carefully   †','#8a3040',12),
+]},
+
+/* 2 — NIGHTCLUB-UI. Linksbündige Statuszeilen, dann ein grosser Satz mittig. */
+'Afterhours':{emo:'●',blocks:[
+  SP(10),
+  L('  //   N E O N   A F T E R D A R K   //','#4de8ff',16,'left'),
+  SP(10),
+  {t:'kv',c:'#7fd4ff',s:12,items:[
+    ['STATUS','●  ONLINE'],
+    ['ENERGY','███████░░'],
+    ['VIBE','after midnight'],
+  ]},
+  SP(14),
+  L('N O   R U L E S','#ff6fae',19),
+  L('J U S T   C H E M I S T R Y','#ff6fae',19),
+  SP(14),
+  L('────────  03:17 AM  ────────','#3f6f88',12),
+]},
+
+/* 3 — MAGAZIN. Bewusst asymmetrisch: ein Absatz links, einer rechts. */
+'Editorial':{emo:'▤',blocks:[
+  SP(12),
+  {t:'lr',c:'#8a8690',s:11,left:'  ISSUE 07',right:'2026  '},
+  SP(14),
+  L('M I S S L A R I F A R I','#f2f0f4',19),
+  L('────────  after hours.  ────────','#8a8690',12),
+  SP(14),
+  L('  THE PERSON','#8a8690',11,'left'),
+  L('  slightly chaotic.',null,13,'left'),
+  L('  permanently caffeinated.',null,13,'left'),
+  SP(14),
+  L('THE MOOD  ','#8a8690',11,'right'),
+  L('dark / playful / complicated  ',null,13,'right'),
+  SP(14),
+  {t:'lr',c:'#4e4a56',s:12,left:'  VOL. 01  ──────────────',right:'♡  '},
+]},
+
+/* 4 — AKTE. Formular: Beschriftung links, Wert am rechten Rand, dazu eine
+       Spalte Ankreuzfelder. Keine gepunkteten Zeilen mehr. */
+'Classified':{emo:'▪',blocks:[
+  SP(10),
+  L('  C O N F I D E N T I A L','#c04a4a',15,'left'),
+  L('  ──────────────────────────────','#4a4650',11,'left'),
+  SP(12),
+  {t:'lr',c:null,s:12,left:'  FILE',right:'0916  '},
+  {t:'lr',c:null,s:12,left:'  SUBJECT',right:'MissLarifari  '},
+  {t:'lr',c:null,s:12,left:'  STATUS',right:'still at large  '},
+  SP(14),
+  L('  [ ✓ ]   photographed',null,12,'left'),
+  L('  [ ✓ ]   interviewed',null,12,'left'),
+  L('  [ ✖ ]   contained','#c04a4a',12,'left'),
+  SP(14),
+  L('  NOTES','#7a7682',10,'left'),
+  L('  Looks harmless. The file suggests otherwise.',null,13,'left'),
+  SP(14),
+  L('A C C E S S   G R A N T E D  ','#5fa87a',13,'right'),
+]},
+
+/* 5 — KETTEN. Panel mit Gliedern an beiden Seiten. */
+'Chains':{emo:'⊙',blocks:[
+  SP(12),
+  L('⊙═══════⊙═══════⊙═══════⊙','#7a7078',12),
+  SP(12),
+  L('Y O U R N A M E','#e8e4e8',20),
+  L('chained to chaos','#9a8a86',13,'center',{i:1}),
+  SP(14),
+  {t:'art',c:'#b0a4a0',s:12,lines:[
+    '⊙                              ⊙',
+    '     music      ·  darkwave     ',
+    '     mood       ·  dangerous    ',
+    '     status     ·  unavailable  ',
+    '⊙                              ⊙',
+  ]},
+  SP(14),
+  L('──────  break at own risk  ──────','#8a5048',12),
+]},
+
+/* 6 — UMLAUFBAHN. Gestreute Zeichen, bewusst nicht symmetrisch. */
+'Orbit':{emo:'✦',blocks:[
+  SP(14),
+  {t:'art',c:'#a8b4cc',s:14,lines:[
+    '                ✦                  ',
+    '      ·                    ☾       ',
+    '   L A R I                     ·   ',
+  ]},
+  SP(16),
+  L('somewhere',null,14),
+  L('between dreams',null,14),
+  L('and chaos',null,14),
+  SP(16),
+  {t:'art',c:'#a8b4cc',s:14,lines:[
+    '     ·           ✧            ·    ',
+  ]},
+  SP(14),
+  L('currently orbiting','#8a94ac',12),
+  L('my own world','#8a94ac',12),
+  SP(12),
+  {t:'art',c:'#a8b4cc',s:14,lines:[
+    '                          ☽        ',
+  ]},
+]},
+
+/* 7 — WARNSCHILD. Ein durchgehender Kasten, sonst nichts. */
+'Hazard':{emo:'▲',blocks:[
+  SP(16),
+  {t:'art',c:'#e0b83c',s:13,lines:[
+    '┌─────  W A R N I N G  ─────     ┐',
+    '│   HIGHLY ADDICTIVE                      │',
+    '│                                                       │',
+    '│   may cause:                                   │',
+    '│     •  attachment                               │',
+    '│     •  bad decisions                           │',
+    '│     •  late nights                                │',
+    '└──  USE RESPONSIBLY  ──────┘',
+  ]},
+  SP(14),
+  L('side effects are the point.','#8a7a48',12,'center',{i:1}),
+]},
+
+/* 8 — TRACKLIST. Drei Spalten: Nummer, Titel, Laufzeit. */
+'Tracklist':{emo:'♪',blocks:[
+  SP(12),
+  {t:'lr',c:'#c9a86a',s:12,left:'  NOW PLAYING  ─────────────',right:'●  '},
+  SP(12),
+  {t:'cols',c:null,s:13,bullet:'',gap:22,cols:[
+    ['01','02','03','04'],
+    ['overthinking','bad decisions','midnight talks','don’t fall for me'],
+    ['3:42','4:13','5:07','--:--']]},
+  SP(14),
+  L('♡','#c9a86a',13),
+  SP(12),
+  L('  CURRENT MOOD','#8a7a5a',11,'left'),
+  L('  ▰▰▰▰▰▰▱▱▱','#c9a86a',13,'left'),
+]},
+
+/* 9 — ZIMMERKARTE. Kopf mittig, Angaben links, Schlusszeile mittig. */
+'Hotel':{emo:'◇',blocks:[
+  SP(14),
+  L('H O T E L   N O I R','#e8dcc0',18),
+  L('─────────────','#8a7a52',12),
+  L('R O O M   0916','#c9a86a',15),
+  SP(14),
+  L('  GUEST','#8a7a52',10,'left'),
+  L('  MissLarifari',null,14,'left'),
+  SP(10),
+  {t:'kv',c:null,s:12,items:[
+    ['CHECK IN','midnight'],
+    ['CHECK OUT','never'],
+  ]},
+  SP(14),
+  L('◇   ◇   ◇','#8a7a52',12),
+  SP(10),
+  L('please disturb.','#e8dcc0',14,'center',{i:1}),
+]},
+
+/* 10 — TAROTKARTE. Breiter Kasten, damit die Einrückung bezahlbar bleibt. */
+'Arcana':{emo:'☾',blocks:[
+  SP(12),
+  {t:'art',c:'#c9a86a',s:14,lines:[
+    '┌────────────────────┐',
+    '│         XIX                                      │',
+    '│          ☾                                       │',
+    '│      L A R I                                   │',
+    '│     THE CHAOS                           │',
+    '│          ✦                                       │',
+    '└────────────────────┘',
+  ]},
+  SP(14),
+  L('upright','#8a7a52',11),
+  L('charming  ·  curious',null,13),
+  SP(10),
+  L('reversed','#8a7a52',11),
+  L('absolutely trouble',null,13),
+]},
+
+/* 11 — BAUPLAN. Nummerierte Teileliste, ein Massband quer, darunter die
+       technischen Angaben. Kein Kasten, keine gepunkteten Zeilen. */
+'Schematic':{emo:'▮',blocks:[
+  SP(10),
+  L('  //  S U B J E C T _ 0 9 1 6','#7fd4ff',14,'left'),
+  SP(12),
+  {t:'cols',c:null,s:13,bullet:'',gap:18,left:true,cols:[
+    ['  1','  2','  3'],
+    ['head','heart','patience'],
+    ['·','·','·'],
+    ['overclocked','reinforced','not installed']]},
+  SP(14),
+  L('|──────────  S C A L E   1 : 1  ──────────|','#4f7488',12),
+  SP(14),
+  {t:'kv',c:'#6fa8c8',s:12,items:[
+    ['TOLERANCE','± chaos'],
+    ['MATERIAL','stubborn'],
+    ['FINISH','matte black'],
+  ]},
+  SP(10),
+  L('  build_0916  //  v2.6','#4f7488',11,'left'),
+]},
+
+/* 12 — POLAROIDWAND. Zwei versetzte Bildchen in EINEM art-Block, damit
+       ihre Lage zueinander erhalten bleibt. */
+'Pinboard':{emo:'▭',blocks:[
+  SP(16),
+  {t:'art',c:'#c8c2cc',s:12,lines:[
+    '┌────────────┐                      ',
+    '│  midnight  │                      ',
+    '│    ☾  ✦    │                      ',
+    '└─────♡──────┘                      ',
+    '                      ┌────────────┐',
+    '                      │ bad ideas  │',
+    '                      │     ✟      │',
+    '                      └────✦───────┘',
+  ]},
+  SP(18),
+  L('memories loading...','#8a8490',13,'center',{i:1}),
+]},
+
+/* 13 — KASSENBON. Posten und Menge als zwei Spalten. */
+'Checkout':{emo:'▪',blocks:[
+  SP(14),
+  L('  A F T E R   H O U R S   S T O R E','#e8e4de',14,'left'),
+  L('  ──────────────────────────','#7a7670',12,'left'),
+  L('  ORDER  #0916','#9a968e',11,'left'),
+  SP(12),
+  {t:'cols',c:null,s:13,bullet:'',gap:130,left:true,cols:[
+    ['  chaos','  dark humour','  caffeine','  patience','  affection'],
+    ['x1','x2','x9','x0','???']]},
+  SP(12),
+  L('  ──────────────────────────','#7a7670',12,'left'),
+  {t:'lr',c:null,s:13,left:'  TOTAL',right:'bad idea  '},
+  L('  ──────────────────────────','#7a7670',12,'left'),
+  SP(10),
+  L('  thank you ♡   ·   no refunds.','#9a968e',12,'left'),
+]},
+
+/* 14 — FENSTER. Titelleiste mit Schaltflächen, Eingabezeilen, Ladebalken. */
+'Terminal':{emo:'▮',blocks:[
+  SP(16),
+  {t:'art',c:'#7fd8a0',s:13,lines:[
+    '┌─  profile.exe  ───  □  ×                         ┐',
+    '│   > user:    lari                                         │',
+    '│   > status:  online                                    │',
+    '│   > mood:    unstable                                │',
+    '│   loading personality...                              │',
+    '│   ████████████░░   86%                   │',
+    '│   > don’t click me_                                   │',
+    '└───────────────────────────┘',
+  ]},
+]},
+
+/* 15 — STECKBRIEF. Kopf zwischen zwei Linien, Feldliste, Fusszeile. */
+'Wanted':{emo:'★',blocks:[
+  SP(12),
+  L('═════════════════════════════','#8a7a5a',12),
+  L('W A N T E D','#f0e8d8',24),
+  L('═════════════════════════════','#8a7a5a',12),
+  SP(12),
+  L('L A R I','#e8e0d0',16),
+  L('alias  ·  MissLarifari','#9a9080',11),
+  SP(12),
+  {t:'kv',c:null,s:12,items:[
+    ['LAST SEEN','somewhere loud'],
+    ['CHARGES','stealing attention'],
+    ['REWARD','one honest conversation'],
+  ]},
+  SP(12),
+  L('─────────────────────────────','#8a7a5a',12),
+  L('DEAD OR ALIVE   ·   preferably alive','#b04a3a',12),
+]},
+
+/* 16 — VIP-BÄNDCHEN. Strichcode aus ▮ als gefälschtes UI-Element. */
+'Backstage':{emo:'▮',blocks:[
+  SP(12),
+  {t:'lr',c:'#ff6fae',s:11,left:'  ACCESS ALL AREAS',right:'PASS 0916  '},
+  L('══════════════════════════════════════','#6a4a58',12),
+  SP(10),
+  L('B A C K S T A G E','#ff6fae',20),
+  L('L A R I','#e8e2ea',14),
+  SP(12),
+  {t:'cols',c:null,s:12,bullet:'',gap:34,cols:[
+    ['GATE','ZONE','VALID'],
+    ['3','all','tonight']]},
+  SP(14),
+  L('▮▮ ▮ ▮▮▮ ▮ ▮▮ ▮▮▮ ▮ ▮ ▮▮ ▮▮▮ ▮ ▮▮ ▮','#d8d2da',13),
+  L('scan at the door','#8a8490',11),
+]},
+
+/* 17 — SPIELKARTE. Zeichen in den gegenüberliegenden Ecken, Mitte fast leer. */
+'Joker':{emo:'♠',blocks:[
+  SP(10),
+  L('  J','#e8e4e8',20,'left'),
+  L('  ♠','#e8e4e8',15,'left'),
+  SP(22),
+  L('♠','#b0243a',30),
+  SP(12),
+  L('T H E   J O K E R','#e8e4e8',15),
+  L('wild card  ·  plays by no rules','#8a8490',12),
+  SP(24),
+  L('♠  ','#e8e4e8',15,'right'),
+  L('J  ','#e8e4e8',20,'right'),
+]},
+
+/* 18 — AUSWERTUNG. Prozentwert oben rechts, Balken, Urteil. */
+'Matchfile':{emo:'▰',blocks:[
+  SP(10),
+  L('  M A T C H   R E P O R T   ·   #0916','#8fd8c0',13,'left'),
+  L('  ─────────────────────────────','#3e5e54',11,'left'),
+  SP(10),
+  {t:'lr',c:null,s:14,left:'  COMPATIBILITY',right:'87 %  '},
+  SP(12),
+  {t:'bars',c:'#8fd8c0',s:12,items:[['HUMOUR',9],['PATIENCE',4],['CHAOS',10]]},
+  SP(12),
+  L('  VERDICT','#5f9f88',11,'left'),
+  L('  Proceed with curiosity.',null,13,'left'),
+  L('  Bring snacks.',null,13,'left'),
+  SP(10),
+  L('  ─────────────────────────────','#3e5e54',11,'left'),
+  L('results not guaranteed.  ','#5f9f88',11,'right'),
+]},
+
+/* 19 — SPURENSICHERUNG. Fundmarken liegen gestreut wie auf einem Tatortfoto,
+       darunter die Legende in zwei Spalten. Nur EIN Absperrband, sonst wuerde
+       es aussehen wie die Vorlage 'Rails'. */
+'Evidence':{emo:'▬',blocks:[
+  SP(12),
+  L('▬ DO NOT CROSS ▬ DO NOT CROSS ▬','#d8b83c',11),
+  SP(16),
+  {t:'art',c:'#e8e4e0',s:14,lines:[
+    '   [1]                            ',
+    '                [2]         [4]   ',
+    '        [3]                       ',
+  ]},
+  SP(16),
+  {t:'cols',c:null,s:12,bullet:'',gap:16,cols:[
+    ['[1]','[2]','[3]','[4]'],
+    ['one earring, left behind',
+     'someone else’s jacket',
+     'a message, never sent',
+     'the truth, partial']]},
+  SP(16),
+  {t:'lr',c:'#8a8680',s:11,left:'  case 0916',right:'still open  '},
+]},
+
+/* 20 — CHARAKTERBOGEN. Werteraster oben, Fertigkeiten darunter. */
+'Statsheet':{emo:'◈',blocks:[
+  SP(12),
+  L('L A R I','#ece4d4',19),
+  L('LVL 28   ·   CHAOTIC GOOD','#9a8f7a',12),
+  L('─────────────────────────────','#6a5f4a',12),
+  SP(12),
+  {t:'grid3',c:null,s:13,gap:34,items:[
+    'STR   8','DEX  14','CON   9',
+    'INT  16','WIS   7','CHA  18']},
+  SP(14),
+  L('─────────────────────────────','#6a5f4a',12),
+  SP(10),
+  L('  SKILLS','#9a8f7a',10,'left'),
+  L('  sarcasm  ·  expert',null,12,'left'),
+  L('  staying up late  ·  legendary',null,12,'left'),
+  SP(10),
+  L('  INVENTORY','#9a8f7a',10,'left'),
+  L('  coffee, headphones, bad ideas',null,12,'left'),
+]},
+
 };
 
 /* ALL bleibt name → blocks, damit die Prüfskripte weiter funktionieren */
@@ -1794,19 +2794,31 @@ for(const [grp,set] of [['bild',FROM_IMAGES],['neu',INVENTED]])
 /* Kategorien für die Galerie — nach Stimmung, nicht nach Bauweise.
    Reihenfolge innerhalb einer Kategorie bleibt chronologisch (alt → neu). */
 const CATS = {
-  'Soft':     ['Velvet','Daydream','Moonlit','Heart','Tarot','Fortune','Constellation'],
-  'Bold':     ['Signature','Wired','Static','Caution','Dogtag','Scoreboard','Bartab','Blueprint','Vault','Loading','Vinyl'],
+  'Soft':     ['Velvet','Daydream','Moonlit','Heart','Tarot','Fortune','Constellation',
+               'Cascade','Subtitles','Soft Dark'],
+  'Bold':     ['Signature','Wired','Static','Caution','Dogtag','Scoreboard','Bartab','Blueprint','Vault','Loading','Vinyl',
+               'Commandments','Titles','Rails','Sleeve'],
   'Playful':  ['Receipt','Boarding','Forecast','Overheard','Label','Playlist','Recipe','Character','Balance','Nametag','Certificate',
-               'Season','Prescription','Needy'],
+               'Season','Prescription','Needy',
+               'Weekdays','Transcript','Frontpage','Hours'],
   'Clean':    ['Bare','Ladder','Hourglass','Scatter','Nightshift','Dossier','Dictionary','Diamond','Compass','Museum',
-               'Polaroid','Library','Overcast'],
-  'Detailed': ['Halo','Ultimatum','Inventory','Overload','Meters','Chapters'],
-  'Ornate':   ['Aurora','Prism','Grimoire','Neon','Seance','Silk','Chandelier','Ember','Butterfly','Petals'],
+               'Polaroid','Library','Overcast',
+               'Corners','Handles','Acrostic','Diptych','Elegant','Modern'],
+  'Detailed': ['Halo','Ultimatum','Inventory','Overload','Meters','Chapters',
+               'Bootlog'],
+  'Ornate':   ['Aurora','Prism','Grimoire','Neon','Seance','Silk','Chandelier','Ember','Butterfly','Petals',
+               'Marquee','Luxury'],
   'Girly':    ['Bubblegum','Slumber','Bows','Diary','Sparkle','Sweettooth','Pointe','Highness'],
-  'Goth':     ['Crypt','Nevermore','Requiem','Coffin','Cathedral','Ouija','Thorns','Eclipse'],
+  'Goth':     ['Crypt','Nevermore','Requiem','Coffin','Cathedral','Ouija','Thorns','Eclipse',
+               'Victorian','Witchy','Dark Romantic'],
   'Steel':    ['Manual','Rank','Poker','Coordinates','Radio','Bounty',
                'Highway','Barcode','Toolbox','Chess','Tavern','Platform'],
-  'Onyx':     ['Gentleman','Neondrive','Understated','Crossfire','Respawn','Vespers'],
+  'Onyx':     ['Gentleman','Neondrive','Understated','Crossfire','Respawn','Vespers',
+               'Sourcecode','Redacted'],
+  'Spicy':    ['Temptation','After Dark','Red Flags','Brat','Obsession','Private Room','Tease',
+               'Dangerous','Soft Submission','Dominion','Protocol','Sinful','No Strings','Touch Me'],  'Props':    ['Maleficium','Afterhours','Editorial','Classified','Chains','Orbit','Hazard',
+               'Tracklist','Hotel','Arcana','Schematic','Pinboard','Checkout','Terminal',
+               'Wanted','Backstage','Joker','Matchfile','Evidence','Statsheet'],
 };
 
 let current = Object.keys(ALL)[0];
