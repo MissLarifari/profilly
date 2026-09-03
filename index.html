@@ -2877,6 +2877,257 @@ const INVENTED = {
   L('  coffee, headphones, bad ideas',null,12,'left'),
 ]},
 
+/* ---- Noise -------------------------------------------------------------
+   Nach einem 3dx-Profil gebaut, das Lari gefunden hat: nichts zentriert,
+   Woerter stehen kreuz und quer, ein blasser Name liegt wie ein Schatten
+   dahinter, der Ton ist patzig statt einladend. Der Trick ist die
+   handgesetzte Einrueckung mit 'left', so wie bei Scatter - zentrieren
+   wuerde die Unordnung sofort kaputtmachen. Die Einrueckungen sind
+   ausgerechnet, nicht abgezaehlt: jede Zeile beginnt an einer gewaehlten
+   Pixelposition im 480px-Feld, damit die Streuung ueber die ganze Breite
+   traegt und nicht in der linken Haelfte klebt.                          */
+
+'Loudmouth':{emo:'⌁',blocks:[
+  SP(10),
+  L('not here to be agreeable',null,13,'left',{'f':'smallcaps'}),
+  L('      ask around, you will hear worse','#8b8699',11,'left',{'i':1}),
+  SP(16),
+  L('                        YOUR NAME','#463f52',22,'left'),
+  L('     gaming','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  L('                                                                                                     hip hop','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  L('                                        anime','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  SP(14),
+  L('sometimes i talk, then i umm,','#b8b2c4',11,'left'),
+  L('              and then i uhh. sorry. mostly.','#8b8699',11,'left',{'i':1}),
+  L('                                                                                   you get used to it','#7d788a',10,'left',{'i':1}),
+]},
+
+'Interference':{emo:'≈',blocks:[
+  SP(12),
+  L('                 SIGNAL LOST','#413b4c',24,'left'),
+  L('you are breaking up','#e0dbe8',13,'left'),
+  SP(4),
+  L('                                                                                say that again','#ff8fbf',12,'left',{'i':1}),
+  SP(4),
+  L('                    or do not','#9b96ad',12,'left'),
+  L('                                                                                                              or do','#7d788a',11,'left',{'i':1}),
+  SP(12),
+  {t:'rule',c:'#4f4859',s:10,char:'─'},
+  L('reception here is terrible on purpose','#8b8699',10,'center',{i:1}),
+]},
+
+'Backtalk':{emo:'»',blocks:[
+  SP(12),
+  {t:'lr',c:'#cfc9d8',s:12,left:'  people say i am nice',right:'they are guessing  '},
+  SP(4),
+  {t:'lr',c:'#cfc9d8',s:12,left:'  people say i am quiet',right:'they are wrong  '},
+  SP(4),
+  {t:'lr',c:'#cfc9d8',s:12,left:'  people say i am a lot',right:'they are right  '},
+  SP(16),
+  L('                            SO WHICH ONE','#443e4f',18,'left'),
+  L('                                                                                   pick one and find out','#8b8699',10,'left',{'i':1}),
+]},
+
+'Whatever':{emo:'¯',blocks:[
+  SP(20),
+  L('  whatever',null,17,'left',{'f':'smallcaps'}),
+  SP(18),
+  L('                                                               i was going to write something here','#7d788a',10,'left'),
+  L('                                                                                   then i did not','#7d788a',10,'left',{'i':1}),
+  SP(24),
+  L('                                                                                                    still here though','#9b96ad',11,'left',{'i':1}),
+]},
+
+'Crosstalk':{emo:'⁘',blocks:[
+  SP(10),
+  L('too loud','#e0dbe8',14,'left'),
+  L('                                                                  too honest','#ff8fbf',12,'left'),
+  L('               too late to fix it','#b8b2c4',13,'left'),
+  L('                                                                                                    too bad','#9b96ad',11,'left'),
+  L('     too much','#c9a8d6',16,'left'),
+  L('                                                        on a good day','#7d788a',10,'left',{'i':1}),
+  L('                                                                                                              and the other ones','#7d788a',10,'left',{'i':1}),
+  SP(14),
+  L('everyone talks at once in here','#8b8699',11,'right',{i:1}),
+]},
+
+'Megaphone':{emo:'▸',blocks:[
+  SP(14),
+  L('  I AM NOT SHOUTING','#f0ecf6',19,'left'),
+  L('             this is just my voice','#9b96ad',11,'left',{'i':1}),
+  SP(18),
+  L('loud','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  L('                                                  blunt','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  L('                                                                                                    tired','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  L('                          honest','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  L('                                                                            late','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  SP(14),
+  L('                                                                                   turn it down yourself','#7d788a',10,'left',{'i':1}),
+]},
+
+/* Zweiter Schwung Noise. Gleiches Prinzip: x-Position waehlen, Leerzeichen
+   ausrechnen lassen. Jede Vorlage nimmt sich eine andere Form von Laerm vor
+   - Rueckkopplung, Stille, Hin und Her, Widerspruch, Lautstaerke, Nachtreten. */
+
+'Feedback':{emo:'≋',blocks:[
+  SP(12),
+  L('say that again','#7d788a',11,'left'),
+  L('          say that again','#b8b2c4',14,'left'),
+  L('                     SAY THAT AGAIN','#e0dbe8',17,'left'),
+  L('                               SAY THAT AGAIN','#ff8fbf',21,'left'),
+  SP(12),
+  L('                                                                                   no? thought so','#7d788a',10,'left',{'i':1}),
+]},
+
+'Dead Air':{emo:'⋯',blocks:[
+  SP(24),
+  L('                   . . .','#3d3846',30,'left'),
+  SP(20),
+  L('i had something','#8b8699',10,'left'),
+  L('                                                                                                              it left','#7d788a',10,'left',{'i':1}),
+  SP(26),
+  L('                                                            still nothing','#9b96ad',11,'left',{'i':1}),
+]},
+
+'Ricochet':{emo:'⇄',blocks:[
+  SP(12),
+  L('you started it','#e0dbe8',13,'left'),
+  L('                                                              you finished it','#ff8fbf',13,'left'),
+  SP(4),
+  L('      i only reacted','#9b96ad',12,'left'),
+  L('                                                                                        you overreacted','#9b96ad',12,'left'),
+  SP(4),
+  L('fine','#e0dbe8',13,'left'),
+  L('                                                                                  fine','#ff8fbf',13,'left'),
+  SP(14),
+  L('nobody won that','#7d788a',10,'right',{i:1}),
+]},
+
+'Mixed Signals':{emo:'⇅',blocks:[
+  SP(12),
+  L('warm','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  L('                                                                       cold','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  L('               depends','#c9a8d6',16,'left'),
+  L('                                                                                                     on the day','#7d788a',11,'left',{'i':1}),
+  L('   patient','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  L('                                                                                     not','#cfc9d8',12,'left',{'f':'smallcaps'}),
+  SP(16),
+  L('                           PICK A LANE','#443e4f',18,'left'),
+  L('                              i will not','#8b8699',10,'left',{'i':1}),
+]},
+
+'Volume':{emo:'▰',blocks:[
+  SP(14),
+  L('hey','#7d788a',10,'left'),
+  L('           hey','#9b96ad',12,'left'),
+  L('                    HEY','#b8b2c4',15,'left'),
+  L('                            HEY','#e0dbe8',19,'left'),
+  L('                              HEY','#ff8fbf',24,'left'),
+  SP(12),
+  L('                                                                                                thank you for looking','#7d788a',10,'left',{'i':1}),
+]},
+
+'Last Word':{emo:'⁇',blocks:[
+  SP(12),
+  L('i am done talking about this','#e0dbe8',13,'left'),
+  L('               one more thing though','#b8b2c4',12,'left',{'i':1}),
+  L('                               and another','#9b96ad',12,'left',{'i':1}),
+  L('                                                  and this','#8b8699',11,'left',{'i':1}),
+  L('                                                                      and that','#7d788a',11,'left',{'i':1}),
+  L('                                                                                          ok now i am done','#6f6a7c',10,'left',{'i':1}),
+  SP(12),
+  L('                                                                                                                 probably','#7d788a',10,'left',{'i':1}),
+]},
+
+/* ---- Spine -------------------------------------------------------------
+   Akrostichon mit Kreuzung: senkrecht steht ein Wort, waagerecht kreuzen
+   Eigenschaften genau auf dem passenden Buchstaben. Die Einrueckung ist
+   ausgerechnet - fuer jedes Wort wird der Kreuzungsbuchstabe mittig auf die
+   Achse gesetzt, sonst steht die Senkrechte krumm. Vorbild war ein fremdes
+   3dx-Profil; die Wortwahl hier ist eigene, nicht dessen Inhalt.          */
+
+'Submissive':{emo:'↓',blocks:[
+  SP(14),
+  L('                                                              S','#cfc9d8',12,'left'),
+  L('                                                              U','#cfc9d8',12,'left'),
+  L('                                                  H U M B L E','#8f86a8',12,'left'),
+  L('                                                      C O M P L I A N T','#8f86a8',12,'left'),
+  L('                                                               I','#cfc9d8',12,'left'),
+  L('                                              H O N E S T','#8f86a8',12,'left'),
+  L('                                              Y O U R S','#8f86a8',12,'left'),
+  L('                                                               I','#cfc9d8',12,'left'),
+  L('                                                      D E V O T E D','#8f86a8',12,'left'),
+  L('                                            G E N T L E','#8f86a8',12,'left'),
+  SP(14),
+  L('read it downwards','#7d788a',10,'center',{i:1}),
+]},
+
+'Dominant':{emo:'↑',blocks:[
+  SP(14),
+  L('                                                              D','#cfc9d8',12,'left'),
+  L('                                                      P R O T E C T I V E','#8f86a8',12,'left'),
+  L('                                                              M','#cfc9d8',12,'left'),
+  L('                                                               I','#cfc9d8',12,'left'),
+  L('                                              P A T I E N T','#8f86a8',12,'left'),
+  L('                                                              A','#cfc9d8',12,'left'),
+  L('                                                      H O N E S T','#8f86a8',12,'left'),
+  L('                                                           S T E A D Y','#8f86a8',12,'left'),
+  SP(14),
+  L('read it downwards','#7d788a',10,'center',{i:1}),
+]},
+
+'Switch':{emo:'⇅',blocks:[
+  SP(14),
+  L('                                                              S O F T','#8f86a8',12,'left'),
+  L('                                                              W','#cfc9d8',12,'left'),
+  L('                                                   C U R I O U S','#8f86a8',12,'left'),
+  L('                                                           A T T E N T I V E','#8f86a8',12,'left'),
+  L('                                                              C','#cfc9d8',12,'left'),
+  L('                                                              H U N G R Y','#8f86a8',12,'left'),
+  SP(14),
+  L('depends entirely on you','#7d788a',10,'center',{i:1}),
+]},
+
+'Devoted':{emo:'♡',blocks:[
+  SP(14),
+  L('                                                              D','#cfc9d8',12,'left'),
+  L('                                                           T E N D E R','#8f86a8',12,'left'),
+  L('                                                              V','#cfc9d8',12,'left'),
+  L('                                                           L O Y A L','#8f86a8',12,'left'),
+  L('                                                              T','#cfc9d8',12,'left'),
+  L('                                                 P A T I E N T','#8f86a8',12,'left'),
+  L('                                                              D','#cfc9d8',12,'left'),
+  SP(14),
+  L('nothing complicated about it','#7d788a',10,'center',{i:1}),
+]},
+
+'Curious':{emo:'‽',blocks:[
+  SP(14),
+  L('                                                              C A R E F U L','#8f86a8',12,'left'),
+  L('                                                              U','#cfc9d8',12,'left'),
+  L('                                                              R','#cfc9d8',12,'left'),
+  L('                                                    P A T I E N T','#8f86a8',12,'left'),
+  L('                                                              O','#cfc9d8',12,'left'),
+  L('                                                              U','#cfc9d8',12,'left'),
+  L('                                              H O N E S T','#8f86a8',12,'left'),
+  SP(14),
+  L('ask me something better','#7d788a',10,'center',{i:1}),
+]},
+
+'Romantic':{emo:'❀',blocks:[
+  SP(14),
+  L('                                                              R','#cfc9d8',12,'left'),
+  L('                                                          S O F T','#8f86a8',12,'left'),
+  L('                                                 W A R M','#8f86a8',12,'left'),
+  L('                                                              A','#cfc9d8',12,'left'),
+  L('                                                              N','#cfc9d8',12,'left'),
+  L('                                                           A T T E N T I V E','#8f86a8',12,'left'),
+  L('                                                               I','#cfc9d8',12,'left'),
+  L('                                     M A G N E T I C','#8f86a8',12,'left'),
+  SP(14),
+  L('old fashioned on purpose','#7d788a',10,'center',{i:1}),
+]},
+
 };
 
 /* ALL bleibt name → blocks, damit die Prüfskripte weiter funktionieren */
@@ -2910,7 +3161,10 @@ const CATS = {
   'Onyx':     ['Gentleman','Neondrive','Understated','Crossfire','Respawn','Vespers',
                'Sourcecode','Redacted'],
   'Spicy':    ['Temptation','After Dark','Red Flags','Brat','Obsession','Private Room','Tease',
-               'Dangerous','Soft Submission','Dominion','Protocol','Sinful','No Strings','Touch Me'],  'Props':    ['Maleficium','Afterhours','Editorial','Classified','Chains','Orbit','Hazard',
+               'Dangerous','Soft Submission','Dominion','Protocol','Sinful','No Strings','Touch Me'],  'Noise':    ['Loudmouth','Interference','Backtalk','Whatever','Crosstalk','Megaphone',
+               'Feedback','Dead Air','Ricochet','Mixed Signals','Volume','Last Word'],
+  'Spine':    ['Submissive','Dominant','Switch','Devoted','Curious','Romantic'],
+  'Props':    ['Maleficium','Afterhours','Editorial','Classified','Chains','Orbit','Hazard',
                'Tracklist','Hotel','Arcana','Schematic','Pinboard','Checkout','Terminal',
                'Wanted','Backstage','Joker','Matchfile','Evidence','Statsheet'],
 };
