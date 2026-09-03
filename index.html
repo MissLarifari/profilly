@@ -102,8 +102,15 @@
   /* Einordnung direkt unter dem Kopf: Profilly ist kein Ersatz fuer den
      ueblichen Profil-Editor, sondern eine Vorlagensammlung. */
   .lead{max-width:640px;margin:20px 0 0;font-size:14.5px;line-height:1.6;
-    color:var(--text-secondary)}
+    color:var(--text-secondary);text-wrap:pretty}
   .lead b{color:var(--text-primary);font-weight:600}
+  .lead+.lead{margin-top:12px}
+  /* Namensnennung. Steht oben bei der Einleitung, nicht im Fuss: wer das
+     Werkzeug benutzt, soll sie sehen, ohne bis ans Seitenende zu scrollen. */
+  .credit{max-width:640px;margin:20px 0 0;font-size:13.5px;line-height:1.6;
+    color:var(--text-muted);text-wrap:pretty}
+  .credit b{color:var(--text-secondary);font-weight:600}
+  .hrt{color:var(--accent2)}
 
   /* ---------- Schrittleiste ---------- */
   /* Der aktive Schritt ist deutlich hervorgehoben, die anderen bleiben
@@ -459,10 +466,20 @@
   </header>
 
   <p class="lead">
-    <b>Profilly gives you ready-made profile layouts to customize.</b>
-    Pick a template, replace the placeholder text with your own, then copy and
-    paste it into 3DX. You’re not creating or adding new layouts — you’re simply
-    personalizing the ones already provided.
+    <b>Profilly makes customizing your 3DX profile quick and easy.</b>
+    Choose one of the ready-made layouts, replace the placeholder text with your
+    own, and copy it straight into 3DX.
+  </p>
+
+  <p class="lead">
+    You’re not creating or adding new layouts — you’re simply making the
+    existing templates your own. <span class="hrt" aria-hidden="true">♥</span>
+  </p>
+
+  <p class="credit">
+    Enjoy using Profilly?<br>
+    If you feel like it, a little gift in 3DX to <b>MissLarifari</b> would
+    honestly make my day. <span class="hrt" aria-hidden="true">♥</span>
   </p>
 
   <ol class="wizard">
@@ -1623,23 +1640,23 @@ const INVENTED = {
   L('✟   ☾   ✟   ☾   ✟','#6b5f7a',14),
 ]},
 
-'Requiem':{emo:'♰',blocks:[
-  {t:'rule',c:'#5a5266',s:12,char:'─',mid:'♰'},
+'Requiem':{emo:'✟',blocks:[
+  {t:'rule',c:'#5a5266',s:12,char:'─',mid:'✟'},
   SP(10),
   L('R E Q U I E M','#c9bfd8',15),
   L('for whoever I was before','#8a7f9c',13,'center',{i:1}),
   SP(12),
-  {t:'cols',c:'#b0a5c0',s:13,bullet:'♱ ',gap:34,cols:[
+  {t:'cols',c:'#b0a5c0',s:13,bullet:'✟ ',gap:34,cols:[
     ['candles','old music'],
     ['silence','colder rooms']]},
   SP(12),
-  {t:'rule',c:'#5a5266',s:12,char:'─',mid:'♰'},
+  {t:'rule',c:'#5a5266',s:12,char:'─',mid:'✟'},
   L('kneel or leave','#a83248',12,'center',{i:1}),
 ]},
 
 /* Sargform über die Zeilenlänge */
-'Coffin':{emo:'♱',blocks:[
-  {t:'rule',c:'#5a5266',s:12,char:'─',end:'♱'},
+'Coffin':{emo:'✟',blocks:[
+  {t:'rule',c:'#5a5266',s:12,char:'─',end:'✟'},
   SP(10),
   L('▪','#8a7f9c',13),
   L('▪   ▪','#8a7f9c',13),
@@ -1650,11 +1667,11 @@ const INVENTED = {
   L('▪','#8a7f9c',13),
   SP(10),
   L('six feet down and still talking','#a83248',12,'center',{i:1}),
-  {t:'rule',c:'#5a5266',s:12,char:'─',end:'♱'},
+  {t:'rule',c:'#5a5266',s:12,char:'─',end:'✟'},
 ]},
 
-'Cathedral':{emo:'♰',blocks:[
-  L('♰            ♰            ♰','#8a7f9c',14),
+'Cathedral':{emo:'✟',blocks:[
+  L('✟            ✟            ✟','#8a7f9c',14),
   L('│            │            │','#5a5266',13),
   {t:'rule',c:'#5a5266',s:12,char:'─',mid:'✟'},
   SP(10),
@@ -1663,7 +1680,7 @@ const INVENTED = {
   SP(10),
   {t:'rule',c:'#5a5266',s:12,char:'─',mid:'✟'},
   L('│            │            │','#5a5266',13),
-  L('♰            ♰            ♰','#8a7f9c',14),
+  L('✟            ✟            ✟','#8a7f9c',14),
 ]},
 
 /* Hexenbrett */
@@ -1845,10 +1862,10 @@ const INVENTED = {
 ]},
 
 /* 6 — Gothic Male: Kathedrale statt Rüschen, Silber und Bordeaux */
-'Vespers':{emo:'♰',blocks:[
+'Vespers':{emo:'✟',blocks:[
   SP(16),
   L('Y O U R  N A M E','#d8d4dc',21),
-  L('♰  ═══════  34  ·  Vienna  ·  1889  ═══════  ♰','#7c626e',12),
+  L('✟  ═══════  34  ·  Vienna  ·  1889  ═══════  ✟','#7c626e',12),
   SP(14),
   L('────────  ✟  A B O U T  ✟  ────────','#a8404f',12),
   L('Old buildings, older music',null,13),
