@@ -457,6 +457,40 @@
     .panel{padding:16px}
     h2{font-size:var(--fs-lg)}
   }
+
+  /* ---------- Datenschutz / Nutzungsbedingungen ---------- */
+  /* Die leiseste Zeile der Seite. Sie steht ganz unten, weil sie gefunden
+     werden muss, aber niemanden beim Bauen stoeren soll. */
+  .legal-foot{display:flex;justify-content:center;gap:8px;margin:34px 0 6px;
+    font-size:var(--fs-xs);color:var(--text-muted)}
+  .legal-foot a{color:var(--text-muted);text-decoration:none;
+    border-bottom:1px dashed var(--border-strong)}
+  .legal-foot a:hover{color:var(--text-primary);border-color:var(--accent-border)}
+
+  /* margin:auto zentriert den Dialog — das globale margin:0 hat es ihm genommen. */
+  #legal{margin:auto;width:min(640px,calc(100vw - 28px));max-height:86vh;padding:18px 22px 22px;
+    background:var(--surface);color:var(--text-secondary);
+    border:1px solid var(--border);border-radius:var(--r-lg);
+    box-shadow:0 30px 80px rgba(0,0,0,.55)}
+  #legal::backdrop{background:rgba(6,4,10,.66);backdrop-filter:blur(3px)}
+  .legal-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:16px}
+  .legal-seg{display:flex;padding:3px;gap:2px;border:1px solid var(--border);
+    border-radius:var(--r-pill);background:var(--sunken)}
+  .legal-seg:first-child{margin-right:auto}
+  .legal-seg button{font:inherit;font-size:var(--fs-sm);padding:5px 12px;cursor:pointer;
+    color:var(--text-muted);background:transparent;border:1px solid transparent;
+    border-radius:var(--r-pill)}
+  .legal-seg button[aria-selected="true"]{color:var(--text-primary);
+    background:var(--accent-tint);border-color:var(--accent-border)}
+  .legal-x{font:inherit;width:30px;height:30px;cursor:pointer;color:var(--text-muted);
+    background:transparent;border:1px solid var(--border);border-radius:50%}
+  .legal-x:hover{color:var(--text-primary)}
+  #legalTitle{margin:0;font-size:var(--fs-lg);color:var(--text-primary)}
+  .legal-updated{margin:3px 0 0;font-size:var(--fs-xs);color:var(--text-muted)}
+  #legalBody h3{margin:18px 0 5px;font-size:var(--fs-sm);font-weight:600;color:var(--text-primary)}
+  #legalBody p{margin:0 0 8px;font-size:var(--fs-sm);line-height:1.62;text-wrap:pretty;
+    overflow-wrap:anywhere}
+  #legalBody a{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -590,7 +624,194 @@
       </div>
     </div>
   </div>
+
+  <footer class="legal-foot">
+    <a href="#privacy">Privacy</a><span aria-hidden="true">·</span><a href="#terms">Terms</a>
+  </footer>
 </div>
+
+<!-- Datenschutz + Nutzungsbedingungen. Ein Dialog in DERSELBEN Datei: Sophs
+     Server veroeffentlicht nur index.html, eine zweite Seite kaeme nie an.
+     Erreichbar ueber #privacy und #terms. Text und Logik ganz unten. -->
+<dialog id="legal" aria-labelledby="legalTitle">
+  <div class="legal-head">
+    <div class="legal-seg" role="tablist">
+      <button role="tab" data-doc="privacy">Privacy</button>
+      <button role="tab" data-doc="terms">Terms</button>
+    </div>
+    <div class="legal-seg">
+      <button data-lang="en">EN</button>
+      <button data-lang="de">DE</button>
+    </div>
+    <button class="legal-x" id="legalClose" aria-label="Close">✕</button>
+  </div>
+  <h2 id="legalTitle"></h2>
+  <p class="legal-updated" id="legalUpdated"></p>
+  <div id="legalBody"></div>
+</dialog>
+
+<script>
+/* ---------- Datenschutz + Nutzungsbedingungen ----------
+   Geschrieben gegen das, was die Seite wirklich tut — aendert sich das eine,
+   muss das andere mit:
+   - keine Cookies, kein Tracking, keine Schriften oder Skripte von Dritten
+   - localStorage nur 'profilly.gallery' (Galerie auf/zu)
+   - der Profiltext entsteht im Browser und geht nirgendwohin
+   Kontakt ueber The Cloud auf Discord statt Name/Adresse: Laris Wahl, 27.09.2026.
+   Dieselben Texte (mit Gaestebuch) stehen in Gifty: src/data/legal.ts. */
+(function(){
+  const DISCORD = 'https://discord.gg/h3uAk96r68';
+  const TEXT = {
+    en: {
+      privacy: { title:'Privacy Policy', updated:'Last updated: 27 September 2026', s:[
+        ['Who is responsible', [
+          'Profilly is a free, private, non-commercial hobby project by Lari (MissLarifari).',
+          'Contact: message Lari on The Cloud’s Discord server — ' + DISCORD ]],
+        ['The short version', [
+          'No account, no cookies, no tracking, no analytics, no ads. Your profile text is built in your own browser and is never sent to us.' ]],
+        ['Hosting and server logs', [
+          'Profilly is hosted on sophey.vodka. To deliver the page, the server technically has to process your IP address, the date and time, the file requested, your browser type and the referring page. The host may keep this briefly in server logs to run the service and protect it against abuse.',
+          'Legal basis: Art. 6(1)(f) GDPR — our legitimate interest in delivering the site securely.',
+          'Profilly is a single file. No fonts, scripts or other content are loaded from third parties.' ]],
+        ['Stored in your browser', [
+          'Profilly remembers one thing in your browser’s local storage: whether you have the template gallery open or closed. It stays on your device and is never sent to us. You can delete it at any time by clearing this site’s data in your browser.' ]],
+        ['Your profile text', [
+          'Everything you type is processed only in your browser and is gone when you close the page. The clipboard is only used when you press the copy button.' ]],
+        ['Links to other sites', [
+          'Profilly links to Gifty and to Discord. Nothing is loaded from them until you click. After that, their own privacy policies apply.' ]],
+        ['Your rights', [
+          'Under the GDPR you have the right to access, rectification, erasure, restriction of processing, data portability and objection. You also have the right to lodge a complaint with a data protection supervisory authority.' ]],
+        ['Changes', [ 'If Profilly changes what it does with data, this page will be updated.' ]],
+      ]},
+      terms: { title:'Terms of Use', updated:'Last updated: 27 September 2026', s:[
+        ['What Profilly is', [
+          'Profilly is a free fan tool for designing profile texts for the game 3DXChat, made by Lari (MissLarifari) as a private, non-commercial project.',
+          'Profilly is not affiliated with, endorsed by or connected to 3DXChat or its developers. “3DXChat” is a trademark of its respective owners.' ]],
+        ['Using Profilly', [
+          'You can use Profilly for free and without an account. By using it you accept these terms.',
+          'The profiles you make are yours. The templates may be used freely for your own 3DXChat profile.' ]],
+        ['Your responsibility', [
+          'You are responsible for the texts you create and publish in your profile. Follow 3DXChat’s rules and treat other players with respect.',
+          'Do not try to disrupt, overload or attack the service.' ]],
+        ['No guarantee', [
+          'Profilly is offered as is. There is no guarantee that it is always available, free of errors, or that a profile will look exactly the same in game — 3DXChat can change how it displays text at any time.',
+          'Profilly may be changed, paused or discontinued at any time.' ]],
+        ['Liability', [
+          'Since Profilly is provided free of charge, liability is limited to intent and gross negligence, as far as the law allows. Liability for injury to life, body or health remains unaffected.' ]],
+        ['Applicable law', [
+          'German law applies. If you use Profilly as a consumer, the mandatory consumer protection rules of the country you live in remain unaffected.' ]],
+      ]},
+    },
+    de: {
+      privacy: { title:'Datenschutzerklärung', updated:'Stand: 27. September 2026', s:[
+        ['Verantwortlich', [
+          'Profilly ist ein kostenloses, privates, nicht-kommerzielles Hobbyprojekt von Lari (MissLarifari).',
+          'Kontakt: eine Nachricht an Lari auf dem Discord-Server The Cloud — ' + DISCORD ]],
+        ['Kurz gesagt', [
+          'Kein Konto, keine Cookies, kein Tracking, keine Analyse, keine Werbung. Dein Profiltext entsteht in deinem eigenen Browser und wird nie an uns geschickt.' ]],
+        ['Hosting und Server-Logs', [
+          'Profilly liegt auf sophey.vodka. Um die Seite auszuliefern, muss der Server technisch bedingt deine IP-Adresse, Datum und Uhrzeit, die angeforderte Datei, deinen Browsertyp und die zuvor besuchte Seite verarbeiten. Der Hoster kann diese Angaben kurzzeitig in Server-Logs speichern, um den Betrieb sicherzustellen und Missbrauch abzuwehren.',
+          'Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO — unser berechtigtes Interesse an einer sicheren Auslieferung der Seite.',
+          'Profilly ist eine einzige Datei. Es werden keine Schriften, Skripte oder anderen Inhalte von Dritten nachgeladen.' ]],
+        ['In deinem Browser gespeichert', [
+          'Profilly merkt sich im lokalen Speicher deines Browsers (localStorage) genau eine Sache: ob die Vorlagen-Galerie auf- oder zugeklappt ist. Das bleibt auf deinem Gerät und wird nie an uns übertragen. Du kannst es jederzeit löschen, indem du die Websitedaten dieser Seite in deinem Browser entfernst.' ]],
+        ['Dein Profiltext', [
+          'Alles, was du eintippst, wird nur in deinem Browser verarbeitet und ist weg, wenn du die Seite schließt. Die Zwischenablage wird nur benutzt, wenn du auf den Kopieren-Knopf drückst.' ]],
+        ['Links zu anderen Seiten', [
+          'Profilly verlinkt auf Gifty und auf Discord. Von dort wird erst etwas geladen, wenn du klickst. Danach gelten deren eigene Datenschutzerklärungen.' ]],
+        ['Deine Rechte', [
+          'Nach der DSGVO hast du das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren.' ]],
+        ['Änderungen', [ 'Ändert sich, was Profilly mit Daten macht, wird diese Seite angepasst.' ]],
+      ]},
+      terms: { title:'Nutzungsbedingungen', updated:'Stand: 27. September 2026', s:[
+        ['Was Profilly ist', [
+          'Profilly ist ein kostenloses Fan-Werkzeug zum Gestalten von Profiltexten für das Spiel 3DXChat, gemacht von Lari (MissLarifari) als privates, nicht-kommerzielles Projekt.',
+          'Profilly steht in keiner Verbindung zu 3DXChat oder dessen Entwicklern und wird von ihnen weder unterstützt noch geprüft. „3DXChat“ ist eine Marke der jeweiligen Inhaber.' ]],
+        ['Nutzung', [
+          'Du kannst Profilly kostenlos und ohne Konto benutzen. Mit der Nutzung akzeptierst du diese Bedingungen.',
+          'Die Profile, die du baust, gehören dir. Die Vorlagen darfst du frei für dein eigenes 3DXChat-Profil verwenden.' ]],
+        ['Deine Verantwortung', [
+          'Für die Texte, die du erstellst und in deinem Profil veröffentlichst, bist du selbst verantwortlich. Halte dich an die Regeln von 3DXChat und geh respektvoll mit anderen um.',
+          'Versuche nicht, den Dienst zu stören, zu überlasten oder anzugreifen.' ]],
+        ['Keine Garantie', [
+          'Profilly wird so angeboten, wie es ist. Es gibt keine Garantie, dass es immer erreichbar und fehlerfrei ist oder dass ein Profil im Spiel genau gleich aussieht — 3DXChat kann jederzeit ändern, wie Text angezeigt wird.',
+          'Profilly kann jederzeit geändert, pausiert oder eingestellt werden.' ]],
+        ['Haftung', [
+          'Da Profilly unentgeltlich angeboten wird, ist die Haftung — soweit gesetzlich zulässig — auf Vorsatz und grobe Fahrlässigkeit beschränkt. Die Haftung für Schäden an Leben, Körper oder Gesundheit bleibt unberührt.' ]],
+        ['Anwendbares Recht', [
+          'Es gilt deutsches Recht. Nutzt du Profilly als Verbraucher, bleiben die zwingenden Verbraucherschutzvorschriften deines Wohnsitzlandes unberührt.' ]],
+      ]},
+    },
+  };
+
+  const dlg = document.getElementById('legal');
+  const HASH = { '#privacy':'privacy', '#terms':'terms' };
+  let doc = 'privacy';
+  let lang = /^de\b/i.test(navigator.language || '') ? 'de' : 'en';
+
+  // Text bleibt Text; nur eine Adresse im Absatz wird zum Link.
+  function para(s){
+    const p = document.createElement('p');
+    s.split(/(https?:\/\/\S+)/).forEach((part, i) => {
+      if (i % 2) { const a = document.createElement('a'); a.href = part; a.target = '_blank'; a.rel = 'noopener'; a.textContent = part; p.append(a); }
+      else p.append(part);
+    });
+    return p;
+  }
+
+  function draw(){
+    const t = TEXT[lang][doc];
+    document.getElementById('legalTitle').textContent = t.title;
+    document.getElementById('legalUpdated').textContent = t.updated;
+    const body = document.getElementById('legalBody');
+    body.replaceChildren();
+    for (const [h, ps] of t.s) {
+      const h3 = document.createElement('h3'); h3.textContent = h; body.append(h3);
+      ps.forEach(s => body.append(para(s)));
+    }
+    dlg.querySelectorAll('[data-doc]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.doc === doc)));
+    dlg.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.lang === lang)));
+    dlg.scrollTop = 0;
+  }
+
+  function fromHash(){
+    const d = HASH[location.hash];
+    if (!d) return;
+    doc = d; draw();
+    if (!dlg.open) dlg.showModal();
+  }
+
+  // Schliessen nimmt #privacy/#terms wieder aus der Adresse — sonst oeffnet
+  // derselbe Link beim zweiten Klick nichts, weil sich der Hash nicht aendert.
+  // Direkt beim Schliessen, nicht erst im 'close'-Ereignis: das kommt in einem
+  // Hintergrund-Tab gar nicht an (gemessen).
+  function hashWeg(){
+    if (HASH[location.hash]) history.replaceState(null, '', location.pathname + location.search);
+  }
+  function zu(){ dlg.close(); hashWeg(); }
+  dlg.addEventListener('close', hashWeg);                     // Escape schliesst selbst
+  dlg.addEventListener('click', e => {
+    // Klick auf den Hintergrund. Das Ziel allein reicht nicht: auch der
+    // Innenrand des Dialogs meldet sich als `dlg`.
+    if (e.target === dlg) {
+      const r = dlg.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) zu();
+      return;
+    }
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.doc) { doc = b.dataset.doc; draw(); }
+    else if (b.dataset.lang) { lang = b.dataset.lang; draw(); }
+  });
+  document.getElementById('legalClose').addEventListener('click', zu);
+  // Und falls der Hash doch noch dasteht: ein Klick auf den Link oeffnet trotzdem.
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href="#privacy"], a[href="#terms"]');
+    if (a && a.getAttribute('href') === location.hash) { e.preventDefault(); fromHash(); }
+  });
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
+})();
+</script>
 
 <script>
 const L = (text,c,s,a,o={}) => ({t:'line',text,c,s:s||13,a:a||'center',...o});
@@ -2257,7 +2478,9 @@ const INVENTED = {
   // Trenner so breit wie die gepunkteten Zeilen darunter: sonst wirkt der
   // Kopf schmal und der Block darunter ausgefranst. Lange Zeilen sind
   // ausserdem BILLIGER, weil die Einrueckung wegfaellt.
-  L('×  ─────────────  27  ·  Lisbon  ─────────────  ×','#a8202e',12),
+  // Dasselbe Rot wie die Ueberschrift darunter: zwei Toene bedeuten zwei
+  // <color>-Paare. Die Vorlage lag mit CRLF-Zaehlung ueber dem Limit.
+  L('×  ─────────────  27  ·  Lisbon  ─────────────  ×','#c02c3a',12),
   SP(12),
   L('────────────  R E D   F L A G S  ────────────','#c02c3a',12),
   {t:'menu',c:null,s:12,items:[
@@ -2269,7 +2492,10 @@ const INVENTED = {
   ]},
   SP(10),
   // Unterschrift am selben rechten Rand wie die Punktreihen
-  {t:'lr',c:'#8a5a60',s:12,left:'  consider yourself warned',right:'—  N.  '},
+  // Die zwei Leerzeichen hinter N. waren echte Zeichen - anders als alles,
+  // was lr und menu zum Auffuellen erzeugen. Genau die zwei, um die die
+  // Vorlage mit CRLF-Zaehlung ueber dem Limit lag und im Spiel abbrach.
+  {t:'lr',c:'#8a5a60',s:12,left:'  consider yourself warned',right:'—  N.'},
 ]},
 
 'Brat':{emo:'✦',blocks:[
@@ -3179,6 +3405,790 @@ const INVENTED = {
   L('old fashioned on purpose','#7d788a',10,'center',{i:1}),
 ]},
 
+/* Nachtprofil fuer einen DJ. Farben: der 3dx-Profilgrund ist selbst fast
+   schwarz, tiefes Dunkelblau und Anthrazit sind dort als SCHRIFT unlesbar.
+   Sie tragen deshalb nur die Trennlinien (#3d475e); der Text laeuft in
+   Eisweiss und Stahlblau, der ruhige Akzent ist ein gedaempftes Cyan.
+   Die Regler sind ein bars-Block - im DJ-Zusammenhang liest sich das wie
+   ein Mischpult, und den Baustein gab es laengst.
+   Erste Fassung hatte einen kv-Block und zehn Farbwechsel und lag bei
+   1469 Zeichen. Jeder Farbwechsel kostet ein <color>-Paar, rund 23
+   Zeichen; gleichfarbige Zeilen stehen deshalb beieinander. */
+'Peak Time':{emo:'◉',blocks:[
+  {t:'rule',c:'#3d475e',s:12,char:'─',mid:'◉'},
+  SP(10),
+  L('Y O U R   N A M E','#d6dfec',18),
+  L('dj  ·  house and techno','#8fa0b8',12),
+  SP(12),
+  // Nur zwei Regler: ein dritter fuer 'honesty' kostete 67 Zeichen und
+  // sagte dasselbe wie die Textzeile weiter unten.
+  {t:'bars',c:'#7d9bff',s:11,items:[['techno',9],['house',8]]},
+  SP(12),
+  L('i say what i mean','#d6dfec',13),
+  L('and i mean most of it','#6fc3c9',12,'center',{i:1}),
+  SP(6),
+  L('honest, direct, a little kinky','#8fa0b8',12),
+  SP(10),
+  {t:'rule',c:'#3d475e',s:12,char:'─',mid:'◉'},
+]},
+
+/* ---- Nocturne ----------------------------------------------------------
+   Nachtprofile in der Palette von Peak Time: Dunkelblau nur in den Linien,
+   Text in Eisweiss und Stahlblau, Koenigsblau und ein gedaempftes Cyan als
+   Akzente. Gleiche Regel wie dort - gleichfarbige Zeilen beieinander, sonst
+   kostet jeder Wechsel ein <color>-Paar.                                  */
+
+'Soundcheck':{emo:'▮',blocks:[
+  {t:'rule',c:'#3d475e',s:12,char:'─',mid:'◉'},
+  SP(10),
+  L('S O U N D C H E C K','#d6dfec',17),
+  SP(12),
+  {t:'menu',c:'#8fa0b8',s:12,items:[
+    ['monitors','loud'],['patience','low'],['small talk','off']]},
+  SP(12),
+  L('if you need me i am in the booth','#8fa0b8',12),
+  L('say something better than hi','#6fc3c9',11,'center',{i:1}),
+  SP(10),
+  {t:'rule',c:'#3d475e',s:12,char:'─',mid:'◉'},
+]},
+
+'Low End':{emo:'▬',blocks:[
+  SP(16),
+  L('L O W   E N D','#d6dfec',22),
+  L('everything above it is decoration','#8fa0b8',11,'center',{i:1}),
+  SP(16),
+  {t:'menu',c:'#7d9bff',s:12,items:[
+    ['kick','yes'],['bass','more'],['ego','no']]},
+  SP(16),
+  L('direct is not the same as rude','#d6dfec',12),
+  L('i can do both','#6fc3c9',12,'center',{i:1}),
+]},
+
+'Last Call':{emo:'◑',blocks:[
+  SP(14),
+  L('L A S T   C A L L','#d6dfec',18),
+  SP(12),
+  {t:'lr',c:'#8fa0b8',s:12,left:'  doors',right:'23:00  '},
+  {t:'lr',c:'#8fa0b8',s:12,left:'  peak time',right:'03:00  '},
+  {t:'lr',c:'#8fa0b8',s:12,left:'  the honest hour',right:'05:00  '},
+  SP(14),
+  L('i am better after the second one','#7d9bff',12),
+  L('and worse at pretending','#6fc3c9',11,'center',{i:1}),
+]},
+
+'Analog':{emo:'◍',blocks:[
+  SP(14),
+  L('A N A L O G','#d6dfec',18),
+  L('records, cables, bad sleep','#8fa0b8',11,'center',{i:1}),
+  SP(14),
+  {t:'cols',c:'#8fa0b8',s:12,bullet:'· ',gap:34,left:1,cols:[
+    ['vinyl','modular'],['909','no laptop']]},
+  SP(14),
+  L('i keep what still works','#d6dfec',12),
+  L('people included','#6fc3c9',12,'center',{i:1}),
+]},
+
+'Blue Hour':{emo:'◐',blocks:[
+  SP(18),
+  L('B L U E   H O U R','#7d9bff',18),
+  L('the part of the night nobody posts','#8fa0b8',11,'center',{i:1}),
+  SP(16),
+  L('the room is empty, the speakers still warm','#d6dfec',12),
+  L('this is where i get honest','#6fc3c9',12,'center',{i:1}),
+  SP(16),
+  L('stay if you want the quiet version','#8fa0b8',11),
+]},
+
+'House Rules':{emo:'◈',blocks:[
+  {t:'rule',c:'#3d475e',s:11,char:'─'},
+  SP(10),
+  L('H O U S E   R U L E S','#d6dfec',16),
+  SP(12),
+  {t:'menu',c:'#8fa0b8',s:12,items:[
+    ['ask first','always'],['games','no'],['kinky','within reason']]},
+  SP(12),
+  L('honest, direct, not shy about it','#7d9bff',12),
+  L('tell me what you want, i will do the same','#6fc3c9',11,'center',{i:1}),
+  SP(10),
+  {t:'rule',c:'#3d475e',s:11,char:'─'},
+]},
+
+/* Zweiter Schwung Nocturne. Gleiche Palette, aber Bausteine, die in der
+   Gruppe noch fehlten: der player-Block, ein grid3-Raster und eine
+   seg-Zeile mit gemischten Groessen.                                      */
+
+'Now Playing':{emo:'▶',blocks:[
+  SP(14),
+  L('N O W   P L A Y I N G','#8fa0b8',12),
+  SP(10),
+  {t:'player',c:'#d6dfec',s:13,title:'▶ YOUR SET, LIVE',cur:'1:47',total:'6:12'},
+  SP(14),
+  L('six hours is a warm up','#7d9bff',12),
+  L('ask me again at four','#6fc3c9',11,'center',{i:1}),
+]},
+
+'Rider':{emo:'▤',blocks:[
+  {t:'rule',c:'#3d475e',s:11,char:'─'},
+  SP(10),
+  L('R I D E R','#d6dfec',16),
+  SP(12),
+  {t:'menu',c:'#8fa0b8',s:12,items:[
+    ['booth','dark'],['monitors','honest'],['drinks','later']]},
+  SP(12),
+  L('everything else i bring myself','#7d9bff',12),
+  SP(10),
+  {t:'rule',c:'#3d475e',s:11,char:'─'},
+]},
+
+'Signal Chain':{emo:'→',blocks:[
+  SP(16),
+  L('mic  ▸  desk  ▸  room  ▸  you','#8fa0b8',13),
+  SP(14),
+  {t:'seg',s:13,a:'center',parts:[
+    {text:'nothing in that chain ',c:'#8fa0b8',s:12},
+    {text:'lies',c:'#7d9bff',s:22},
+  ]},
+  SP(14),
+  L('neither do i','#d6dfec',13),
+  L('it saves us both the evening','#6fc3c9',11,'center',{i:1}),
+]},
+
+'Green Room':{emo:'□',blocks:[
+  SP(18),
+  L('G R E E N   R O O M','#d6dfec',17),
+  L('twenty minutes before it starts','#8fa0b8',11,'center',{i:1}),
+  SP(16),
+  L('this is the quiet version of me','#7d9bff',12),
+  L('the loud one comes on at midnight','#8fa0b8',12),
+  SP(16),
+  L('both are honest','#6fc3c9',12,'center',{i:1}),
+]},
+
+'Residency':{emo:'◇',blocks:[
+  SP(14),
+  L('R E S I D E N C Y','#d6dfec',17),
+  SP(12),
+  {t:'lr',c:'#8fa0b8',s:12,left:'  friday',right:'the basement  '},
+  {t:'lr',c:'#8fa0b8',s:12,left:'  saturday',right:'wherever it is loud  '},
+  {t:'lr',c:'#8fa0b8',s:12,left:'  sunday',right:'nowhere, do not ask  '},
+  SP(14),
+  L('regular, not predictable','#7d9bff',12),
+]},
+
+'Off Record':{emo:'●',blocks:[
+  SP(16),
+  L('O F F   R E C O R D','#d6dfec',16),
+  SP(14),
+  {t:'grid3',c:'#8fa0b8',s:12,gap:30,items:[
+    'direct','curious','patient',
+    'honest','kinky','warm']},
+  SP(14),
+  L('i will tell you which one you get','#7d9bff',12),
+  L('usually all six','#6fc3c9',11,'center',{i:1}),
+]},
+
+/* ---- Classified --------------------------------------------------------
+   Aktenoptik nach dem Vorbild von Redacted, aber lauter: Titel 24-28px statt
+   22, ein grosses gestempeltes Wort je Vorlage, und die Balken sind
+   unterschiedlich lang - gleich lange sehen nach Platzhalter aus, ungleiche
+   nach Schwaerzung. Die Balken sind HELL (#cfd3dd): auf dem fast schwarzen
+   3dx-Grund ist ein geschwaerzter Balken nur sichtbar, wenn er hell ist.
+   Palette wie Nocturne: Linien Tiefblau #46567d, Koenigsblau #5b8cff fuer
+   Kopfzeilen, das Schlusswort im hellen Cyan #4fd6e0. Erste Fassung hatte
+   Aktenrot und Bernstein - sah nach Akte aus, war aber nicht Laris Palette.      */
+
+'Clearance':{emo:'▓',blocks:[
+  {t:'rule',c:'#46567d',s:11,char:'─'},
+  SP(8),
+  L('C L E A R A N C E','#eaf1ff',26),
+  // Die Stufe steckt IN der Linie statt in einer eigenen Zeile: ein mid
+  // verdraengt Striche und kostet dadurch fast nichts, waehrend die
+  // eigene zentrierte Zeile 65 Zeichen brauchte - genau die 18, die
+  // ueber dem Limit lagen, plus Reserve.
+  {t:'rule',c:'#b9c6dc',s:12,char:'─',mid:'L E V E L   ███'},
+  SP(12),
+  {t:'menu',c:'#7d8fa8',s:12,items:[
+    // Laengere Balken sind BILLIGER: jeder verdraengt zwei Punkte der
+    // Fuehrungslinie, spart also netto ein Zeichen. Damit kamen die
+    // letzten vier ueberzaehligen Zeichen weg.
+    ['name','██████████████'],
+    ['status','███████████'],
+    ['intentions','█████████████████████']]},
+  SP(12),
+  {t:'seg',s:13,a:'center',parts:[
+    {text:'access ',c:'#7d8fa8',s:13},
+    {text:'GRANTED',c:'#4fd6e0',s:30}]},
+  SP(8),
+  L('ask the right question and it opens','#eaf1ff',12),
+  SP(8),
+  {t:'rule',c:'#46567d',s:11,char:'─'},
+]},
+
+'Case File':{emo:'▤',blocks:[
+  SP(12),
+  L('C A S E   F I L E','#eaf1ff',26),
+  L('────  N O .  ██ / ███  ────','#5b8cff',12),
+  SP(12),
+  {t:'menu',c:'#7d8fa8',s:12,items:[
+    ['subject','█████████'],
+    ['known for','████████████'],
+    ['convicted of','nothing yet']]},
+  SP(12),
+  {t:'seg',s:13,a:'center',parts:[
+    {text:'case remains ',c:'#7d8fa8',s:13},
+    {text:'OPEN',c:'#4fd6e0',s:32}]},
+  SP(10),
+  L('bring evidence or bring wine','#eaf1ff',12),
+]},
+
+'Intercept':{emo:'▚',blocks:[
+  SP(12),
+  L('▚  I N T E R C E P T  ▚','#5b8cff',20),
+  SP(12),
+  L('.. and then ███████ said','#eaf1ff',13),
+  L('that ██████████ was a bad idea','#eaf1ff',13),
+  L('███████ did it anyway','#eaf1ff',13),
+  SP(12),
+  {t:'seg',s:13,a:'center',parts:[
+    {text:'transcript ',c:'#7d8fa8',s:12},
+    {text:'ENDS',c:'#4fd6e0',s:28},
+    {text:' here',c:'#7d8fa8',s:12}]},
+  SP(10),
+  L('the rest you get in person','#b9c6dc',12),
+]},
+
+'Need To Know':{emo:'●',blocks:[
+  {t:'rule',c:'#46567d',s:11,char:'─'},
+  SP(8),
+  L('N E E D   T O   K N O W','#eaf1ff',24),
+  SP(12),
+  L('you do not need to know ██████████','#7d8fa8',12),
+  L('or why ████████ stopped calling','#7d8fa8',12),
+  SP(10),
+  L('you do need to know this:','#b9c6dc',13),
+  SP(6),
+  {t:'seg',s:13,a:'center',parts:[
+    {text:'i ',c:'#7d8fa8',s:13},
+    {text:'MEAN IT',c:'#4fd6e0',s:30}]},
+  SP(8),
+  L('every single time','#eaf1ff',13),
+  SP(8),
+  {t:'rule',c:'#46567d',s:11,char:'─'},
+]},
+
+'Declassified':{emo:'▨',blocks:[
+  SP(12),
+  L('████████  ████  ██████████','#b9c6dc',14),
+  L('███  ████████  ███  ████','#b9c6dc',14),
+  L('█████████  ██  ███████████','#b9c6dc',14),
+  SP(12),
+  {t:'seg',s:13,a:'center',parts:[
+    {text:'one line ',c:'#7d8fa8',s:13},
+    {text:'DECLASSIFIED',c:'#4fd6e0',s:22}]},
+  SP(12),
+  L('i am exactly as advertised','#eaf1ff',15),
+  SP(10),
+  L('the rest stays in the file','#7d8fa8',11,'center',{i:1}),
+]},
+/* Nach einem Webentwurf von Lari gebaut. Der hatte Karten, Kacheln und zwei
+   Spalten - in 3dx gibt es eine Textspalte und 1000 Zeichen. Uebersetzt sind
+   deshalb die Mittel, nicht das Layout: der gesperrte Vorspann ueber dem
+   Namen, der Wellenform-Streifen, die nummerierte Liste als Punktlinie
+   (dort war es eine Tabelle mit 01-05) und der grosse Satz in der Mitte.
+   Weggefallen sind die Personality-Kacheln und die zweite Spalte - beides
+   braucht Flaeche, die es hier nicht gibt.
+   ACHTUNG: die Wellenform nutzt die Blockstufen U+2581 bis U+2587. Nur ▁ und
+   █ stehen in der gemessenen Zeichenliste; die Zwischenstufen sind in 3dx
+   UNGEPRUEFT. Zeichnet das Spiel sie nicht, bleibt die Zeile leer. */
+'Private Frequency':{emo:'▮',blocks:[
+  SP(10),
+  L('P R I V A T E   F R E Q U E N C Y','#7d8fa8',11),
+  L('Y O U R   N A M E','#eaf1ff',28),
+  L('D J  ·  M U S I C I A N  ·  P R O D U C E R','#5b8cff',12),
+  SP(10),
+  L('▁▃▅▇█▇▅▃▁▃▅▇█▇▅▃▁','#4fd6e0',13),
+  // Als zentrierte Zeile kostete das 86 Zeichen. In einer Trennlinie
+  // verdraengt der Text Striche und kostet dadurch rund 30 weniger -
+  // und bringt den Trennstrich gleich mit, den der Entwurf auch hat.
+  {t:'rule',c:'#46567d',s:11,char:'─',mid:'heavy bass · no fake energy'},
+  SP(12),
+  // Im Entwurf war das eine Tabelle mit 01-05. Als menu-Block mit
+  // Punktlinien kostete sie 400 Zeichen - die Punkte sind nur 4px breit
+  // und fuellen die volle Breite. Zwei linksbuendige Zeilen mit fester
+  // Einrueckung bringen dieselbe Aufzaehlung fuer ein Viertel davon.
+  L('      01  techno          02  house','#7d8fa8',12,'left'),
+  L('      03  producing       04  late nights','#7d8fa8',12,'left'),
+  SP(12),
+  {t:'seg',s:13,a:'center',parts:[
+    {text:'i mean ',c:'#7d8fa8',s:13},
+    {text:'WHAT I SAY',c:'#4fd6e0',s:24}]},
+  SP(8),
+  // Eine Zeile statt zwei: jede zentrierte Zeile zahlt ihre eigene
+  // Einrueckung, zwei kurze sind teurer als eine lange.
+  L('no performance — just the person behind the sound','#eaf1ff',12),
+]},
+/* ---- Lari -----------------------------------------------------------
+   Gruenes Profil nach Laris Vorgabe: was sie ausmacht, was sie nicht will.
+   Farben: Tiefgruen #2f4a3c nur in den Linien (als Schrift waere es auf dem
+   fast schwarzen 3dx-Grund unlesbar), Smaragd #4fc98a in den Ueberschriften,
+   Mint #a8e6c0 fuer Name und Schlusswort, Creme #e8f2ea im Text.
+
+   Zeichenwahl bewusst eng: laut der Messung aus den Spieldateien
+   (reference_3dx_schriftarten_zeichen, 05.09.2026) stehen ─ und ♥ in der
+   eingebetteten Arial und sehen damit bei JEDEM Spieler gleich aus. Das ☾
+   und die ◈ aus Laris jetzigem Profil kommen dagegen vom Windows des
+   Betrachters - die koennen anderswo fehlen.
+
+   Die beiden Ueberschriften stecken als mid IN den Trennlinien: das kostet
+   rund 30 Zeichen weniger als eine eigene zentrierte Zeile und bringt den
+   Strich gleich mit.                                                      */
+'Evergreen':{emo:'♥',blocks:[
+  {t:'rule',c:'#2f4a3c',s:12,char:'─',mid:'♥'},
+  SP(8),
+  L('M I S S L A R I F A R I','#a8e6c0',24),
+  SP(10),
+  {t:'rule',c:'#4fc98a',s:11,char:'─',mid:'W H A T   Y O U   G E T'},
+  SP(6),
+  // left:1 statt zentriert: der Baustein rechnet die Spaltenbreiten weiter
+  // korrekt aus, beginnt aber bei 0. Zentriert kostete jede Zeile 49 Zeichen
+  // reine Einrueckung. Der Punkt traegt den Einzug jetzt selbst - und weil
+  // er bei ACHT Zellen steht, kostet jedes Leerzeichen darin acht Zeichen.
+  // gap:30 statt 46: der Abstand zwischen den Spalten wird mit Leerzeichen
+  // gefuellt, jedes davon zaehlt. 16px weniger sind gut fuenf Zeichen je Zeile.
+  {t:'cols',c:'#e8f2ea',s:12,bullet:' · ',gap:30,left:1,cols:[
+    // Der laengste Eintrag bestimmt die Spaltenbreite. 'honest & direct'
+    // steht deshalb in Spalte 1 - so beginnt Spalte 2 fast dort, wo sie in
+    // der zweiten Liste auch beginnt, und die beiden Bloecke fluchten.
+    ['honest & direct','creative'],
+    ['loyal','loving']]},
+  SP(12),
+  {t:'rule',c:'#4fc98a',s:11,char:'─',mid:'W H A T   E N D S   I T'},
+  SP(6),
+  {t:'cols',c:'#8fa89a',s:12,bullet:' · ',gap:30,left:1,cols:[
+    ['lies & fake people','unnecessary drama'],
+    ['disloyalty','disrespect']]},
+  SP(12),
+  {t:'seg',s:13,a:'center',parts:[
+    {text:'my circle is ',c:'#8fa89a',s:13},
+    {text:'EARNED',c:'#a8e6c0',s:26},
+    {text:', not collected',c:'#e8f2ea',s:13}]},
+  SP(8),
+  {t:'rule',c:'#2f4a3c',s:12,char:'─',mid:'♥'},
+]},
+/* Drei weitere Fassungen desselben Inhalts, damit Lari vergleichen kann.
+   Alle bewusst mit LANGEN Zeilen und wenigen Farbwechseln gebaut: seit dem
+   CRLF-Fund kostet jede Code-Zeile zwei Zeichen, und jeder Farbwechsel ein
+   <color>-Paar (~23). Evergreen daneben ist die tabellarische Fassung.     */
+
+'Rooted':{emo:'♥',blocks:[
+  {t:'rule',c:'#2f4a3c',s:12,char:'─',mid:'♥'},
+  SP(8),
+  L('M I S S L A R I F A R I','#a8e6c0',24),
+  SP(12),
+  // Eine lange Zeile statt vier Tabellenzellen: keine Spaltenauffuellung,
+  // keine Einrueckung pro Zeile, und es liest sich als Satz.
+  L('loyal  ·  creative  ·  honest & direct  ·  loving','#e8f2ea',13),
+  SP(12),
+  {t:'rule',c:'#4fc98a',s:11,char:'─',mid:'i n s t a n t   n o'},
+  SP(8),
+  L('lies  ·  fake people  ·  disloyalty','#8fa89a',12),
+  L('unnecessary drama  ·  disrespect','#8fa89a',12),
+  SP(12),
+  L('i do not chase and i do not repeat myself','#a8e6c0',13),
+  SP(8),
+  {t:'rule',c:'#2f4a3c',s:12,char:'─',mid:'♥'},
+]},
+
+'Willow':{emo:'♥',blocks:[
+  // KEIN SP() als erster Baustein: die erste Leerzeile einer Vorlage oeffnet
+  // ein eigenes Tag-Paar mit Farbe #000 und kostet 36 Zeichen fuer nichts.
+  // Spaetere Leerzeilen fallen in bestehende Tag-Bereiche und sind gratis.
+  // Blueten um den Namen: ✿ und ❀ liegen in den Noto-Fonts des Spiels,
+  // sehen also bei jedem Spieler gleich aus. Breiterer Text heisst
+  // weniger Einrueckung - die Deko kostet hier fast nichts.
+  L('❀   M I S S L A R I F A R I   ❀','#a8e6c0',22),
+  // Alter und Kim direkt unter den Namen, gesperrt wie dieser - das ♥ steht
+  // in der eingebetteten Arial und sieht bei jedem Spieler gleich aus.
+  L('4 2   ♥   K i m','#4fc98a',13),
+  SP(12),
+  // Fliesstext statt Aufzaehlung. Lange Zeilen brauchen kaum Einrueckung,
+  // deshalb ist diese Fassung die billigste von allen dreien.
+  L('i am loyal, creative, and i say it to your face','#e8f2ea',13),
+  L('i love deeply, or i don’t bother at all','#e8f2ea',13),
+  SP(10),
+  // Ein Satz, eine Zeile: zwei kurze zentrierte Zeilen zahlen jede ihre
+  // eigene Einrueckung. Groesse 11, damit die lange Zeile unter 444px bleibt.
+  L('lies and fake people get one chance — i’ve never given a second one.','#8fa89a',11),
+  SP(12),
+  L('you will always know where you stand','#4fc98a',12),
+  SP(10),
+  // Laris eigene Form aus ihrem echten Profil: die Namen als Reihe, darunter
+  // eine leise Erklaerzeile. Keine Ich-Ansage - die passte nicht zum Rest.
+  L('G I F T Y   ·   P R O F I L L Y   ·   T H E   C L O U D','#4fc98a',12),
+  L('gift editor  ·  profile editor  ·  club','#8fa89a',11),
+  SP(10),
+  {t:'rule',c:'#2f4a3c',s:11,char:'─',mid:'✿   ♥   ✿'},
+]},
+
+'Sage':{emo:'♥',blocks:[
+  SP(16),
+  L('L O Y A L','#a8e6c0',32),
+  L('creative  ·  honest  ·  direct  ·  loving','#e8f2ea',13),
+  SP(16),
+  {t:'seg',s:13,a:'center',parts:[
+    {text:'and zero patience for ',c:'#8fa89a',s:12},
+    {text:'DRAMA',c:'#4fc98a',s:26}]},
+  SP(10),
+  L('lie to me once and we are finished','#8fa89a',12),
+  SP(18),
+  L('M I S S L A R I F A R I','#4fc98a',13),
+]},
+/* Drei weitere Formen fuer denselben Inhalt. Zeichenwahl: ✓ liegt in den
+   Noto-Fonts des Spiels, × ist Latin-1 und damit in der Arial - beide sehen
+   bei jedem Spieler gleich aus. ✗ waere Dingbats und kaeme aus dem Windows
+   des Betrachters, deshalb das schlichte ×. */
+
+'Growth':{emo:'♥',blocks:[
+  {t:'rule',c:'#2f4a3c',s:12,char:'─',mid:'♥'},
+  SP(8),
+  L('M I S S L A R I F A R I','#a8e6c0',22),
+  SP(12),
+  {t:'bars',c:'#4fc98a',s:11,items:[['loyal',10],['creative',9],['loving',10]]},
+  SP(10),
+  {t:'bars',c:'#8fa89a',s:11,items:[['drama',0],['fake people',0]]},
+  SP(12),
+  L('the bottom two do not move, ever','#e8f2ea',12),
+  SP(8),
+  {t:'rule',c:'#2f4a3c',s:12,char:'─',mid:'♥'},
+]},
+
+'Give And Take':{emo:'♥',blocks:[
+  SP(12),
+  L('M I S S L A R I F A R I','#a8e6c0',22),
+  SP(12),
+  {t:'lr',c:'#4fc98a',s:11,left:'  W H A T   I   G I V E',right:'W H A T   I   W O N T   T A K E  '},
+  SP(6),
+  {t:'lr',c:'#e8f2ea',s:12,left:'  loyal',right:'disloyalty  '},
+  {t:'lr',c:'#e8f2ea',s:12,left:'  honest & direct',right:'lies  '},
+  {t:'lr',c:'#e8f2ea',s:12,left:'  creative',right:'fake people  '},
+  {t:'lr',c:'#e8f2ea',s:12,left:'  loving',right:'disrespect  '},
+  SP(12),
+  L('the right column ends things','#8fa89a',12),
+]},
+
+'Green Light':{emo:'♥',blocks:[
+  SP(12),
+  L('M I S S L A R I F A R I','#a8e6c0',22),
+  SP(12),
+  {t:'menu',c:'#e8f2ea',s:12,items:[
+    ['  loyal','✓'],['  creative','✓'],['  honest & direct','✓'],['  loving','✓']]},
+  SP(10),
+  // Zwei Zeilen statt drei: eine Punktlinie kostet rund 100 Zeichen, und die
+  // Vorlage lag 57 drueber. Zusammenfassen statt streichen - so bleiben alle
+  // vier Abneigungen stehen.
+  {t:'menu',c:'#8fa89a',s:12,items:[
+    ['  lies, fake people, drama','×'],['  disloyalty & disrespect','×']]},
+  SP(12),
+  L('the crossed ones are not up for discussion','#4fc98a',12),
+]},
+/* Drei weitere Anordnungen von Laris fertigem Profiltext. Regeln, die hier
+   ueberall angewandt sind:
+   - KEIN SP() als erster Baustein (oeffnet ein Tag-Paar mit #000, 36 Zeichen)
+   - Ueberschriften und Deko als mid in einer Linie statt als eigene Zeile
+   - lange Zeilen statt kurzer, die zahlen weniger Einrueckung
+   - nur ✿ ❀ ♥ ─ · als Zeichen, die stehen alle in den Spiel-Fonts          */
+
+'Bloom':{emo:'✿',blocks:[
+  L('❀   M I S S L A R I F A R I   ❀','#a8e6c0',22),
+  L('4 2   ♥   K i m','#4fc98a',13),
+  // Zwei Abschnittslinien, nicht drei: jede kostet rund 57 Zeichen plus den
+  // Farbwechsel davor und danach. Mit drei lag die Vorlage 212 ueber dem
+  // Limit. Aus demselben Grund stehen alle vier Textzeilen in EINER Farbe
+  // und EINER Groesse - jeder Wechsel waere ein weiteres Tag-Paar.
+  {t:'rule',c:'#2f4a3c',s:11,char:'─',mid:'a b o u t'},
+  L('i am loyal, creative, and i say it to your face','#e8f2ea',12),
+  L('i love deeply, or i don’t bother at all','#e8f2ea',12),
+  L('lies and fake people get one chance — i’ve never given a second one.','#e8f2ea',12),
+  L('you will always know where you stand','#e8f2ea',12),
+  // Die Tool-Namen stecken IN der Linie statt in einer eigenen Zeile: der
+  // Text verdraengt Striche und ist damit fast gratis, waehrend die eigene
+  // zentrierte Zeile rund 105 Zeichen kostete.
+  {t:'rule',c:'#4fc98a',s:11,char:'─',mid:'G I F T Y  ·  P R O F I L L Y  ·  T H E  C L O U D'},
+  L('gift editor  ·  profile editor  ·  club','#8fa89a',11),
+]},
+
+'Fern':{emo:'❀',blocks:[
+  L('❀   M I S S L A R I F A R I   ❀','#a8e6c0',22),
+  L('4 2   ♥   K i m','#4fc98a',13),
+  SP(12),
+  // Deko am Zeilenanfang statt in eigenen Zeilen - kostet nur die Zeichen
+  // selbst und macht die Zeilen breiter, was die Einrueckung senkt.
+  L('✿   i am loyal, creative, and i say it to your face','#e8f2ea',13),
+  L('✿   i love deeply, or i don’t bother at all','#e8f2ea',13),
+  SP(8),
+  L('✿   lies and fake people get one chance — i’ve never given a second one.','#8fa89a',11),
+  SP(8),
+  L('✿   you will always know where you stand','#4fc98a',12),
+  SP(12),
+  L('❀   G I F T Y  ·  P R O F I L L Y  ·  T H E  C L O U D   ❀','#4fc98a',12),
+  L('gift editor  ·  profile editor  ·  club','#8fa89a',11),
+]},
+
+'Ivy':{emo:'♥',blocks:[
+  // Nur EINE Zierlinie, unten. Die obere kostete 57 Zeichen plus Farbwechsel
+  // und der Name traegt den Kopf mit seinen Blueten ohnehin.
+  L('❀   M I S S L A R I F A R I   ❀','#a8e6c0',22),
+  L('4 2   ♥   K i m','#4fc98a',13),
+  SP(12),
+  L('i am loyal, creative, and i say it to your face','#e8f2ea',13),
+  L('i love deeply, or i don’t bother at all','#e8f2ea',13),
+  SP(10),
+  L('lies and fake people get one chance — i’ve never given a second one.','#8fa89a',11),
+  SP(10),
+  L('you will always know where you stand','#4fc98a',12),
+  SP(12),
+  // Die Tool-Namen als mid in der Schlusslinie: verdraengt Striche, kostet
+  // also kaum mehr als die Linie allein - und rahmt sie gleichzeitig ein.
+  {t:'rule',c:'#4fc98a',s:11,char:'─',mid:'G I F T Y  ·  P R O F I L L Y  ·  T H E  C L O U D'},
+  L('gift editor  ·  profile editor  ·  club','#8fa89a',11),
+  {t:'rule',c:'#2f4a3c',s:11,char:'─',mid:'✿   ♥   ✿'},
+]},
+/* Drei Formen, die sich von den zentrierten Fassungen absetzen.            */
+
+/* Linksbuendig. Spart die komplette Zentrier-Einrueckung und wirkt dadurch
+   ganz anders - naeher an einem gesetzten Text als an einem Aushang. Der
+   gewonnene Platz geht in die Blueten-Randspalte. */
+'Meadow':{emo:'✿',blocks:[
+  L('  ❀   M I S S L A R I F A R I','#a8e6c0',22,'left'),
+  L('       4 2   ♥   K i m','#4fc98a',13,'left'),
+  SP(12),
+  L('  ✿   i am loyal, creative, and i say it to your face','#e8f2ea',13,'left'),
+  L('  ✿   i love deeply, or i don’t bother at all','#e8f2ea',13,'left'),
+  SP(8),
+  L('  ✿   lies and fake people get one chance','#8fa89a',12,'left'),
+  L('        i’ve never given a second one.','#8fa89a',12,'left'),
+  SP(8),
+  L('  ❀   you will always know where you stand','#4fc98a',12,'left'),
+  SP(12),
+  L('  G I F T Y  ·  P R O F I L L Y  ·  T H E  C L O U D','#4fc98a',12,'left'),
+  L('  gift editor  ·  profile editor  ·  club','#8fa89a',11,'left'),
+]},
+
+/* Verstreut. Jede Zeile beginnt woanders, wie bei der Noise-Gruppe - nur
+   freundlicher, weil Blueten statt Kanten. Auch hier linksbuendig, die
+   Einrueckung ist von Hand gesetzt und damit Teil der Form. */
+'Thorn':{emo:'❀',blocks:[
+  L('❀   M I S S L A R I F A R I','#a8e6c0',22,'left'),
+  L('                        4 2   ♥   K i m','#4fc98a',13,'left'),
+  SP(14),
+  L('   i am loyal, creative,','#e8f2ea',14,'left'),
+  L('              and i say it to your face','#e8f2ea',13,'left'),
+  SP(6),
+  L('        i love deeply, or i don’t bother at all','#e8f2ea',13,'left'),
+  SP(12),
+  L('  lies and fake people get one chance','#8fa89a',12,'left'),
+  L('                   i’ve never given a second one.','#8fa89a',11,'left'),
+  SP(12),
+  L('            you will always know where you stand','#4fc98a',12,'left'),
+  SP(12),
+  L('   ✿   G I F T Y  ·  P R O F I L L Y  ·  T H E  C L O U D','#4fc98a',12,'left'),
+  L('           gift editor  ·  profile editor  ·  club','#8fa89a',11,'left'),
+]},
+
+/* Ein Wort gross mitten im Satz, als seg-Zeile. Das verschiebt die Betonung
+   auf "to your face" statt auf den Namen. */
+'Orchard':{emo:'♥',blocks:[
+  L('❀   M I S S L A R I F A R I   ❀','#a8e6c0',20),
+  L('4 2   ♥   K i m','#4fc98a',13),
+  SP(14),
+  L('i am loyal, creative, and i say it','#e8f2ea',13),
+  // seg lohnt nur bei GEMISCHTEN Groessen in einer Zeile. Fuer ein einzelnes
+  // Stueck ist L() dasselbe Ergebnis mit weniger Aufwand im Code.
+  L('T O   Y O U R   F A C E','#a8e6c0',22),
+  SP(10),
+  L('i love deeply, or i don’t bother at all','#e8f2ea',13),
+  L('lies and fake people get one chance — i’ve never given a second one.','#8fa89a',11),
+  SP(10),
+  L('you will always know where you stand','#4fc98a',12),
+  SP(12),
+  {t:'rule',c:'#4fc98a',s:11,char:'─',mid:'G I F T Y  ·  P R O F I L L Y  ·  T H E  C L O U D'},
+  L('gift editor  ·  profile editor  ·  club','#8fa89a',11),
+]},
+/* Drei Fassungen in ganz anderem Ton als die Blueten-Varianten.            */
+
+/* Konsole. Gruen auf Schwarz ist die klassische Terminalfarbe, und der
+   Prompt macht aus dem Profil eine Abfrage statt eines Aushangs.
+   Durchweg linksbuendig - das spart die Zentrier-Einrueckung komplett und
+   ist hier sogar die richtige Form. */
+'Greenscreen':{emo:'▮',blocks:[
+  L('> whoami','#4fc98a',12,'left'),
+  L('  MISSLARIFARI · 42 · with Kim','#e8f2ea',13,'left'),
+  SP(10),
+  L('> traits','#4fc98a',12,'left'),
+  L('  loyal, creative, honest and direct, loving','#e8f2ea',13,'left'),
+  SP(10),
+  L('> policy','#4fc98a',12,'left'),
+  L('  lies and fake people get one chance','#e8f2ea',13,'left'),
+  L('  i’ve never given a second one.','#8fa89a',12,'left'),
+  SP(10),
+  L('> built','#4fc98a',12,'left'),
+  L('  gifty · profilly · the cloud','#e8f2ea',13,'left'),
+  SP(10),
+  L('> _','#4fc98a',12,'left'),
+]},
+
+/* Steckbrief. Der kv-Baustein setzt die Werte in eine feste Spalte, dadurch
+   liest es sich wie ein ausgefuelltes Formular - nuechtern, was zu "direkt"
+   besser passt als jede Bluete. */
+'Field Notes':{emo:'▤',blocks:[
+  L('M I S S L A R I F A R I','#a8e6c0',20),
+  {t:'rule',c:'#2f4a3c',s:11,char:'─'},
+  {t:'kv',c:'#e8f2ea',s:12,items:[
+    ['age','42, with Kim'],
+    ['gives','loyalty, honesty, a lot of love'],
+    ['takes','none of the above from liars'],
+    ['builds','gifty, profilly, the cloud']]},
+  {t:'rule',c:'#2f4a3c',s:11,char:'─'},
+  L('one chance given, never a second','#8fa89a',11),
+]},
+
+/* Zutatenliste. Passt zum Gruen, ohne noch eine Bluete zu brauchen, und
+   traegt den bissigen Ton in der Schlusszeile weiter. */
+'Harvest':{emo:'♥',blocks:[
+  L('M I S S L A R I F A R I','#a8e6c0',20),
+  L('s e r v e s   1   ·   k e e p s   f o r e v e r','#8fa89a',11),
+  {t:'rule',c:'#2f4a3c',s:11,char:'─'},
+  L('2 parts loyal, 2 parts creative','#e8f2ea',13,'left'),
+  L('1 part honest, no filler','#e8f2ea',13,'left'),
+  L('love, deeply or not at all','#e8f2ea',13,'left'),
+  SP(10),
+  L('contains no lies, drama or fake people','#8fa89a',12,'left'),
+  {t:'rule',c:'#2f4a3c',s:11,char:'─'},
+  L('made by hand — gifty · profilly · the cloud','#4fc98a',11),
+]},
+/* Zwei gothische und zwei arrogante Fassungen desselben Inhalts.
+   Gothic laeuft in entsaettigtem Moos- und Giftgruen statt im frischen Mint,
+   arrogant lebt von hartem Kontrast und weniger Worten.
+   Das ✟ ist laut CLAUDE.md in-game geprueft. */
+
+'Nightshade':{emo:'✟',blocks:[
+  L('✟   M I S S L A R I F A R I   ✟','#9fc4a8',22),
+  L('4 2   ·   b o u n d   t o   K i m','#6b9c7a',12),
+  {t:'rule',c:'#2a3f31',s:11,char:'─',mid:'✟'},
+  L('loyal to the few, cold to the rest','#c8d6cc',13),
+  L('i love deeply, or i don’t bother at all','#c8d6cc',13),
+  L('lies get one chance — i have never given a second','#7f9186',11),
+  {t:'rule',c:'#2a3f31',s:11,char:'─',mid:'✟'},
+  L('g i f t y   ·   p r o f i l l y   ·   t h e   c l o u d','#6b9c7a',11),
+]},
+
+'Absinthe':{emo:'✟',blocks:[
+  L('M I S S L A R I F A R I','#b8d96a',20),
+  L('✟   4 2   ·   K i m   ✟','#7f9a52',12),
+  SP(12),
+  L('i keep what is mine and i bury the rest','#d6e0c8',13),
+  SP(8),
+  L('loyal   ·   creative   ·   honest   ·   devoted','#d6e0c8',12),
+  SP(8),
+  L('liars get one evening, never two','#8a9578',12),
+  SP(12),
+  {t:'rule',c:'#3a4a2a',s:11,char:'─',mid:'g i f t y  ·  p r o f i l l y  ·  t h e  c l o u d'},
+]},
+
+'Standards':{emo:'◆',blocks:[
+  L('M I S S L A R I F A R I','#f0f7f2',26),
+  L('4 2   ·   t a k e n','#4fc98a',12),
+  SP(14),
+  L('i am loyal, creative and direct.','#f0f7f2',14),
+  L('you will not have to guess.','#f0f7f2',14),
+  SP(12),
+  L('lies get one chance. i have never given a second.','#8fa89a',12),
+  SP(12),
+  L('if that is too much for you, good.','#4fc98a',13),
+  SP(12),
+  L('gifty  ·  profilly  ·  the cloud  —  all mine','#8fa89a',11),
+]},
+
+'Terms':{emo:'▪',blocks:[
+  L('T E R M S','#f0f7f2',28),
+  {t:'rule',c:'#2f4a3c',s:11,char:'─'},
+  {t:'kv',c:'#f0f7f2',s:12,items:[
+    ['you get','loyalty, honesty, depth'],
+    ['i get','the same, or nothing'],
+    ['liars get','one chance, once']]},
+  {t:'rule',c:'#2f4a3c',s:11,char:'─'},
+  L('n o n   n e g o t i a b l e','#4fc98a',14),
+  SP(10),
+  L('signed, 42, with Kim  ·  gifty · profilly · the cloud','#8fa89a',11),
+]},
+/* Tuerschild. Der Inhalt zerfaellt in zwei Haelften - warm nach innen
+   (Community, Freundin, Zuhoererin, Macherin), zu und kalt nach aussen.
+   Das Layout macht genau diesen Bruch sichtbar: zwei Abschnittslinien mit
+   OPEN und CLOSED, und die untere Haelfte entsaettigt statt gruen.
+   Kein SP() als erster Baustein - das kostet 36 Zeichen fuer nichts. */
+'Door Policy':{emo:'▣',blocks:[
+  L('M I S S L A R I F A R I','#a8e6c0',22),
+  L('4 2   ·   K i m   ·   b u i l d e r','#4fc98a',12),
+  {t:'rule',c:'#4fc98a',s:11,char:'─',mid:'O P E N'},
+  L('you have used something i made — probably today','#e8f2ea',13),
+  L('i am in the community more than most, and i listen','#e8f2ea',12),
+  L('a very good friend — to the people i pick','#e8f2ea',13),
+  // Entsaettigt statt gruen: der Bruch entsteht durch die Farbe, nicht durch
+  // lautere Worte. Rot waere staerker, wuerde aber Laris Palette sprengen.
+  {t:'rule',c:'#5a6560',s:11,char:'─',mid:'C L O S E D'},
+  // Eine lange Zeile statt zwei kurzen: jede zentrierte Zeile zahlt ihre
+  // eigene Einrueckung, zusammen waren es 17 Zeichen zu viel.
+  L('not one of them? keep walking, the door is behind you','#8a948f',13),
+]},
+
+/* Werkstatt. Dieselbe Person von der Macher-Seite her erzaehlt: erst was
+   gebaut wurde, dann wer dahintersteckt. Linksbuendig, damit es wie eine
+   Werkliste liest und nicht wie ein Aushang. */
+'Workshop':{emo:'◈',blocks:[
+  L('  M I S S L A R I F A R I','#a8e6c0',20,'left'),
+  L('  creative head · 42 · with Kim','#4fc98a',12,'left'),
+  SP(12),
+  L('  b u i l t','#8fa89a',11,'left'),
+  L('     a few things this game runs on','#e8f2ea',13,'left'),
+  L('     you have used at least one of them','#e8f2ea',13,'left'),
+  L('     which ones is my business','#8fa89a',13,'left'),
+  SP(12),
+  L('  a l s o','#8fa89a',11,'left'),
+  L('     i listen better than most people talk','#e8f2ea',13,'left'),
+  L('     a very good friend, to the few who earn it','#e8f2ea',13,'left'),
+  SP(12),
+  L('  not one of them? there is the door.','#6b7a72',12,'left'),
+]},
+/* Laris eigene Absinthe-Fassung, schaerfer gefasst. Drei Aenderungen gegen
+   ihren Entwurf:
+   - die fuehrenden Tabs vor der russischen Zeile sind raus. Tabs zaehlen in
+     3dx als Zeichen und richten nichts aus; zentriert wird mit Leerzeichen.
+   - "don't confuse my kindness with flirting" bittet um etwas. "my kindness
+     is not an invitation" stellt fest - das ist der arrogantere Modus.
+   - "not because i want you" redet noch von dir. "it was never about you"
+     dreht es um: die Entscheidung liegt bei ihr, du kommst gar nicht vor.
+   Kyrillisch ist sicher, es steckt in der eingebetteten Arial. Die Zeile
+   steht in fast schwarzem Gruen - lesbar, aber wie ein Wasserzeichen. */
+'Chalk Lines':{emo:'✟',blocks:[
+  L('✟   M I S S L A R I F A R I   ✟','#b8d96a',20),
+  L('◇   4 2   ·   K i m   ◇','#7f9a52',12),
+  L('','#d6e0c8',12),
+  L('i keep what is mine and i bury the rest','#d6e0c8',12),
+    // Die Liebe gehoert an die Stelle, die ohnehin abgrenzt: laenger heisst
+  // hier sogar billiger, weil die Zentrier-Einrueckung schrumpft.
+  L('my kindness is not an invitation','#d6e0c8',12),
+  L('i am nice because i decided to be. it was never about you','#d6e0c8',12),
+  L('you don’t know me and don’t like me, that’s a very special skill','#d6e0c8',12),
+  SP(10),
+  L('loyal   ✧   creative   ✧   honest   ✧   devoted','#d6e0c8',12),
+    // Beide Gedanken in EINER Zeile. Getrennt kosteten sie 182 Zeichen, weil
+  // jede kurze zentrierte Zeile ihre eigene Einrueckung zahlt - zusammen
+  // sind es 83. Genau die 45, die ueber dem Limit lagen, plus Reserve.
+  L('liars get one evening. gossip gets none. make up your own mind','#d6e0c8',12),
+  L('','#d6e0c8',12),
+  {t:'rule',c:'#6d8a4f',s:11,char:'─',mid:'g i f t y  ·  p r o f i l l y  ·  t h e  c l o u d'},
+  L('✟   Мои дни черчены мелом, их ты просто сотри   ✟','#7f9a52',16),
+]},
 };
 
 /* ALL bleibt name → blocks, damit die Prüfskripte weiter funktionieren */
@@ -3209,12 +4219,24 @@ const CATS = {
                'Victorian','Witchy','Dark Romantic'],
   'Steel':    ['Manual','Rank','Poker','Coordinates','Radio','Bounty',
                'Highway','Barcode','Toolbox','Chess','Tavern','Platform'],
+  'Nocturne': ['Peak Time','Soundcheck','Low End','Last Call','Analog',
+               'Blue Hour','House Rules','Now Playing','Rider','Signal Chain',
+               'Private Frequency',
+               'Green Room','Residency','Off Record'],
   'Onyx':     ['Gentleman','Neondrive','Understated','Crossfire','Respawn','Vespers',
-               'Sourcecode','Redacted'],
+               'Sourcecode'],
   'Spicy':    ['Temptation','After Dark','Red Flags','Brat','Obsession','Private Room','Tease',
                'Dangerous','Soft Submission','Dominion','Protocol','Sinful','No Strings','Touch Me'],  'Noise':    ['Loudmouth','Interference','Backtalk','Whatever','Crosstalk','Megaphone',
                'Feedback','Dead Air','Ricochet','Mixed Signals','Volume','Last Word'],
   'Spine':    ['Submissive','Dominant','Switch','Devoted','Curious','Romantic'],
+  'Classified': ['Redacted','Clearance','Case File','Intercept',
+                 'Need To Know','Declassified'],
+  'Lari':     ['Evergreen','Rooted','Willow','Sage',
+               'Growth','Give And Take','Green Light',
+               'Bloom','Fern','Ivy','Meadow','Thorn','Orchard',
+               'Greenscreen','Field Notes','Harvest',
+               'Nightshade','Absinthe','Standards','Terms',
+               'Door Policy','Workshop','Chalk Lines'],
   'Props':    ['Maleficium','Afterhours','Editorial','Classified','Chains','Orbit','Hazard',
                'Tracklist','Hotel','Arcana','Schematic','Pinboard','Checkout','Terminal',
                'Wanted','Backstage','Joker','Matchfile','Evidence','Statsheet'],
@@ -3257,6 +4279,14 @@ function applyFont(text, style){
 }
 
 const DEF_COLOR = '#e8e2f2';  // 3dx-Standardfarbe: dafür braucht es kein <color>-Tag
+/* Echte Laenge fuer 3dx: jeder Zeilenumbruch zaehlt als CRLF, also ZWEI
+   Zeichen. Bewiesen am 13.09.2026 an der Vorlage 'Evergreen' - 998
+   gezaehlte Zeichen plus 16 Umbrueche ergaben 1014, und das Spiel schnitt
+   nach 1000 ab: vom schliessenden </color></size> blieb genau ein '<'.
+   Sind die Tags unbalanciert, rendert Unity nichts mehr und der rohe Code
+   steht sichtbar im Profil. Ohne diese Funktion gab die Oberflaeche Code
+   frei, der im Spiel zerbricht. */
+const laenge = t => t.length + (t.split('\n').length - 1);
 const SAFE = 444;   // Ziel beim Auffüllen (Spalten, Menü, rechtsbündig)
 const HARD = 444;   // Warnschwelle = dieselbe Grenze, bis zu der aufgefüllt wird
 /* Warum so viel Abstand zu 480: die Breitenrechnung ist ein Modell, kein
@@ -3558,7 +4588,7 @@ function render(){
   $('wide').textContent = wide ? `⚠ ${wide} line${wide>1?'s':''} too wide` : '';
 
   // deutliches Banner über der Vorschau, sobald etwas nicht funktioniert
-  const codeLen = code.join('\n').length;
+  const codeLen = laenge(code.join('\n'));
   const probleme = [];
   if(wide) probleme.push(`<b>${wide} line${wide>1?'s':''} too wide</b> — marked in red below.`
     + `<small>3dx wraps them, which breaks the layout. Shorten the text or lower the size.</small>`);
@@ -3570,16 +4600,16 @@ function render(){
 
   const out = code.join('\n');
   $('code').value = out;
-  $('chars').textContent = out.length;
-  $('fill').style.width = Math.min(100, out.length/10) + '%';
-  const over = out.length > 1000;
+  $('chars').textContent = codeLen;
+  $('fill').style.width = Math.min(100, codeLen/10) + '%';
+  const over = codeLen > 1000;
   $('meter').classList.toggle('over', over);
   // Über 1000 schneidet 3dx ab und der rohe Code landet im Profil → sperren
   const cb = $('copyBtn');
   cb.disabled = over;
   cb.style.opacity = over ? .45 : 1;
   cb.style.cursor  = over ? 'not-allowed' : 'pointer';
-  cb.textContent   = over ? `${out.length-1000} characters over limit` : 'Copy profile code';
+  cb.textContent   = over ? `${codeLen-1000} characters over limit` : 'Copy profile code';
 
   // Klartext-Anzeige im Copy-Bereich (reine Darstellung, gleiche Zahlen)
   const st = $('readyState'), sz = $('readySize');
@@ -3743,7 +4773,7 @@ function drawGallery(folgeAktueller = true){
 
   $('gallery').innerHTML = treffer.filter(n=>ALL[n]).map(n=>{
     blocks = clone(ALL[n]); render();
-    const len = $('code').value.length;
+    const len = laenge($('code').value);
     return `<button class="card${n===current?' on':''}" data-l="${n}">
       <span class="emo">${META[n].emo}</span>
       <span class="nm">${n}</span>
@@ -4086,5 +5116,7 @@ drawBlocks(); drawGallery();
   $('showCode').addEventListener('click', () => setzen(2));
 })();
 </script>
+
+
 </body>
 </html>

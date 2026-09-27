@@ -50,7 +50,8 @@ Alles in-game gemessen, nicht geschätzt:
 - Es wird **nicht** automatisch zentriert; „mittig" entsteht durch Leerzeichen
 - Zu lange Zeilen brechen an **Wortgrenzen** um und zerlegen das Layout.
   Deshalb: nur bis **444 px** auffüllen, ab **464 px** warnen
-- Limit **1000 Zeichen** inklusive aller Tags. Darüber schneidet 3dx ab und
+- Limit **1000 Zeichen** inklusive aller Tags, und **jeder Zeilenumbruch zählt
+  als zwei** (CRLF). Darüber schneidet 3dx ab und
   die rohen Tags werden sichtbar
 
 ## Zeichen sparen

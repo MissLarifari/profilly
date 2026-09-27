@@ -60,7 +60,15 @@ for (const [name, bl] of Object.entries(api.ALL)) {
   const blocks = api.clone(bl);
   api.setBlocks(blocks);
   api.render();
-  const n = api.code().length;
+  // 3dx zaehlt den Zeilenumbruch als CRLF, also ZWEI Zeichen - genau wie
+  // bei Gifts. Die Notiz, beim Profil sei es nur eines, war falsch.
+  // Bewiesen am 13.09.2026: Evergreen wurde mit 998 gezaehlten Zeichen
+  // und 16 Umbruechen im Spiel nach 1000 abgeschnitten - uebrig blieb
+  // vom schliessenden </color></size> genau ein '<', also 14 Zeichen
+  // zu viel. 998 + 16 = 1014. Ohne diese Zeile zaehlt jede Vorlage mit
+  // vielen Zeilen zu niedrig und bricht erst IM SPIEL ab.
+  const roh = api.code();
+  const n = roh.length + (roh.split(String.fromCharCode(10)).length - 1);
 
   let widest = 0;
   for (const ln of api.toLines(blocks)) {
