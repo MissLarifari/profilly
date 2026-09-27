@@ -654,25 +654,35 @@
 /* ---------- Datenschutz + Nutzungsbedingungen ----------
    Geschrieben gegen das, was die Seite wirklich tut — aendert sich das eine,
    muss das andere mit:
-   - keine Cookies, kein Tracking, keine Schriften oder Skripte von Dritten
+   - Profilly selbst: keine Cookies, keine Schriften oder Skripte von Dritten
+   - ABER sophey.vodka baut in jede ausgelieferte Seite einen Zaehler ein, auch
+     hier: <script> → /api/track?h=<host>&p=<pfad> (kein Cookie, taeglich
+     wechselnder Besucherschluessel, keine IP gespeichert). Server-Logs 14 Tage.
+     Quelle: https://sophey.vodka/privacy, am 27.09.2026 an der Live-Seite geprueft.
    - localStorage nur 'profilly.gallery' (Galerie auf/zu)
    - der Profiltext entsteht im Browser und geht nirgendwohin
-   Kontakt ueber The Cloud auf Discord statt Name/Adresse: Laris Wahl, 27.09.2026.
+   Kontakt: lari@sophey.vodka + The Cloud auf Discord (Laris Wahl, 27.09.2026).
    Dieselben Texte (mit Gaestebuch) stehen in Gifty: src/data/legal.ts. */
 (function(){
   const DISCORD = 'https://discord.gg/h3uAk96r68';
+  const MAIL = 'lari@sophey.vodka';
+  const HOST_PRIVACY = 'https://sophey.vodka/privacy';
   const TEXT = {
     en: {
       privacy: { title:'Privacy Policy', updated:'Last updated: 27 September 2026', s:[
         ['Who is responsible', [
           'Profilly is a free, private, non-commercial hobby project by Lari (MissLarifari).',
-          'Contact: message Lari on The Cloud’s Discord server — ' + DISCORD ]],
+          'Contact: ' + MAIL + ' — or message Lari on The Cloud’s Discord server: ' + DISCORD ]],
         ['The short version', [
-          'No account, no cookies, no tracking, no analytics, no ads. Your profile text is built in your own browser and is never sent to us.' ]],
+          'Profilly itself sets no cookies, needs no account, shows no ads and sends your text nowhere — it is built in your own browser. The server sophey.vodka counts page views anonymously, without storing your IP address.' ]],
         ['Hosting and server logs', [
-          'Profilly is hosted on sophey.vodka. To deliver the page, the server technically has to process your IP address, the date and time, the file requested, your browser type and the referring page. The host may keep this briefly in server logs to run the service and protect it against abuse.',
-          'Legal basis: Art. 6(1)(f) GDPR — our legitimate interest in delivering the site securely.',
-          'Profilly is a single file. No fonts, scripts or other content are loaded from third parties.' ]],
+          'Profilly is hosted on sophey.vodka, run by Sophey on servers in Germany. To deliver the page, the server technically has to process your IP address, the date and time, the address requested and your browser type. sophey.vodka keeps these access logs for 14 days to run the service and fend off attacks, then deletes them.',
+          'Legal basis: Art. 6(1)(f) GDPR — the legitimate interest in delivering the site securely.',
+          'No fonts, scripts or other content are loaded from third parties.' ]],
+        ['Page view counting by sophey.vodka', [
+          'sophey.vodka adds a small script to every page it serves, Profilly included. When you open Profilly it reports the page address to the server. It sets no cookie and stores nothing on your device.',
+          'sophey.vodka stores the page address, the page you came from, your browser type, the time and an anonymous visitor key that changes every day. Your IP address is not stored.',
+          'Legal basis: Art. 6(1)(f) GDPR — knowing which pages are used. You can object by email to legal@sophey.vodka or block /api/track in your browser. Details: ' + HOST_PRIVACY ]],
         ['Stored in your browser', [
           'Profilly remembers one thing in your browser’s local storage: whether you have the template gallery open or closed. It stays on your device and is never sent to us. You can delete it at any time by clearing this site’s data in your browser.' ]],
         ['Your profile text', [
@@ -680,7 +690,7 @@
         ['Links to other sites', [
           'Profilly links to Gifty and to Discord. Nothing is loaded from them until you click. After that, their own privacy policies apply.' ]],
         ['Your rights', [
-          'Under the GDPR you have the right to access, rectification, erasure, restriction of processing, data portability and objection. You also have the right to lodge a complaint with a data protection supervisory authority.' ]],
+          'Under the GDPR you have the right to access, rectification, erasure, restriction of processing, data portability and objection. To use them, write to ' + MAIL + '. You also have the right to lodge a complaint with a data protection supervisory authority.' ]],
         ['Changes', [ 'If Profilly changes what it does with data, this page will be updated.' ]],
       ]},
       terms: { title:'Terms of Use', updated:'Last updated: 27 September 2026', s:[
@@ -706,13 +716,17 @@
       privacy: { title:'Datenschutzerklärung', updated:'Stand: 27. September 2026', s:[
         ['Verantwortlich', [
           'Profilly ist ein kostenloses, privates, nicht-kommerzielles Hobbyprojekt von Lari (MissLarifari).',
-          'Kontakt: eine Nachricht an Lari auf dem Discord-Server The Cloud — ' + DISCORD ]],
+          'Kontakt: ' + MAIL + ' — oder eine Nachricht an Lari auf dem Discord-Server The Cloud: ' + DISCORD ]],
         ['Kurz gesagt', [
-          'Kein Konto, keine Cookies, kein Tracking, keine Analyse, keine Werbung. Dein Profiltext entsteht in deinem eigenen Browser und wird nie an uns geschickt.' ]],
+          'Profilly selbst setzt keine Cookies, braucht kein Konto, zeigt keine Werbung und schickt deinen Text nirgendwohin — er entsteht in deinem eigenen Browser. Der Server sophey.vodka zählt Seitenaufrufe anonym, ohne deine IP-Adresse zu speichern.' ]],
         ['Hosting und Server-Logs', [
-          'Profilly liegt auf sophey.vodka. Um die Seite auszuliefern, muss der Server technisch bedingt deine IP-Adresse, Datum und Uhrzeit, die angeforderte Datei, deinen Browsertyp und die zuvor besuchte Seite verarbeiten. Der Hoster kann diese Angaben kurzzeitig in Server-Logs speichern, um den Betrieb sicherzustellen und Missbrauch abzuwehren.',
-          'Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO — unser berechtigtes Interesse an einer sicheren Auslieferung der Seite.',
-          'Profilly ist eine einzige Datei. Es werden keine Schriften, Skripte oder anderen Inhalte von Dritten nachgeladen.' ]],
+          'Profilly liegt auf sophey.vodka, betrieben von Sophey auf Servern in Deutschland. Um die Seite auszuliefern, muss der Server technisch bedingt deine IP-Adresse, Datum und Uhrzeit, die aufgerufene Adresse und deinen Browsertyp verarbeiten. sophey.vodka bewahrt diese Zugriffsprotokolle 14 Tage auf, um den Betrieb sicherzustellen und Angriffe abzuwehren, und löscht sie dann.',
+          'Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO — das berechtigte Interesse an einer sicheren Auslieferung der Seite.',
+          'Es werden keine Schriften, Skripte oder anderen Inhalte von Dritten nachgeladen.' ]],
+        ['Besucherzählung durch sophey.vodka', [
+          'sophey.vodka baut in jede Seite, die es ausliefert, ein kleines Skript ein — auch in Profilly. Öffnest du Profilly, meldet es die Seitenadresse an den Server. Es setzt kein Cookie und speichert nichts auf deinem Gerät.',
+          'sophey.vodka speichert die Seitenadresse, die Seite, von der du kamst, deinen Browsertyp, die Uhrzeit und einen anonymen Besucherschlüssel, der sich jeden Tag ändert. Deine IP-Adresse wird nicht gespeichert.',
+          'Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO — zu wissen, welche Seiten benutzt werden. Widersprechen kannst du per E-Mail an legal@sophey.vodka oder indem du /api/track in deinem Browser blockierst. Details: ' + HOST_PRIVACY ]],
         ['In deinem Browser gespeichert', [
           'Profilly merkt sich im lokalen Speicher deines Browsers (localStorage) genau eine Sache: ob die Vorlagen-Galerie auf- oder zugeklappt ist. Das bleibt auf deinem Gerät und wird nie an uns übertragen. Du kannst es jederzeit löschen, indem du die Websitedaten dieser Seite in deinem Browser entfernst.' ]],
         ['Dein Profiltext', [
@@ -720,7 +734,7 @@
         ['Links zu anderen Seiten', [
           'Profilly verlinkt auf Gifty und auf Discord. Von dort wird erst etwas geladen, wenn du klickst. Danach gelten deren eigene Datenschutzerklärungen.' ]],
         ['Deine Rechte', [
-          'Nach der DSGVO hast du das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren.' ]],
+          'Nach der DSGVO hast du das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Dafür genügt eine E-Mail an ' + MAIL + '. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren.' ]],
         ['Änderungen', [ 'Ändert sich, was Profilly mit Daten macht, wird diese Seite angepasst.' ]],
       ]},
       terms: { title:'Nutzungsbedingungen', updated:'Stand: 27. September 2026', s:[
@@ -749,12 +763,17 @@
   let doc = 'privacy';
   let lang = /^de\b/i.test(navigator.language || '') ? 'de' : 'en';
 
-  // Text bleibt Text; nur eine Adresse im Absatz wird zum Link.
+  // Text bleibt Text; nur eine Web- oder Mailadresse im Absatz wird zum Link.
+  // Hinter jedem Punkt der Mailadresse muss ein Buchstabe stehen, sonst
+  // wanderte der Satzpunkt mit in den Link.
   function para(s){
     const p = document.createElement('p');
-    s.split(/(https?:\/\/\S+)/).forEach((part, i) => {
-      if (i % 2) { const a = document.createElement('a'); a.href = part; a.target = '_blank'; a.rel = 'noopener'; a.textContent = part; p.append(a); }
-      else p.append(part);
+    s.split(/(https?:\/\/\S+|[\w.+-]+@[\w-]+(?:\.[\w-]+)+)/).forEach((part, i) => {
+      if (!(i % 2)) { p.append(part); return; }
+      const a = document.createElement('a');
+      if (/^https?:/.test(part)) { a.href = part; a.target = '_blank'; a.rel = 'noopener'; }
+      else a.href = 'mailto:' + part;
+      a.textContent = part; p.append(a);
     });
     return p;
   }
