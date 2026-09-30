@@ -3871,6 +3871,15 @@ const esc = s => String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
    Layouts kaputt. Die em-Werte unten sind so gewählt, dass sie mit Runden
    zu BEIDEN In-Game-Messungen passen (30er-Ketten bei Größe 13, ▔ bei 11). */
 const GLYPH_EM = {
+
+  // Die Schmuckschriften fancy und thai benutzen ℓ (U+2113) und ∂ (U+2202).
+  // Beide stehen in der Arial und sind SCHMAL. Ohne eigenen Eintrag greift
+  // weiter unten die Regel cp>0x2100 = ganzes Geviert, die fuer die CJK-
+  // Ersatzschrift gedacht ist: das Feld wird dann dreimal so breit wie das
+  // Zeichen und reisst mitten im Wort eine Luecke auf - "the cloud" las sich
+  // als "the cl oud". Gegen die Arial gemessen, deren A/M/i/Leerzeichen
+  // exakt der in-game gemessenen Tabelle entsprechen.
+  'ℓ':0.3232,'∂':0.4941,
   '·':0.31, '↳':0.46, '⋆':0.54, '»':0.54, '«':0.54,
   // Striche und Blöcke sind NICHT gleich breit, auch wenn sie bei Größe 13
   // beide 9px messen: bei Größe 11 ist ─ dann 8px, ▔ aber nur 7px.
@@ -4174,8 +4183,8 @@ function render(){
                    : wide ? 'Some lines will wrap'
                    : 'Ready for 3DX ✓';
     st.classList.toggle('bad', !!problem);
-    sz.textContent = `Profile size: ${out.length} / 1000 characters`
-      + (over ? '' : ` · ${1000-out.length} remaining`);
+    sz.textContent = `Profile size: ${codeLen} / 1000 characters`
+      + (over ? '' : ` · ${1000-codeLen} remaining`);
   }
 }
 
